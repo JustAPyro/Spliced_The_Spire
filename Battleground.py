@@ -1,16 +1,36 @@
-# A battleground to actually simulate a fighti n
+# This class also handles making sure turns are being called properly
+# Represents a battle room
 class Battleground:
     def __init__(self, ascention):
         self.ascention = ascention
+        self.actor = None
+        self.game_turn = 0
         self.monsters = []
         print("New battleground created at ascention", ascention)
         
     # Allows you to add a monster to this battleground
     def add_monster(self, monster):
         
-        # When the monster is added to the battleground assign it to the correct asc level
+        print(monster.name, "has joined the battleground.")
+        
+        # Assign the monster the correct ascention level and actor target
         monster.ascention = self.ascention
+        monster.actor = self.actor
         
         # Add the monster to the battleground monster list
         self.monsters.append(monster)
         
+    def add_actor(self, actor):
+        print("An actor has joined the battleground")
+        self.actor = actor
+        
+    def next_round(self):
+        self.actor.execute_turn()
+        for monster in self.monsters:
+            monster.take_turn()
+        
+    def battle_over(self):
+        if (self.actor.health > 0 and len(self.monsters)>0):
+            return False
+            
+        return True
