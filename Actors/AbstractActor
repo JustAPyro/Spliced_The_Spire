@@ -1,0 +1,15 @@
+from abc import ABC, abstractmethod
+
+# Super/Parent class of a "Player" can be actual player or AI
+class Actor(ABC):
+    def __init__(self, health):
+        self.health = health
+        
+    def take_damage(self, dmg):
+        self.health -= dmg
+        print("actor takes", dmg, "raw damage and now has", self.health, "health.")
+    
+    @abstractmethod
+    def take_turn(self):
+        pass
+        
