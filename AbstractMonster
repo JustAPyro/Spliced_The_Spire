@@ -1,0 +1,13 @@
+from abc import ABC, abstractmethod
+
+class Monster(ABC):
+    
+    def __init__(self, name, max_health):
+        self.name = name;
+        self.max_health = max_health;
+        self.current_health = max_health;
+        
+    #@abstractmethod
+    def take_turn(self):
+        pass
+    
