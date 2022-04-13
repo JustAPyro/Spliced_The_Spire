@@ -1,0 +1,49 @@
+# Sentry monster
+# See https://slay-the-spire.fandom.com/wiki/Sentry for more info
+
+class Sentry(Monster):
+
+    # Define a sentry by calling abstract base class constructor
+    def __init__(self, health, attack_first):
+        Monster.__init__(self, 
+            name="Sentry",
+            max_health=health)
+        
+        # Sentries alternate abilities, this counter tracks which to use
+        # If we're attacking first start counter at 0
+        self.ability_counter = 0
+        if (not attack_first): # Otherwise start it at 1
+            self.ability_counter = 1
+            
+            
+    # This is a required method that explains what the monster will do on it's turn
+    def take_turn(self):
+        
+        # On the sentries turn we cast alternating ability
+        # if ability counter is even we cast beam, otherwise we use bolt
+        if (self.ability_counter%2==0):
+            self.beam()
+        else:
+            self.bolt()
+            
+        # Increment the ability counter then
+        self.ability_counter += 1 
+
+    
+    # Beam ability 
+    # Asc 3+ does 10 damage
+    # Asc <= 3 does 9 damage
+    def beam(self):
+        print("Sentry casts beam")
+        if (self.ascention <= 3):
+            self.actor.take_damage(9)
+        else:
+            self.actor.take_damage(10)
+            
+    # Bolt ability
+    # Asc 18+ shuffles 3 Dazed into discard pile
+    # Asc <= 18 shuffles 2 Dazed into discard pile
+    def bolt(self):
+        # TODO: Implement
+        print("Sentry casts bolt")
+       
