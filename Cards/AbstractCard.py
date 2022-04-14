@@ -6,17 +6,19 @@ from abc import ABC, abstractmethod
 # abstract card class
 class Card(ABC):
 
-    def __init__(self):
+    def __init__(self, name, energy_cost):
+
+        # Name of the card
+        self.name = name
 
         # normal energy cost of card ("cost" int)
-        self.energyCost = int
+        self.energyCost = energy_cost
 
         # energy cost for this turn ("costForTurn" int)
         self.energyCostForTurn = int
 
         # ("price" int)
         self.storePrice = int
-
         # ("chargeCost" int)
         # ("isCostModified" bool)
         # ("isCostModifiedForTurn" bool)
@@ -236,6 +238,14 @@ class Card(ABC):
     @abstractmethod
     def useCard(self):
         pass
+    
+    # Override the str() method so printing it returns the name
+    def __str__(self):
+        return self.name
+        
+    # Override the repr() method so arrays print neatly
+    def __repr__(self):
+        return self.name
 
 
 """
