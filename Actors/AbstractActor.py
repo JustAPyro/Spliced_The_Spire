@@ -7,7 +7,8 @@ class Actor(ABC):
     def __init__(self, cards, health):
 
         # Instance variables
-        self.health = health
+        self.max_health = health
+        self.current_health = health
 
         # Card piles
         self.draw_pile = cards
@@ -32,6 +33,10 @@ class Actor(ABC):
     @abstractmethod
     def take_turn(self):
         pass
+
+    def take_damage(self, dmg):
+        self.current_health -= dmg
+
 
     def __draw_cards(self, number):
         for i in range(number):

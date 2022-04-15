@@ -1,9 +1,12 @@
 # Sentry monster
-class Sentry(Monster):
+from Monsters.AbstractMonster import AbstractMonster
+
+
+class Sentry(AbstractMonster):
 
     # Define a sentry by calling abstract base class constructor
-    def __init__(self, health, attack_first):
-        Monster.__init__(self, 
+    def __init__(self, health, attack_first=True):
+        AbstractMonster.__init__(self,
             name="Sentry",
             max_health=health)
         

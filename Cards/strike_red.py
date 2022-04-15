@@ -1,9 +1,12 @@
-class StrikeRed(Card):
+from Cards.AbstractCard import AbstractCard
+
+
+class StrikeRed(AbstractCard):
     def __init__(self):
         # Declare the basic information by calling superclass constructor
         super().__init__(
             name="Strike",
             energy_cost=1)
 
-    def useCard(self, target_actor):
-        target_actor.take_damage(6)
+    def useCard(self, target):
+        target.take_damage(6)

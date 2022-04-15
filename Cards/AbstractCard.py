@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 
 # abstract card class
-class Card(ABC):
+class AbstractCard(ABC):
 
     def __init__(self, name, energy_cost):
 
@@ -236,7 +236,7 @@ class Card(ABC):
 
 
     @abstractmethod
-    def useCard(self):
+    def useCard(self, target):
         pass
     
     # Override the str() method so printing it returns the name
