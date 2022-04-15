@@ -1,6 +1,7 @@
 from Battleground import Battleground
 from Actors.CLIActor import Clipper
 from Monsters.Sentry import Sentry
+from Cards.RedDefend import RedDefend
 
 cards = [  # Starting card deck
     "Strike", "Strike", "Strike", "Strike", "Strike",

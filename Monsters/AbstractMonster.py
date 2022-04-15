@@ -8,6 +8,7 @@ class AbstractMonster(ABC):
         self.max_health = max_health
         self.current_health = max_health
         self.turn = 0
+        self.block = 0
 
         # Some defaults that need to be set before using
         self.ascention = 0

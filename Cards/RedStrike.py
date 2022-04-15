@@ -1,7 +1,7 @@
 from Cards.AbstractCard import AbstractCard
 
 
-class StrikeRed(AbstractCard):
+class RedStrike(AbstractCard):
     def __init__(self):
         # Declare the basic information by calling superclass constructor
         super().__init__(

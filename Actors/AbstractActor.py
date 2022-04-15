@@ -9,6 +9,7 @@ class Actor(ABC):
         # Instance variables
         self.max_health = health
         self.current_health = health
+        self.block = 0
 
         # Card piles
         self.draw_pile = cards

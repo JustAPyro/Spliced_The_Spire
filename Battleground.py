@@ -30,7 +30,7 @@ class Battleground:
             monster.take_turn()
         
     def battle_over(self):
-        if (self.actor.health > 0 and len(self.monsters)>0):
+        if (self.actor.current_health > 0 and len(self.monsters)>0):
             return False
             
         return True
