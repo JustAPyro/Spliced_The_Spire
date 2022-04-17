@@ -3,7 +3,7 @@ import random
 
 
 # Super/Parent class of a "Player" can be actual player or AI
-class Actor(ABC):
+class AbstractActor(ABC):
     def __init__(self, cards, health):
 
         # Instance variables

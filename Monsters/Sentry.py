@@ -5,11 +5,30 @@ from Monsters.AbstractMonster import AbstractMonster
 class Sentry(AbstractMonster):
 
     # Define a sentry by calling abstract base class constructor
-    def __init__(self, health, attack_first=True):
+    def __init__(self, health=None, attack_first=True, ascension=0):
+
         AbstractMonster.__init__(self,
-            name="Sentry",
-            max_health=health)
-        
+                                 name="Sentry",
+                                 max_health=health,
+                                 ascension=ascension)
+
+        # no explicit health given
+        if health is None:
+
+            # ascension higher than or equal to 8
+            if self.ascension >= 8:
+
+                # higher health range
+                health = randint(39, 45)
+
+            # no extra health due to ascension level
+            else:
+
+                # health
+                health = randint(38, 42)
+
+
+
         # If we're attacking first start counter at 0
         self.ability_counter = 0
         if (not attack_first): # Otherwise start it at 1
