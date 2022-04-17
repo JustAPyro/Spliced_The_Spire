@@ -35,7 +35,7 @@ class AbstractActor(ABC):
     def take_turn(self):
         pass
 
-    def take_damage(self, dmg):
+    def takeDamage(self, dmg):
         self.current_health -= dmg
 
 

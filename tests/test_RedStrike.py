@@ -1,6 +1,6 @@
 import unittest
-from Monsters.TestMonster import TestMonster
-from Cards.RedStrike import RedStrike
+from src.Monsters.TestMonsterModule import TestMonster
+from src.Cards.RedStrike import RedStrike
 
 
 class TestRedStrike(unittest.TestCase):

@@ -1,4 +1,4 @@
-from Cards.AbstractCard import AbstractCard
+from src.Cards.AbstractCard import AbstractCard
 
 
 class RedDefend(AbstractCard):

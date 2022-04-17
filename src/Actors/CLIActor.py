@@ -1,12 +1,12 @@
 # Command prompt interactive Actor
 # Meant to allow you to play interactively from the command line if you wish
 # Still VERY buggy
-from Actors.AbstractActor import Actor
+from src.Actors.AbstractActor import AbstractActor
 
 
-class Clipper(Actor):
+class Clipper(AbstractActor):
     def __init__(self, cards):
-        Actor.__init__(self, cards, 72)
+        AbstractActor.__init__(self, cards, 72)
         
     def take_turn(self):
         playing = True

@@ -6,7 +6,7 @@ class Battleground:
         self.actor = None
         self.game_turn = 0
         self.monsters = []
-        print("New battleground created at ascention", ascention)
+        print("New battleground created at ascension", self.ascension)
         
     # Allows you to add a monster to this battleground
     def add_monster(self, monster):

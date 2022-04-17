@@ -1,11 +1,12 @@
 import unittest
-from Monsters.TestMonster import TestMonster
-from Cards.RedDefend import RedDefend
+from src.Monsters.TestMonsterModule import TestMonster
+from src.Cards.RedDefend import RedDefend
 
 
 class TestRedDefend(unittest.TestCase):
 
     def test_use_card(self):
+
         """
         Test that block adds 5 block to the target
         """

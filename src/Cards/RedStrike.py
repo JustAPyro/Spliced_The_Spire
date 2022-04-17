@@ -1,4 +1,4 @@
-from Cards.AbstractCard import AbstractCard
+from src.Cards.AbstractCard import AbstractCard
 
 
 class RedStrike(AbstractCard):
@@ -9,4 +9,4 @@ class RedStrike(AbstractCard):
             energy_cost=1)
 
     def useCard(self, target):
-        target.take_damage(6)
+        target.takeDamage(6)
