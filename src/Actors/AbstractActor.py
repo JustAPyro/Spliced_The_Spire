@@ -38,6 +38,8 @@ class AbstractActor(ABC):
     def takeDamage(self, dmg):
         self.current_health -= dmg
 
+    def modifyBlock(self):
+        pass
 
     def __draw_cards(self, number):
         for i in range(number):
