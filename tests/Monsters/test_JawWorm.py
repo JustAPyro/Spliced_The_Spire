@@ -1,7 +1,7 @@
 import unittest
-
+from src.Monsters.AbstractMonster import AbstractMonster
+from src.Monsters.JawWorm import JawWorm
 from src.Actors.ComaActor import ComaAI
-from src.Monsters.JawWormModule import JawWorm
 
 
 class TestJawWorm(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestJawWorm(unittest.TestCase):
         Testing that chomp does 11 damage at A < 2
         """
         # Setup
-        monster = JawWorm(ascension=2)
+        monster = JawWorm(ascension=1)
         player = ComaAI(cards=[], max_health=100)
         monster.setPlayer(player)
 

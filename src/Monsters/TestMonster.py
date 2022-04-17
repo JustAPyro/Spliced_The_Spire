@@ -1,4 +1,4 @@
-from src.Monsters.AbstractMonsterModule import AbstractMonster
+from src.Monsters.AbstractMonster import AbstractMonster
 
 
 class TestMonster(AbstractMonster):

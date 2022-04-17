@@ -1,4 +1,4 @@
-from AbstractMonsterModule import AbstractMonster
+from src.Monsters.AbstractMonster import AbstractMonster
 from src.Utility.HomeUtility import RandomChance
 from random import randint
 
@@ -57,7 +57,7 @@ class JawWorm(AbstractMonster):
             if actionChoice.chance(45):
 
                 # can not use bellow twice in a row
-                if self.actionHistory[-1] == "bellow":
+                if len(self.actionHistory) > 0 and self.actionHistory[-1] == "bellow":
                     continue
 
                 self.bellow()
@@ -70,7 +70,7 @@ class JawWorm(AbstractMonster):
             elif actionChoice.chance(30):
 
                 # Can not thrash three times in a row
-                if self.actionHistory[-2] == self.actionHistory[-1] == "thrash":
+                if len(self.actionHistory) > 0 and self.actionHistory[-2] == self.actionHistory[-1] == "thrash":
                     continue
 
                 self.thrash()
@@ -83,7 +83,7 @@ class JawWorm(AbstractMonster):
             elif actionChoice.chance(25):
 
                 # cannot use chomp twice in a row
-                if self.actionHistory[-1] == "chomp":
+                if len(self.actionHistory) > 0 and self.actionHistory[-1] == "chomp":
                     continue
 
                 self.chomp()

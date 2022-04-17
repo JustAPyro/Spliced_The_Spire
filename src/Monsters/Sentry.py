@@ -1,5 +1,5 @@
 # Sentry monster
-from src.Monsters.AbstractMonsterModule import AbstractMonster
+from src.Monsters.AbstractMonster import AbstractMonster
 from random import randint
 
 

@@ -1,5 +1,5 @@
 import unittest
-from src.Monsters.TestMonsterModule import TestMonster
+from src.Monsters.TestMonster import TestMonster
 from src.Cards.RedDefend import RedDefend
 
 

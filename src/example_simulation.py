@@ -1,6 +1,6 @@
 from Battleground import Battleground
-from Monsters.SentryModule import Sentry
 from Actors.ComaActor import ComaAI
+from Monsters import JawWorm
 
 cards = [  # Starting card deck
     "Strike", "Strike", "Strike", "Strike", "Strike",
@@ -9,8 +9,8 @@ cards = [  # Starting card deck
 ]
 
 bg = Battleground(ascension=0)  # Create a battleground at ascension 0
-bg.add_actor(ComaAI(cards))  # Add a CLI actor
-bg.add_monster(Sentry(health=None, attack_first=True, ascension=0))  # Add a sentry with 42 health
+bg.add_actor(ComaAI(cards, 72))  # Add a CLI actor
+bg.add_monster(JawWorm())  # Add a sentry with 42 health
 
 print("====== Battle Start ======")
 while not bg.battle_over():
