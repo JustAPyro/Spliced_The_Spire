@@ -1,3 +1,4 @@
+from Actors.ComaActor import ComaAI
 from Battleground import Battleground
 from Actors.CLIActor import Clipper
 from Monsters.Sentry import Sentry
@@ -11,7 +12,7 @@ cards = [  # Starting card deck
 
 bg = Battleground(0)  # Create a battleground at ascension 0
 bg.add_monster(Sentry(42))  # Add a sentry with 42 health
-bg.add_actor(Clipper(cards))  # Add a CLI actor
+bg.add_actor(ComaAI(cards))  # Add a CLI actor
 print("====== Battle Start ======")
 while not bg.battle_over():
     bg.next_round()

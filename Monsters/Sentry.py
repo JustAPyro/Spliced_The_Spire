@@ -20,11 +20,11 @@ class Sentry(AbstractMonster):
     def take_turn(self):
         
         # Alternate, if ability counter is even beam, otherwise bolt
-        if (self.ability_counter%2==0):
+        if self.ability_counter%2==0:
             self.beam()
         else:
             self.bolt()
-        self.ability_counter += 1 # Increment the ability counter now
+        self.ability_counter += 1  # Increment the ability counter now
 
     
     # Beam ability 

@@ -2,9 +2,12 @@
 from Actors.AbstractActor import Actor
 
 
-class ComaAI(Actor):
+from Actors import AbstractActor
+
+
+class ComaAI(AbstractActor):
     def __init__(self, cards):
-        Actor.__init__(self, cards, 72)
+        AbstractActor.__init__(self, cards, 72)
         
         
     def take_turn(self):
