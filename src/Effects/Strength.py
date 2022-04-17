@@ -8,7 +8,6 @@ class Strength(AbstractEffect):
                                 effectType="Buff",
                                 decreaseOverTime=False)
         self.strength = strength
-    
 
     def modifyDamageDealt(self, dmg):
         return dmg + self.strength

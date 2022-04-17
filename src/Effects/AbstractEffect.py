@@ -13,7 +13,7 @@ class AbstractEffect(ABC):
     def onTurnEnd(self):
         pass
 
-    def modifyDamage(self, dmg):
+    def modifyDamageDealt(self, dmg):
         pass
 
     def modifyDamageTaken(self, dmg):
