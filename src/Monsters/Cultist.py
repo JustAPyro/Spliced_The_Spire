@@ -14,3 +14,9 @@ class Cultist(AbstractMonster):
 
     def take_turn(self):
         pass
+
+    def incantation(self):
+        pass
+
+    def darkStrike(self):
+        pass

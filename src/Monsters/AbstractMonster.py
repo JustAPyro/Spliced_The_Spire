@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from src.Effects import Strength
+from src.Effects import Strength, Ritual
+
 from random import randint
 
 
@@ -40,7 +41,10 @@ class AbstractMonster(ABC):
 
     def __init__(self, name, max_health, ascension, act=1):
         self.name = name
+        self.ascension = ascension
+        self.act = act
 
+        # Assign the health
         if type(max_health) is dict:
             # If a dict was provided calculate health based on that
             self.max_health = calculateHealth(max_health, ascension)
@@ -49,16 +53,19 @@ class AbstractMonster(ABC):
             # Otherwise, just use the provided value
             max_health = max_health
 
+        # Set all buffs to zero and initialize them
+        self.effects = {
+            "Ritual": Ritual(self, 0)  # Default start with 0 Ritual
+        }
+
         # Since this monster was just created, set current health to max
         self.current_health = max_health
         self.turn = 0
-
         self.block = 0
         self.strength = Strength()
 
         # Some defaults that need to be set before using
-        self.ascension = ascension
-        self.act = act
+
         self.actor = None
         self.actionHistory = []
 
@@ -80,6 +87,15 @@ class AbstractMonster(ABC):
 
     def gainStrength(self, strength):
         self.strength.strength += strength
+
+    def modify(self, effect, quantity):
+        """ Used to modify (+/-) the quantity of an effect
+
+        :param effect: The effect you want modified
+        :param quantity: The quantity (positive or negative) you want changed
+        :return: None
+        """
+        self.effects[effect].modify(quantity)
 
     @abstractmethod
     def take_turn(self):

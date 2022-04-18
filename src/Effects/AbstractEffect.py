@@ -2,10 +2,14 @@ from abc import ABC
 
 
 class AbstractEffect(ABC):
-    def __init__(self, name, effectType, decreaseOverTime):
+    def __init__(self, target, name, effectType, decreaseOverTime, quantity):
+
+        # Set the standard instance variables passed in
+        self.target = target
         self.name = name
         self.effectType = effectType
         self.decreaseOverTime = decreaseOverTime
+        self.quantity = quantity
 
     def onTurnStart(self):
         pass
