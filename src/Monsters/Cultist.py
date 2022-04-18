@@ -25,12 +25,11 @@ class Cultist(AbstractMonster):
 
     def incantation(self):
         # Ritual gain is based on ascension
-        action = self.ascensionBased({
+        self.ascensionBased({
             1: lambda: self.modifyEffect("Ritual", 3),  # A1- Gain 3 Ritual
             2: lambda: self.modifyEffect("Ritual", 4),  # A2+ Gain 4 Ritual
             17: lambda: self.modifyEffect("Ritual", 5)  # A17+ Gain 5 Ritual
         })
-        action()
 
     def darkStrike(self):
         # Dark strike always does 6 damage

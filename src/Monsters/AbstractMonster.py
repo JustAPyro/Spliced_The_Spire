@@ -120,7 +120,7 @@ class AbstractMonster(ABC):
                 return actionDict[ascensionBounds[i]]
 
         # If it's not lower than the highest bound, then we know to use the last range
-        return actionDict[ascensionBounds[-1]]
+        actionDict[ascensionBounds[-1]]() # So call the method
 
     @abstractmethod
     def take_turn(self):
