@@ -74,9 +74,9 @@ between the braces beside the Effect name, so it goes from ``` - [ ] EffectName:
 will automatically update the Effect with a Checkmark.
 
 
-# Effects List:
+# Effects List
 
-## Shared (Both Player & Enemy)
+## Shared (Both Player & Enemy):
 ### Buffs
 - [ ] Artifact:
   - Stack Type: Counter
@@ -171,7 +171,22 @@ will automatically update the Effect with a Checkmark.
   - Wiki: Block is not removed at the start of the Turn
   - Luke: This one seems a bit complicated to implement
   
-## Player only Effects
+### Debuffs
+ - [ ] Confused:
+ - [ ] Dexterity:
+ - [ ] Dexterity Down:
+ - [ ] Focus:
+ - [ ] Frail:
+ - [ ] No Draw:
+ - [ ] Poison:
+ - [ ] Shackled:
+ - [ ] Slow:
+ - [ ] Strength (Negative):
+ - [ ] Strength Down:
+ - [ ] Vulnerable:
+ - [ ] Weak
+  
+## Player Only Effects:
 ### Buffs
  - [ ] Accuracy:
 	- Stack Type: Intensity
@@ -279,8 +294,18 @@ will automatically update the Effect with a Checkmark.
  - [ ] Tools of the Trade:
  - [ ] Wave of the Hand:
  - [ ] Well-Laid Plans
+
+ ### Debuffs
+ - [ ] Bias:
+ - [ ] Constricted:
+ - [ ] Draw Reduction:
+ - [ ] Entangled:
+ - [ ] Fasting:
+ - [ ] Hex:
+ - [ ] No Block:
+ - [ ] Wraith Form:
  
- ## Enemy Effects
+## Enemy Only Effects:
  
 ### Buffs
  - [ ] Angry:
@@ -307,4 +332,11 @@ will automatically update the Effect with a Checkmark.
  - [ ] Thievery:
  - [ ] Time Warp:
  - [ ] Unawakened
+
+ ### Debuffs
+ - [ ] Block Return:
+ - [ ] Choked:
+ - [ ] Corpse Explosion:
+ - [ ] Lock-On:
+ - [ ] Mark:
 
