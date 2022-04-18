@@ -6,7 +6,6 @@ from src.Cards.RedStrike import RedStrike
 class TestRedStrike(unittest.TestCase):
 
     def test_use_card(self):
-
         """
         Test that strike removes 6 health from the enemy
         """
@@ -19,5 +18,3 @@ class TestRedStrike(unittest.TestCase):
 
         # Assert
         self.assertEqual(monster.current_health, 4, "Monster Health Incorrect")
-
-
