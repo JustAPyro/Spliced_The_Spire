@@ -1,6 +1,7 @@
 from random import randint
 
 
+
 class RandomChance:
     def __init__(self, *args):
         self.chances = args

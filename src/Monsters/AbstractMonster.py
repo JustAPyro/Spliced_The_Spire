@@ -17,19 +17,20 @@ def calculateHealth(max_health, ascension):
     """
 
     # Start with a sorted list of the ascension bounds
-    ascensionBounds = max_health.keys().sort()
+    ascensionBounds = list(max_health.keys())
+    ascensionBounds.sort()
 
     # We need to have defined behavior for ascension 1+ at least
-    if ascensionBounds[0] is not 1:
+    if ascensionBounds[0] != 1:
         raise Exception
 
     # starting from the second ascension, and increasing
-    for i in range(1, len(ascensionBounds)):
+    for i in range(0, len(ascensionBounds)):
 
         # Check if this ascension is lower than the next ascension
-        if ascension < ascensionBounds[i]:
+        if ascension <= ascensionBounds[i]:
             # If so, generate and return health based on the previous range
-            low, high = max_health[ascensionBounds[i - 1]]
+            low, high = max_health[ascensionBounds[i]]
             return randint(low, high)
 
         # If it's not lower than the highest bound, then we know to use the last range
@@ -62,7 +63,7 @@ class AbstractMonster(ABC):
         self.current_health = max_health
         self.turn = 0
         self.block = 0
-        self.strength = Strength()
+        self.strength = Strength(self, 0)
 
         # Some defaults that need to be set before using
 
@@ -88,14 +89,38 @@ class AbstractMonster(ABC):
     def gainStrength(self, strength):
         self.strength.strength += strength
 
-    def modify(self, effect, quantity):
+    def modifyEffect(self, effect, quantity):
         """ Used to modify (+/-) the quantity of an effect
 
         :param effect: The effect you want modified
         :param quantity: The quantity (positive or negative) you want changed
         :return: None
         """
-        self.effects[effect].modify(quantity)
+        self.effects[effect].quantity += quantity
+
+    def getEffect(self, effect):
+        return self.effects[effect].quantity
+
+    def ascensionBased(self, actionDict):
+
+        # Sort keys
+        ascensionBounds = list(actionDict.keys())
+        ascensionBounds.sort()
+
+        # We need to have defined behavior for ascension 1+ at least
+        if ascensionBounds[0] != 1:
+            raise Exception
+
+        # starting from the second ascension, and increasing
+        for i in range(0, len(ascensionBounds)):
+
+            # Check if this ascension is lower than the next ascension
+            if self.ascension <= ascensionBounds[i]:
+                # If so, generate and return health based on the previous range
+                return actionDict[ascensionBounds[i]]
+
+        # If it's not lower than the highest bound, then we know to use the last range
+        return actionDict[ascensionBounds[-1]]
 
     @abstractmethod
     def take_turn(self):

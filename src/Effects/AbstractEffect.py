@@ -25,3 +25,6 @@ class AbstractEffect(ABC):
 
     def modifyDefense(self):
         pass
+
+    def modifyQuantity(self, quantity):
+        self.quantity += quantity
