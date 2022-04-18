@@ -74,8 +74,10 @@ between the braces beside the Effect name, so it goes from ``` - [ ] EffectName:
 will automatically update the Effect with a Checkmark.
 
 
-## All Effects:
+### Effects List:
 
+## Shared (Both Player & Enemy)
+# Buffs
 - [ ] Artifact:
   - Stack Type: Counter
   - Trigger: When a debuff is received
@@ -169,5 +171,140 @@ will automatically update the Effect with a Checkmark.
   - Wiki: Block is not removed at the start of the Turn
   - Luke: This one seems a bit complicated to implement
   
+## Player only Effects
+# Buffs
+ - [ ] Accuracy:
+	- Stack Type: Intensity
+	- Trigger: When SHIVS deal damage
+	- Wiki: Shivs deal X additional damage
+	
+ - [ ] After Image:
+	- Stack Type: Intensity
+	- Trigger: Whenever you play a card
+	- Wiki: Whenever you play a card, gain X Block
+	
+ - [ ] Amplify:
+	- Stack Type: Counter
+	- Trigger: The next Power card played
+	- Wiki: Your next X Power cards are played twice.
+	
+ - [ ] Battle Hymn:
+	- Stack Type: Intensity
+	- Trigger: Start of turn
+	- Wiki: At the start of each turn add X Smites into your hand.
 
+ - [ ] Berserk:
+	- Stack Type: Intensity
+	- Trigger: Start of your turn
+	- Wiki: At the start of your turn, gain X Energy
+	
+ - [ ] Blasphemer:
+	- Stack Type: NO
+	- Trigger: Start of next turn
+	- Wiki: At the start of your turn, die.
+	
+ - [ ] Blur:
+	- Stack Type: Duration
+	- Trigger: Start of your turn
+	- Wiki: Block is not removed at the start of your next X turns.
+	
+ - [ ] Brutality:
+	- Stack Type: Intensity
+	- Trigger: At the start of your turn
+	- Wiki: At the start of your turn, lose X HP and draw X cards.
+	
+ - [ ] Burst:
+	- Stack Type: Counter
+	- Trigger: When a skill is played
+	- Wiki: Your next X Skills are played twice
+
+ - [ ] Collect:
+	- Stack Type: Duration
+	- Trigger: Start of your turn
+	- Wiki: Put an Upgraded Miracle into your hand at the start of your next X turns.
+	
+ - [ ] Combust:
+ - [ ] Corruption:
+ - [ ] Creative AI:
+ - [ ] Dark Embrace:
+ - [ ] Demon Form:
+ - [ ] Deva:
+ - [ ] Devotion:
+ - [ ] Double Damage:
+ - [ ] Double Tap:
+ - [ ] Duplication:
+ - [ ] Echo Form:
+ - [ ] Electro:
+ - [ ] Envenom:
+ - [ ] Equilibrium:
+ - [ ] Establishment:
+ - [ ] Evolve:
+ - [ ] Feel No Pain:
+ - [ ] Fire Breathing:
+ - [ ] Flame Barrier:
+ - [ ] Foresight:
+ - [ ] Free Attack Power:
+ - [ ] Heatsink:
+ - [ ] Hello:
+ - [ ] Infinite Blades:
+ - [ ] Juggernaut:
+ - [ ] Like Water:
+ - [ ] Loop:
+ - [ ] Machine Learning:
+ - [ ] Magnetism:
+ - [ ] Master Reality:
+ - [ ] Mayhem:
+ - [ ] Mental Fortress:
+ - [ ] Nightmare:
+ - [ ] Nirvana:
+ - [ ] Noxious Fumes:
+ - [ ] Omega:
+ - [ ] Panache:
+ - [ ] Pen Nib:
+ - [ ] Phantasmal:
+ - [ ] Rage:
+ - [ ] Rebound:
+ - [ ] Regen (Player? Intense/duration):
+ - [ ] Rushdown:
+ - [ ] Repair:
+ - [ ] Rupture:
+ - [ ] Sadistic:
+ - [ ] Simmering Rage:
+ - [ ] Static Discharge:
+ - [ ] Storm:
+ - [ ] Study:
+ - [ ] Surrounded:
+ - [ ] The Bomb:
+ - [ ] Thousand Cuts:
+ - [ ] Tools of the Trade:
+ - [ ] Wave of the Hand:
+ - [ ] Well-Laid Plans
+ 
+ ## Enemy Effects
+ 
+# Buffs
+ - [ ] Angry:
+ - [ ] Back Attack:
+ - [ ] Beat of Death:
+ - [ ] Curiosity:
+ - [ ] Curl Up:
+ - [ ] Enrage:
+ - [ ] Explosive:
+ - [ ] Fading:
+ - [ ] Invincible:
+ - [ ] Life Link:
+ - [ ] Malleable:
+ - [ ] Minion:
+ - [ ] Mode Shift:
+ - [ ] Painful Stabs:
+ - [ ] Reactive:
+ - [ ] Sharp Hide:
+ - [ ] Shifting:
+ - [ ] Split:
+ - [ ] Spore Cloud:
+ - [ ] Stasis:
+ - [ ] Strength Up:
+ - [ ] Thievery:
+ - [ ] Time Warp:
+ - [ ] Unawakened
 
