@@ -74,10 +74,10 @@ between the braces beside the Effect name, so it goes from ``` - [ ] EffectName:
 will automatically update the Effect with a Checkmark.
 
 
-### Effects List:
+# Effects List:
 
 ## Shared (Both Player & Enemy)
-# Buffs
+### Buffs
 - [ ] Artifact:
   - Stack Type: Counter
   - Trigger: When a debuff is received
@@ -172,7 +172,7 @@ will automatically update the Effect with a Checkmark.
   - Luke: This one seems a bit complicated to implement
   
 ## Player only Effects
-# Buffs
+### Buffs
  - [ ] Accuracy:
 	- Stack Type: Intensity
 	- Trigger: When SHIVS deal damage
@@ -282,7 +282,7 @@ will automatically update the Effect with a Checkmark.
  
  ## Enemy Effects
  
-# Buffs
+### Buffs
  - [ ] Angry:
  - [ ] Back Attack:
  - [ ] Beat of Death:
