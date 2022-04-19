@@ -27,8 +27,11 @@ class RedLouse(AbstractMonster):
     def take_turn(self):
         action = self.conditionalChanceBasedAction({
             ["25%", "3X"]: self.__grow(),  # 25% chance of growing, cannot use 3 times in a row
-            ["75%", "3X"]: self.__bite()  # 75% chance of biting, cannot use 3 times in a row
+            ["75%", "3X"]: self.__bite()   # 75% chance of biting, cannot use 3 times in a row
         })
+        action()
+
+    # - - - - - Monster Abilities - - - - -
 
     def __bite(self):
         action = self.ascensionBasedAction({
