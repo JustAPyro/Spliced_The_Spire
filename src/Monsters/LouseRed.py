@@ -2,7 +2,7 @@ from src.Monsters.AbstractMonster import AbstractMonster
 from random import randint
 
 
-class RedLouse(AbstractMonster):
+class LouseRed(AbstractMonster):
     def __init__(self, ascension=1):
         AbstractMonster.__init__(self,
                                  name="Louse",
