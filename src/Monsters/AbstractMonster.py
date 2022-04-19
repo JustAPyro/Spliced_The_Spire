@@ -101,8 +101,48 @@ class AbstractMonster(ABC):
     def getEffect(self, effect):
         return self.effects[effect].quantity
 
-    def conditionalChanceBasedAction(self, actionDict):
-        pass
+    def conditionalChanceBasedAction(self, actionMap):
+
+        # Start by assuming a probability of 100
+        totalProbability = 100
+        bannedMethods = []
+        probabilities = []
+
+        # This adjusts total probability and adds anything that shouldn't occur to bannedMethods
+        for based, method in actionMap.items():
+            percent, times = based  # unpack the percent and times
+
+            # Save the probabilities to our list
+            probabilities.append(based)
+
+            if times.replace("X", "") == "":
+                continue  # This was an empty conditional, so skip it
+
+            # Get the history for x number of turns
+            history = self.actionHistory[-times.replace("X", ""):]
+
+            # If we did this method last turn AND we've done the same method for each of the last turn
+            if history[-1] == method and len(set(history)) <= 1:
+                # Reduce the total probability because we will not be allowing this to occur
+                totalProbability -= percent.replace("%", "")
+                bannedMethods.append(method)
+
+        # Sort the keys based on likelihood (lowest first)
+        probabilities.sort(key=lambda x: int(x[0].replace("", "")))
+
+        # Start with probability 0
+        prob = 0
+
+        # Generate a random number
+        roll = randint(0, totalProbability)
+
+        # Then for each key/probability
+        for probability in probabilities:
+            prob += int(probability[0].replace("%", ""))
+            if roll <= prob:
+                return actionMap[probability]
+
+    raise Exception
 
     def ascensionBasedAction(self, actionDict):
 

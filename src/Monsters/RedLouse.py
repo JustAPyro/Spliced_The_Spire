@@ -44,26 +44,4 @@ class RedLouse(AbstractMonster):
         })
         action()
 
-    def conditionalChanceBasedAction(self, actionMap):
-
-        # Start by assuming a probability of 100
-        totalProbability = 100
-        bannedMethods = []
-
-        # This adjusts total probability and adds anything that shouldn't occur to bannedMethods
-        for based, method in actionMap.items():
-            percent, times = based  # unpack the percent and times
-
-            if times.replace("X", "") == "":
-                continue  # This was an empty conditional, so skip it
-
-            # Get the history for x number of turns
-            history = self.actionHistory[-times.replace("X", ""):]
-
-            # If we did this method last turn AND we've done the same method for each of the last turn
-            if history[-1] == method and len(set(history)) <= 1:
-
-                # Reduce the total probability because we will not be allowing this to occur
-                totalProbability -= percent.replace("%")
-                bannedMethods.append(method)
 

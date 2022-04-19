@@ -27,5 +27,7 @@ def buss():
     print("buzz")
 
 
-li = [fizz, fizz, fizz]
-print(len(set(li)) <= 1)
+li = [("%100", 1), ("%5", -1), ("%10", -5), ("%2", 10)]
+li.sort(key=lambda x: int(x[0].replace("%", "")))
+
+print(li)
