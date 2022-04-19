@@ -1,6 +1,14 @@
 from random import randint
 
 
+def chanceBasedAction():
+    """
+    25: dostuff
+    25:
+    :return:
+    """
+
+
 class RandomChance:
     def __init__(self, *args):
         self.chances = args
