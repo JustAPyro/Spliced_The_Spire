@@ -15,7 +15,7 @@ class Cultist(AbstractMonster):
     def take_turn(self):
 
         # If it's our first turn
-        if self.turn() is 0:
+        if self.turn() == 0:
             # Use incantation and end turn
             self.incantation()
             return
@@ -25,11 +25,12 @@ class Cultist(AbstractMonster):
 
     def incantation(self):
         # Ritual gain is based on ascension
-        self.ascensionBased({
+        action = self.ascensionBasedAction({
             1: lambda: self.modifyEffect("Ritual", 3),  # A1- Gain 3 Ritual
             2: lambda: self.modifyEffect("Ritual", 4),  # A2+ Gain 4 Ritual
             17: lambda: self.modifyEffect("Ritual", 5)  # A17+ Gain 5 Ritual
         })
+        action()
 
     def darkStrike(self):
         # Dark strike always does 6 damage

@@ -101,7 +101,10 @@ class AbstractMonster(ABC):
     def getEffect(self, effect):
         return self.effects[effect].quantity
 
-    def ascensionBased(self, actionDict):
+    def conditionalChanceBasedAction(self, actionDict):
+        pass
+
+    def ascensionBasedAction(self, actionDict):
 
         # Sort keys
         ascensionBounds = list(actionDict.keys())
@@ -120,7 +123,7 @@ class AbstractMonster(ABC):
                 return actionDict[ascensionBounds[i]]
 
         # If it's not lower than the highest bound, then we know to use the last range
-        actionDict[ascensionBounds[-1]]() # So call the method
+        return actionDict[ascensionBounds[-1]]
 
     @abstractmethod
     def take_turn(self):

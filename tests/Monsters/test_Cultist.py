@@ -53,7 +53,7 @@ class TestCultist(unittest.TestCase):
         cultist.incantation()
 
         # Assert
-        self.assertEquals(5, cultist.getEffect("Ritual"))
+        self.assertEqual(5, cultist.getEffect("Ritual"))
 
         """ - - - - - Test that A20 gives 5 Ritual - - - - - """
         # Setup
