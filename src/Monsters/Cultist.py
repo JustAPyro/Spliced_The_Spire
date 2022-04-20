@@ -1,6 +1,7 @@
 from src.Monsters.AbstractMonster import AbstractMonster
 
 
+# Clean 4/20/22
 class Cultist(AbstractMonster):
     def __init__(self, ascension=1):
         AbstractMonster.__init__(self,
@@ -17,13 +18,14 @@ class Cultist(AbstractMonster):
         # If it's our first turn
         if self.turn() == 0:
             # Use incantation and end turn
-            self.incantation()
+            self._incantation()
             return
 
         # After that we dark strike every turn
-        self.darkStrike()
+        self._darkStrike()
 
-    def incantation(self):
+    # Tested
+    def _incantation(self):
         # Ritual gain is based on ascension
         action = self.ascensionBasedAction({
             1: lambda: self.modifyEffect("Ritual", 3),  # A1- Gain 3 Ritual
@@ -32,6 +34,7 @@ class Cultist(AbstractMonster):
         })
         action()
 
-    def darkStrike(self):
+    # Tested
+    def _darkStrike(self):
         # Dark strike always does 6 damage
         self.getPlayer().takeDamage(6)

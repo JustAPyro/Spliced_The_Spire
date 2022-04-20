@@ -9,18 +9,32 @@ class TestCultist(unittest.TestCase):
     """
 
     def test_create(self):
+        """
+        TODO: Implement tests
+        Test Cultist Creation
+        :return:
+        """
         pass
 
     def test_take_turn(self):
+        """
+        TODO: Implement tests
+        Testing Cultist Turn
+        :return:
+        """
         pass
 
     def test_incantation(self):
+        """
+        Testing Cultist Incantation
+        :return: None
+        """
         """ - - - - - Test that A1 gives 3 Ritual - - - - - """
         # Setup
         cultist = Cultist(1)
 
         # Execute
-        cultist.incantation()
+        cultist._incantation()
 
         # Assert
         self.assertEqual(3, cultist.getEffect("Ritual"))
@@ -30,7 +44,7 @@ class TestCultist(unittest.TestCase):
         cultist = Cultist(2)
 
         # Execute
-        cultist.incantation()
+        cultist._incantation()
 
         # Assert
         self.assertEqual(4, cultist.getEffect("Ritual"))
@@ -40,7 +54,7 @@ class TestCultist(unittest.TestCase):
         cultist = Cultist(16)
 
         # Execute
-        cultist.incantation()
+        cultist._incantation()
 
         # Assert
         self.assertEqual(5, cultist.getEffect("Ritual"))
@@ -50,7 +64,7 @@ class TestCultist(unittest.TestCase):
         cultist = Cultist(17)
 
         # Execute
-        cultist.incantation()
+        cultist._incantation()
 
         # Assert
         self.assertEqual(5, cultist.getEffect("Ritual"))
@@ -60,12 +74,17 @@ class TestCultist(unittest.TestCase):
         cultist = Cultist(20)
 
         # Execute
-        cultist.incantation()
+        cultist._incantation()
 
         # Assert
         self.assertEqual(5, cultist.getEffect("Ritual"))
 
     def test_darkStrike(self):
+        """
+        Testing Cultist Dark Strike
+        :return: None
+        """
+
         """ - - - - - Test that Dark Strike does 6 Damage - - - - - """
         # Setup
         cultist = Cultist()
@@ -73,7 +92,7 @@ class TestCultist(unittest.TestCase):
         cultist.setPlayer(player)
 
         # Execute
-        cultist.darkStrike()
+        cultist._darkStrike()
 
         # Assert
         self.assertEqual(94, player.current_health)

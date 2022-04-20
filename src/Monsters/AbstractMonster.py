@@ -142,7 +142,7 @@ class AbstractMonster(ABC):
             if roll <= prob:
                 return actionMap[probability]
 
-    raise Exception
+        raise Exception
 
     def ascensionBasedAction(self, actionDict):
 
