@@ -62,11 +62,32 @@ class TestCultist(unittest.TestCase):
 
     def test_take_turn(self):
         """
-        TODO: Implement tests
-        Testing Cultist Turn
-        :return:
+        Testing Cultist Take Turn Logic
+        :return: None
         """
-        pass
+        """ - - - - - Test that Cultist uses Incantation first turn - - - - - """
+        # Setup create a cultist
+        cultist = Cultist(1)
+
+        # Execute
+        ability = cultist.take_turn()
+
+        # Assert
+        self.assertEqual(cultist._incantation, ability)
+
+        """ - - - - - Test that cultist uses Dark strike for every turn after - - - - - """
+        # Setup
+        cultist = Cultist(1)
+        cultist.take_turn()  # Skip the first turn
+        cultist.setPlayer(ComaAI(cards=[], max_health=1000))   # Set a dummy target
+        actions = []         # Create a list to store the moves
+
+        # Execute (Take n turns based on our config file)
+        for i in range(test_config.test_pattern_duration):
+            actions.append(cultist.take_turn())
+
+        # Assert that each one of these was dark strike
+        all(self.assertEqual(cultist._darkStrike, action) for action in actions)
 
     def test_incantation(self):
         """

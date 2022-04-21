@@ -20,11 +20,6 @@ class AbstractActor(ABC):
         # Shuffle the draw pile at the beginning
         random.shuffle(self.draw_pile)
 
-    # This method is called when 
-    def take_damage(self, dmg):
-        self.health -= dmg
-        print("actor takes", dmg, "raw damage and now has", self.health, "health.")
-
     def execute_turn(self):
         self.__draw_cards(5)  # Start executing by drawing cards
         print("Drew cards:", self.hand_pile)
