@@ -1,4 +1,6 @@
 import unittest
+from test_utilities import generateSamples
+import test_config
 from src.Actors.ComaActor import ComaAI
 from src.Monsters import Cultist
 
@@ -10,11 +12,23 @@ class TestCultist(unittest.TestCase):
 
     def test_create(self):
         """
-        TODO: Implement tests
         Test Cultist Creation
-        :return:
+        :return: None
         """
-        pass
+
+        """ - - - - - Test that on A5 health is between 48, 54 - - - - - """
+
+        # Set up
+        quantity = test_config.test_quantity
+        variance = test_config.test_acceptable_variance
+
+        # Execute - Generate 1000 health samples for cultists A5
+        health = generateSamples(lambda: Cultist(5).max_health, quantity)
+
+        # Assert
+        self.assertTrue(all(h <= 54 for h in health))  # All health <= 54
+        self.assertTrue(all(h >= 48 for h in health))  # ALl health >= 48
+        all(self.assertLess(abs(health[h]-quantity/len(health)), variance) for h in health)
 
     def test_take_turn(self):
         """

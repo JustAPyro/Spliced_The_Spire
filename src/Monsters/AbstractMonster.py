@@ -48,7 +48,7 @@ class AbstractMonster(ABC):
         # Assign the health
         if type(max_health) is dict:
             # If a dict was provided calculate health based on that
-            self.max_health = calculateHealth(max_health, ascension)
+            self.max_health = self._ascensionBasedRandomValue(max_health)
 
         else:
             # Otherwise, just use the provided value
@@ -155,15 +155,38 @@ class AbstractMonster(ABC):
             raise Exception
 
         # starting from the second ascension, and increasing
-        for i in range(0, len(ascensionBounds)):
+        for i in range(1, len(ascensionBounds)):
 
             # Check if this ascension is lower than the next ascension
             if self.ascension <= ascensionBounds[i]:
+
                 # If so, generate and return health based on the previous range
-                return actionDict[ascensionBounds[i]]
+                return actionDict[ascensionBounds[i-1]]
 
         # If it's not lower than the highest bound, then we know to use the last range
         return actionDict[ascensionBounds[-1]]
+
+    def _ascensionBasedRandomValue(self, valueDict):
+        """
+        Use this to get a random value based on ascension
+        Returns a random value in a range based on ascension
+        :param valueDict: {1: (5, 10)} -> For ascension 1+ random(5, 10)
+        :return: A random number in the provided range based on the ascension of this monster
+        """
+        # Create a lambda function and insert it in to a generator map for each trny
+        generatorDict = dict()
+        for key in valueDict:
+            bottom, top = valueDict[key]
+            generatorDict[key] = lambda low=bottom, high=top: randint(low, high)
+
+        # Get an ascension based action
+        generator = self.ascensionBasedAction(generatorDict)
+
+        # Return the results of the generator
+        return generator()
+
+    def ascensionBasedValue(self, valueDict):
+        pass
 
     @abstractmethod
     def take_turn(self):

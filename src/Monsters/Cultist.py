@@ -19,10 +19,11 @@ class Cultist(AbstractMonster):
         if self.turn() == 0:
             # Use incantation and end turn
             self._incantation()
-            return
+            return self._incantation
 
         # After that we dark strike every turn
         self._darkStrike()
+        return self._darkStrike
 
     # Tested
     def _incantation(self):
