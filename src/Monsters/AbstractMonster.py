@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from src.Effects import Strength, Ritual
 
 from random import randint
-
+from functools import partial
 
 # Calculates health by ascension
 def calculateHealth(max_health, ascension):
@@ -155,13 +155,13 @@ class AbstractMonster(ABC):
             raise Exception
 
         # starting from the second ascension, and increasing
-        for i in range(1, len(ascensionBounds)):
+        for i in range(0, len(ascensionBounds)-1):
 
             # Check if this ascension is lower than the next ascension
-            if self.ascension <= ascensionBounds[i]:
+            if self.ascension < ascensionBounds[i+1]:
 
                 # If so, generate and return health based on the previous range
-                return actionDict[ascensionBounds[i-1]]
+                return actionDict[ascensionBounds[i]]
 
         # If it's not lower than the highest bound, then we know to use the last range
         return actionDict[ascensionBounds[-1]]
@@ -176,8 +176,8 @@ class AbstractMonster(ABC):
         # Create a lambda function and insert it in to a generator map for each trny
         generatorDict = dict()
         for key in valueDict:
-            bottom, top = valueDict[key]
-            generatorDict[key] = lambda low=bottom, high=top: randint(low, high)
+            low, high = valueDict[key]
+            generatorDict[key] = partial(randint, low, high)
 
         # Get an ascension based action
         generator = self.ascensionBasedAction(generatorDict)

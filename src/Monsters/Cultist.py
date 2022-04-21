@@ -1,5 +1,5 @@
 from src.Monsters.AbstractMonster import AbstractMonster
-
+from functools import partial
 
 # Clean 4/20/22
 class Cultist(AbstractMonster):
@@ -29,9 +29,9 @@ class Cultist(AbstractMonster):
     def _incantation(self):
         # Ritual gain is based on ascension
         action = self.ascensionBasedAction({
-            1: lambda: self.modifyEffect("Ritual", 3),  # A1- Gain 3 Ritual
-            2: lambda: self.modifyEffect("Ritual", 4),  # A2+ Gain 4 Ritual
-            17: lambda: self.modifyEffect("Ritual", 5)  # A17+ Gain 5 Ritual
+            +1: partial(self.modifyEffect, "Ritual", 3),  # A1- Gain 3 Ritual
+            +2: partial(self.modifyEffect, "Ritual", 4),  # A2+ Gain 4 Ritual
+            17: partial(self.modifyEffect, "Ritual", 5)  # A17+ Gain 5 Ritual
         })
         action()
 

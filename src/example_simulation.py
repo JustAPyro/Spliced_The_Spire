@@ -1,6 +1,7 @@
 from Battleground import Battleground
 from Actors.ComaActor import ComaAI
 from Monsters import JawWorm
+from Monsters import Cultist
 
 """
 cards = [  # Starting card deck
@@ -18,16 +19,5 @@ while not bg.battle_over():
     bg.next_round()
 """
 
-
-def fizz():
-    print("fizz")
-
-
-def buss():
-    print("buzz")
-
-
-li = [("%100", 1), ("%5", -1), ("%10", -5), ("%2", 10)]
-li.sort(key=lambda x: int(x[0].replace("%", "")))
-
-print(li)
+for i in range(20):
+    print(f"A5 Cultist generated with {Cultist(5).max_health} health.")

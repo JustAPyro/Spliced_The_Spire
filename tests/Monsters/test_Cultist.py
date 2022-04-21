@@ -26,9 +26,39 @@ class TestCultist(unittest.TestCase):
         health = generateSamples(lambda: Cultist(5).max_health, quantity)
 
         # Assert
-        self.assertTrue(all(h <= 54 for h in health))  # All health <= 54
-        self.assertTrue(all(h >= 48 for h in health))  # ALl health >= 48
-        all(self.assertLess(abs(health[h]-quantity/len(health)), variance) for h in health)
+        all(self.assertLessEqual(h, 54) for h in health)     # All health <= 54
+        all(self.assertGreaterEqual(h, 46) for h in health)  # All health >= 48
+        all(self.assertLess(abs(health[h] - quantity / len(health)), variance) for h in health)
+
+        """ - - - - - Test that on A7 health is between 50, 56 - - - - - """
+        # Testing this because it's an edge case
+
+        # Set up
+        quantity = test_config.test_quantity
+        variance = test_config.test_acceptable_variance
+
+        # Execute - Generate 1000 health samples for cultists A5
+        health = generateSamples(lambda: Cultist(7).max_health, quantity)
+
+        # Assert
+        all(self.assertLessEqual(h, 56) for h in health)     # All health <= 54
+        all(self.assertGreaterEqual(h, 50) for h in health)  # All health >= 48
+        all(self.assertLess(abs(health[h] - quantity / len(health)), variance) for h in health)
+
+        """ - - - - - Test that on A7+ (10) health is between 50, 56 - - - - - """
+        # Testing this as a base case
+
+        # Set up
+        quantity = test_config.test_quantity
+        variance = test_config.test_acceptable_variance
+
+        # Execute - Generate 1000 health samples for cultists A5
+        health = generateSamples(lambda: Cultist(7).max_health, quantity)
+
+        # Assert
+        all(self.assertGreaterEqual(h, 50) for h in health)  # All health >= 48
+        all(self.assertLessEqual(h, 56) for h in health)  # All health <= 54
+        all(self.assertLess(abs(health[h] - quantity / len(health)), variance) for h in health)
 
     def test_take_turn(self):
         """
@@ -71,7 +101,7 @@ class TestCultist(unittest.TestCase):
         cultist._incantation()
 
         # Assert
-        self.assertEqual(5, cultist.getEffect("Ritual"))
+        self.assertEqual(4, cultist.getEffect("Ritual"))
 
         """ - - - - - Test that A17 gives 5 Ritual - - - - - """
         # Setup
