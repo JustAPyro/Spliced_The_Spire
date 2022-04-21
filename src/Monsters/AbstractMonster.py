@@ -74,6 +74,26 @@ class AbstractMonster(ABC):
         adjustedDamage = self.strength.modifyDamageDealt(damage)
         self.getPlayer().takeDamage(adjustedDamage)
 
+    def useAction(self, ability):
+        """ API for having a monster use an ability.
+        By calling this method the super-class will automatically handle things like:
+        - Incrementing turn
+        - Returning the correct method
+        :param ability: The ability you want to use
+        :return: The ability used
+        """
+
+        ability()       # Start by using the ability
+        self.turn += 1  # Increment turn
+
+        # Then, if it's a partial, get and return only the function
+        if type(ability) is partial:
+            return partial.func
+
+        # Otherwise, just return the as is
+        return ability
+
+
     def take_damage(self, dmg):
         self.current_health -= dmg
 
