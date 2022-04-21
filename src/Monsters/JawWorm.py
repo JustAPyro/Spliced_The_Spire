@@ -1,23 +1,17 @@
 from src.Monsters.AbstractMonster import AbstractMonster
-from src.Utility.HomeUtility import RandomChance
-from random import randint
-
+from functools import partial
 
 class JawWorm(AbstractMonster):
     def __init__(self, health=None, ascension=0):
         AbstractMonster.__init__(self,
                                  name="Jaw Worm",
-                                 max_health=health,
+                                 max_health={
+                                     1: (40, 44),  # A1- Health is 40-44
+                                     7: (42, 46)  # A7+ Health is 42-46
+                                 },
                                  ascension=ascension,
                                  act=1
                                  )
-
-        # no specific health
-        if health is None:
-            if self.ascension < 7:
-                self.max_health = randint(40, 44)
-            else:
-                self.max_health = randint(42, 46)
 
         # special for act 3
         if self.act == 3:
@@ -37,62 +31,22 @@ class JawWorm(AbstractMonster):
             -> Cannot Chomp 2x in a row
 
         If in Act 3:
-
+            Start with buffs from bellow, and no guarantee for chomp first turn
 
         """
+        # If it's our first turn, and we're in act one, we chomp
+        if self.turn == 1 and self.act == 1:
+            self._chomp()
 
-        # T1: starting move is always the same unless in act 3
-        if self.act is not 3 and self.turn is 1:
-            self.chomp()
-            return
+        # Otherwise, we follow this logic
+        self.conditionalChanceBasedAction({
+            ["45%", "2X"]: partial(self._bellow),
+            ["30%", "3X"]: partial(self._thrash),
+            ["25%", "2X"]: partial(self._chomp)
+        })
 
-        monsterHasFinished = False
 
-        # keep looping until monster has completed an action
-        while not monsterHasFinished:
-
-            actionChoice = RandomChance(30, 45, 25)
-
-            # 45% change
-            if actionChoice.chance(45):
-
-                # can not use bellow twice in a row
-                if len(self.actionHistory) > 0 and self.actionHistory[-1] == "bellow":
-                    continue
-
-                self.bellow()
-                self.actionHistory.append("bellow")
-
-                # monster is done with turn
-                monsterHasFinished = True
-
-            # 30% chance
-            elif actionChoice.chance(30):
-
-                # Can not thrash three times in a row
-                if len(self.actionHistory) > 0 and self.actionHistory[-2] == self.actionHistory[-1] == "thrash":
-                    continue
-
-                self.thrash()
-                self.actionHistory.append("thrash")
-
-                # monster is done with turn
-                monsterHasFinished = True
-
-            # 25% chance
-            elif actionChoice.chance(25):
-
-                # cannot use chomp twice in a row
-                if len(self.actionHistory) > 0 and self.actionHistory[-1] == "chomp":
-                    continue
-
-                self.chomp()
-                self.actionHistory.append("chomp")
-
-                # monster is done with turn
-                monsterHasFinished = True
-
-    def chomp(self):
+    def _chomp(self):
         """ Attack player
 
         Specification:
@@ -111,7 +65,7 @@ class JawWorm(AbstractMonster):
             # deals 12 damage to player
             self.getPlayer().takeDamage(12)
 
-    def thrash(self):
+    def _thrash(self):
         """ Attacks player and gains block
 
         Specification:
@@ -124,7 +78,7 @@ class JawWorm(AbstractMonster):
         # this monster gains 5 block
         self.gainBlock(5)
 
-    def bellow(self):
+    def _bellow(self):
         """ Monster gains strength and block
 
         Specifications:
