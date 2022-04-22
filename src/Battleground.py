@@ -1,3 +1,5 @@
+from src.Monsters.AbstractMonster import AbstractMonster
+
 # This class also handles making sure turns are being called properly
 # Represents a battle room
 class Battleground:
@@ -5,6 +7,11 @@ class Battleground:
         self.actor = actor
         self.enemies = enemies
         self.game_turn = 0
+
+        enemy: AbstractMonster
+        for enemy in enemies:
+            enemy.setPlayer(actor)
+
 
     # Allows you to add a monster to this battleground
     def add_monster(self, monster):
@@ -23,7 +30,7 @@ class Battleground:
         self.actor = actor
 
     def next_round(self, verbose=False):
-        self.actor.execute_turn()
+        self.actor.execute_turn(verbose)
         for monster in self.enemies:
             monster.take_turn()
 

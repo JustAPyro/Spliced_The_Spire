@@ -21,9 +21,11 @@ class AbstractActor(ABC):
         # Shuffle the draw pile at the beginning
         random.shuffle(self.draw_pile)
 
-    def execute_turn(self):
-        self.__draw_cards(5)  # Start executing by drawing cards
-        print("Drew cards: ", ','.join(map(lambda c: c.name, self.hand_pile)))
+    def execute_turn(self, verbose=False):
+
+        self.__draw_cards(5)  # Start executing by drawing cards and printing if verbose is enabled
+        print(f"Drew cards: {', '.join(map(lambda c: c.name, self.hand_pile))}") if verbose else None
+
         self.take_turn()  # Then use whatever logic to make plays is provided
         self.__discard_cards()  # Then discard the remaining cards
 
