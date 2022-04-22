@@ -178,7 +178,7 @@ class TestJawWorm(unittest.TestCase):
         Test Jaw Worm Thrash Ability
         :return: None
         """
-        pass
+        self.fail()
 
     def test_bellow(self):
         """
@@ -186,4 +186,4 @@ class TestJawWorm(unittest.TestCase):
         Test Jaw Worm Bellow Ability
         :return: None
         """
-        pass
+        self.fail()
