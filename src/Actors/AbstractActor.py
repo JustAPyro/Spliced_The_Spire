@@ -4,9 +4,10 @@ import random
 
 # Super/Parent class of a "Player" can be actual player or AI
 class AbstractActor(ABC):
-    def __init__(self, cards, health):
+    def __init__(self, cards, health, name):
 
         # Instance variables
+        self.name = name
         self.max_health = health
         self.current_health = health
         self.block = 0
@@ -22,7 +23,7 @@ class AbstractActor(ABC):
 
     def execute_turn(self):
         self.__draw_cards(5)  # Start executing by drawing cards
-        print("Drew cards:", self.hand_pile)
+        print("Drew cards: ", ','.join(map(lambda c: c.name, self.hand_pile)))
         self.take_turn()  # Then use whatever logic to make plays is provided
         self.__discard_cards()  # Then discard the remaining cards
 
