@@ -52,7 +52,7 @@ class TestJawWorm(unittest.TestCase):
         variance = test_config.test_acceptable_variance
 
         # Execute - Generate quantity health samples for
-        health = generateSamples(lambda: JawWorm(7).max_health, quantity)
+        health = generateSamples(lambda x=7: JawWorm(x).max_health, quantity)
 
         # Assert
         all(self.assertGreaterEqual(h, 42) for h in health)  # All health greater/equal to min
@@ -83,29 +83,34 @@ class TestJawWorm(unittest.TestCase):
         j = JawWorm(1, act=3)
 
         # Assert (on act 3, should have more than 1 strength/block)
-        self.assertGreater(1, j.getEffect("Block"))
-        self.assertGreater(1, j.getEffect("Strength"))
+        self.assertGreater(j.getEffect("Block"), 1)
+        self.assertGreater(j.getEffect("Strength"), 1)
 
         """ - - - - - Test that on act 1 they start with Chomp - - - - - """
 
         # Set up
         actions = []
+        player = ComaAI(cards=[], max_health=1000)
 
-        # Execute - Generate 1000 health samples for cultists A5
+        # Execute - Generate 1000 tests of it's first turn
         for i in range(test_config.test_pattern_duration):
-            actions.append(JawWorm().take_turn())
+            j = JawWorm()
+            j.setPlayer(player)
+            action = j.take_turn()
 
-        # Assert that it chomped first every time
-        all(self.assertEqual(JawWorm._chomp, action) for action in actions)
+            #  assert that it chomped first turn
+            self.assertEqual(j._chomp, action)
 
         """ - - - - - Test that on act 3 they may not start with chomp - - - - - """
 
         # Set up
         uniqueActions = set()
 
-        # Execute - Generate 1000 health samples for cultists A5
-        for i in range(test_config.test_pattern_duration+10):
-            uniqueActions.add(JawWorm(act=3).take_turn())
+        # Execute - Generate n number of samples based on test_config
+        for i in range(test_config.test_pattern_duration + 10):
+            j = JawWorm(act=3)
+            j.setPlayer(ComaAI(cards=[], max_health=1000))
+            uniqueActions.add(j.take_turn().__func__)
 
         # Assert that it used 3 unique abilities on its different "first turns"
         self.assertEquals(3, len(uniqueActions))
@@ -120,23 +125,27 @@ class TestJawWorm(unittest.TestCase):
 
     def test_chomp(self):
         """
-        TODO: Verify Tests
         Test Jaw Worm Chomp Ability
         :return: None
         """
+
+        """
+        Testing that chomp does 11 damage at A >= 1 (Test Edge case 1)
+        """
+
         # Setup
         monster = JawWorm(ascension=1)
         player = ComaAI(cards=[], max_health=100)
         monster.setPlayer(player)
 
         # Execute
-        monster.chomp()
+        monster._chomp()
 
         # Assert
-        self.assertEquals(player.current_health, 89)
+        self.assertEqual(player.current_health, 89)
 
         """
-        Testing that chomp does 12 damage at A >= 2 (Test Edge case 2)
+        Testing that chomp does 12 damage at A = 2 (Test Edge case 2)
         """
         # Setup
         monster = JawWorm(ascension=2)
@@ -144,21 +153,21 @@ class TestJawWorm(unittest.TestCase):
         monster.setPlayer(player)
 
         # Execute
-        monster.chomp()
+        monster._chomp()
 
         # Assert
-        self.assertEquals(player.current_health, 88)
+        self.assertEqual(player.current_health, 88)
 
         """
-        Testing that chomp does 12 damage at A >= 2 (Test Edge case 2)
+        Testing that chomp does 12 damage at A > 2 (Test Base case)
         """
         # Setup
-        monster = JawWorm(ascension=2)
+        monster = JawWorm(ascension=5)
         player = ComaAI(cards=[], max_health=100)
         monster.setPlayer(player)
 
         # Execute
-        monster.chomp()
+        monster._chomp()
 
         # Assert
         self.assertEquals(player.current_health, 88)

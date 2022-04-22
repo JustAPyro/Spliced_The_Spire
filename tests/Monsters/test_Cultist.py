@@ -26,7 +26,7 @@ class TestCultist(unittest.TestCase):
         health = generateSamples(lambda: Cultist(5).max_health, quantity)
 
         # Assert
-        all(self.assertLessEqual(h, 54) for h in health)     # All health <= 54
+        all(self.assertLessEqual(h, 54) for h in health)  # All health <= 54
         all(self.assertGreaterEqual(h, 46) for h in health)  # All health >= 48
         all(self.assertLess(abs(health[h] - quantity / len(health)), variance) for h in health)
 
@@ -41,7 +41,7 @@ class TestCultist(unittest.TestCase):
         health = generateSamples(lambda: Cultist(7).max_health, quantity)
 
         # Assert
-        all(self.assertLessEqual(h, 56) for h in health)     # All health <= 54
+        all(self.assertLessEqual(h, 56) for h in health)  # All health <= 54
         all(self.assertGreaterEqual(h, 50) for h in health)  # All health >= 48
         all(self.assertLess(abs(health[h] - quantity / len(health)), variance) for h in health)
 
@@ -79,8 +79,8 @@ class TestCultist(unittest.TestCase):
         # Setup
         cultist = Cultist(1)
         cultist.take_turn()  # Skip the first turn
-        cultist.setPlayer(ComaAI(cards=[], max_health=1000))   # Set a dummy target
-        actions = []         # Create a list to store the moves
+        cultist.setPlayer(ComaAI(cards=[], max_health=1000))  # Set a dummy target
+        actions = []  # Create a list to store the moves
 
         # Execute (Take n turns based on our config file)
         for i in range(test_config.test_pattern_duration):
@@ -88,6 +88,17 @@ class TestCultist(unittest.TestCase):
 
         # Assert that each one of these was dark strike
         all(self.assertEqual(cultist._darkStrike, action) for action in actions)
+
+        """ - - - - - Test that turn was incremented - - - - - """
+        # Set up
+        cultist = Cultist(1)
+        cultist.setPlayer(ComaAI(cards=[], max_health=1000))
+        results = []
+
+        # Execute and assert
+        for i in range(test_config.test_pattern_duration):
+            self.assertEquals(i, cultist.turn)
+            cultist.take_turn()
 
     def test_incantation(self):
         """

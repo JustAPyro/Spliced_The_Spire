@@ -4,6 +4,7 @@ from src.Effects import Strength, Ritual
 from random import randint
 from functools import partial
 
+
 # Calculates health by ascension
 def calculateHealth(max_health, ascension):
     """ Calculates health based on the dict and provided ascension level
@@ -70,6 +71,17 @@ class AbstractMonster(ABC):
         self.actor = None
         self.actionHistory = []
 
+        # Call the onStart method for any monsters that have buffs at the start
+        self.onStart()
+
+    def onStart(self):
+        """ Will be called on Monster creation.
+        You can override this in a subclass if you have something
+        you want to happen at the start of the fight.
+        :return: None
+        """
+        pass
+
     def deal_damage(self, damage):
         adjustedDamage = self.strength.modifyDamageDealt(damage)
         self.getPlayer().takeDamage(adjustedDamage)
@@ -83,16 +95,8 @@ class AbstractMonster(ABC):
         :return: The ability used
         """
 
-        ability()       # Start by using the ability
         self.turn += 1  # Increment turn
-
-        # Then, if it's a partial, get and return only the function
-        if type(ability) is partial:
-            return partial.func
-
-        # Otherwise, just return the as is
-        return ability
-
+        return ability()  # Use the ability and return it's type
 
     def take_damage(self, dmg):
         self.current_health -= dmg
@@ -108,6 +112,9 @@ class AbstractMonster(ABC):
 
     def gainStrength(self, strength):
         self.strength.strength += strength
+
+    def addEffect(self, effect):
+        self.effects[effect.name] = effect
 
     def modifyEffect(self, effect, quantity):
         """ Used to modify (+/-) the quantity of an effect
@@ -139,16 +146,17 @@ class AbstractMonster(ABC):
                 continue  # This was an empty conditional, so skip it
 
             # Get the history for x number of turns
-            history = self.actionHistory[-times.replace("X", ""):]
+
+            history = self.actionHistory[-int(times.replace("X", "")):]
 
             # If we did this method last turn AND we've done the same method for each of the last turn
-            if history[-1] == method and len(set(history)) <= 1:
+            if len(history) > 1 and history[-1] == method and len(set(history)) <= 1:
                 # Reduce the total probability because we will not be allowing this to occur
                 totalProbability -= percent.replace("%", "")
                 bannedMethods.append(method)
 
         # Sort the keys based on likelihood (lowest first)
-        probabilities.sort(key=lambda x: int(x[0].replace("", "")))
+        probabilities.sort(key=lambda x: int(x[0].replace("%", "")))
 
         # Start with probability 0
         prob = 0
@@ -175,11 +183,10 @@ class AbstractMonster(ABC):
             raise Exception
 
         # starting from the second ascension, and increasing
-        for i in range(0, len(ascensionBounds)-1):
+        for i in range(0, len(ascensionBounds) - 1):
 
             # Check if this ascension is lower than the next ascension
-            if self.ascension < ascensionBounds[i+1]:
-
+            if self.ascension < ascensionBounds[i + 1]:
                 # If so, generate and return health based on the previous range
                 return actionDict[ascensionBounds[i]]
 
