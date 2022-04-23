@@ -1,4 +1,5 @@
 from src.Monsters.AbstractMonster import AbstractMonster
+from src.Utility import Colors
 
 # This class also handles making sure turns are being called properly
 # Represents a battle room
@@ -30,6 +31,7 @@ class Battleground:
         self.actor = actor
 
     def next_round(self, verbose=False):
+        print(f"{Colors.GREEN}<--- {self.actor.name}'s Turn --->{Colors.RESET}")
         self.actor.execute_turn(verbose)
         for monster in self.enemies:
             monster.take_turn()

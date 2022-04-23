@@ -1,7 +1,7 @@
 from src.Effects.AbstractEffect import AbstractEffect
 
 
-# CLEAN 4/17
+# CLEAN 4/17/2022
 class Ritual(AbstractEffect):
     def __init__(self, target, quantity):       # Constructor
         AbstractEffect.__init__(self, target,   # Call super-constructor

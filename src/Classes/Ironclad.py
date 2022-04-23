@@ -1,4 +1,4 @@
-from Cards.Red import RedStrike, RedDefend, Bash
+from src.Cards.Red import RedStrike, RedDefend, Bash
 
 # Default starting health of Ironclad
 starting_health = 80

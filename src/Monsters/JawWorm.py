@@ -1,5 +1,5 @@
 from src.Monsters.AbstractMonster import AbstractMonster
-from Effects import Strength, Block
+from src.Effects import Strength, Block
 from functools import partial
 
 

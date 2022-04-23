@@ -29,8 +29,8 @@ class Cultist(AbstractMonster):
     def _incantation(self):
         # Ritual gain is based on ascension
         action = self.ascensionBasedAction({
-            +1: partial(self.modifyEffect, "Ritual", 3),  # A1- Gain 3 Ritual
-            +2: partial(self.modifyEffect, "Ritual", 4),  # A2+ Gain 4 Ritual
+            1: partial(self.modifyEffect, "Ritual", 3),  # A1- Gain 3 Ritual
+            2: partial(self.modifyEffect, "Ritual", 4),  # A2+ Gain 4 Ritual
             17: partial(self.modifyEffect, "Ritual", 5)  # A17+ Gain 5 Ritual
         })
         action()
