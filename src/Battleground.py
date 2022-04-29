@@ -36,7 +36,7 @@ class Battleground:
             self.printState()
         self.actor.execute_turn(verbose)
         for monster in self.enemies:
-            monster.take_turn()
+            monster.take_turn(verbose)
 
     def printState(self):
         print(f"{self.actor.name} is at {self.actor.current_health} health, "

@@ -219,5 +219,19 @@ class AbstractMonster(ABC):
         pass
 
     @abstractmethod
-    def take_turn(self):
+    def take_turn(self, verbose):
         pass
+
+    # < - - - - - Helper Methods - - - - - > #
+
+    def dealDamage(self, rawDamage):
+        # The amount of damage based on our effects, powers, and relics
+        modifiedDamage = rawDamage
+
+        # The actual damage done after accounting for player effects, powers and relics
+        actualDamage = self.getPlayer().takeDamage(modifiedDamage)
+
+        # Return the actual damage
+        return actualDamage
+
+

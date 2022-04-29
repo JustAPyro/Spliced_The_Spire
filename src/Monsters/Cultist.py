@@ -14,15 +14,17 @@ class Cultist(AbstractMonster):
                                  ascension=ascension,
                                  act=1)
 
-    def take_turn(self):
+    def take_turn(self, verbose=False):
         # If it's our first turn
         if self.turn == 0:
             # Use incantation and end turn
             self._incantation()
+            print("Used Incantation and gained 3 ritual! (Caw caw!)") if verbose else None
             return self._incantation
 
         # After that we dark strike every turn
         self._darkStrike()
+        print("Used Dark Strike and did ")
         return self._darkStrike
 
     # Tested
@@ -42,8 +44,7 @@ class Cultist(AbstractMonster):
     # Tested
     def _darkStrike(self):
         # Dark strike always does 6 damage
-        self.getPlayer().takeDamage(6)
 
         # End turns by returning dark strike
         self.turn += 1
-        return self._darkStrike
+        return self.dealDamage(6)
