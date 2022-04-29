@@ -1,6 +1,7 @@
 from src.Monsters.AbstractMonster import AbstractMonster
 from src.Utility import Colors
 
+
 # This class also handles making sure turns are being called properly
 # Represents a battle room
 class Battleground:
@@ -12,7 +13,6 @@ class Battleground:
         enemy: AbstractMonster
         for enemy in enemies:
             enemy.setPlayer(actor)
-
 
     # Allows you to add a monster to this battleground
     def add_monster(self, monster):
@@ -31,10 +31,16 @@ class Battleground:
         self.actor = actor
 
     def next_round(self, verbose=False):
-        print(f"{Colors.GREEN}<--- {self.actor.name}'s Turn --->{Colors.RESET}")
+        if verbose:
+            print(f"{Colors.GREEN}<--- {self.actor.name}'s Turn --->{Colors.RESET}")
+            self.printState()
         self.actor.execute_turn(verbose)
         for monster in self.enemies:
             monster.take_turn()
+
+    def printState(self):
+        print(f"{self.actor.name} is at {self.actor.current_health} health, "
+              f"{self.enemies[0].name} is at {self.enemies[0].current_health} health and intends to {self.enemies[0].getIntent()}")
 
     def battle_over(self):
         if self.actor.current_health > 0 and len(self.enemies) > 0:

@@ -61,7 +61,7 @@ class AbstractMonster(ABC):
         }
 
         # Since this monster was just created, set current health to max
-        self.current_health = max_health
+        self.current_health = self.max_health
         self.turn = 0
         self.block = 0
         self.strength = Strength(self, 0)
@@ -81,6 +81,9 @@ class AbstractMonster(ABC):
         :return: None
         """
         pass
+
+    def getIntent(self):
+        return "attack for 4 damage"
 
     def deal_damage(self, damage):
         adjustedDamage = self.strength.modifyDamageDealt(damage)
