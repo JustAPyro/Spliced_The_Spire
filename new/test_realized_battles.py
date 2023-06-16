@@ -2,7 +2,7 @@ import unittest
 
 from actors import AbstractActor
 from cards import RedDefend, RedStrike, Bash
-from enemies import Louse
+from enemies import RedLouse
 from classes import Ironclad
 from intents import Attack, Buff
 from effects import CURLUP, VULNERABLE, BLOCK, STRENGTH
@@ -14,11 +14,11 @@ class TestRealizedBattle(unittest.TestCase):
             health=88,
             hand=[RedDefend(), RedStrike(), RedDefend(), Bash(), RedStrike()]
         )
-        left_louse = Louse().set_start(
+        left_louse = RedLouse().set_start(
             health=15,
             effects=[(CURLUP, 4)],
             intent=Attack(7))
-        right_louse = Louse().set_start(
+        right_louse = RedLouse().set_start(
             health=11,
             effects=[(CURLUP, 4)],
             intent=Buff()
@@ -66,6 +66,5 @@ class TestRealizedBattle(unittest.TestCase):
         self.assertEqual(right_louse.health, -1, 'damage applied correctly')
         self.assertTrue(right_louse.is_dead(), 'right louse is dead')
         self.assertEqual(player.energy, 1, 'player is at correct energy')
-
 
 
