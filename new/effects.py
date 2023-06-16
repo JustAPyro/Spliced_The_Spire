@@ -10,10 +10,12 @@ BLOCK = 'BLOCK'
 CURLUP = 'CURLUP'
 VULNERABLE = 'VULNERABLE'
 STRENGTH = 'STRENGTH'
+RITUAL = 'RITUAL'
 
 
 class EffectMixin:
     def __init__(self):
+        self.ritual_flag = False
         self.effects = {}
 
     def negate_effect(self, effect):
@@ -21,7 +23,7 @@ class EffectMixin:
 
     def decrease_effect(self, effect, quantity):
         current = self.get_effect(effect)
-        if current > 1:
+        if current > 0:
             self.set_effect(effect, current - quantity)
 
     def clear_effects(self):
@@ -34,7 +36,7 @@ class EffectMixin:
             return cur_quantity > 0
         return cur_quantity == quantity
 
-    def get_effect(self, effect):
+    def get_effect(self, effect) -> int:
         return self.effects.get(effect, 0)
 
     def set_effect(self, effect, value):
@@ -62,3 +64,7 @@ class EffectMixin:
 
     def apply_strength(self: AbstractActor | AbstractEnemy, quantity: int):
         self._stack(STRENGTH, quantity)
+
+    def apply_ritual(self: AbstractActor | AbstractEnemy, quantity: int):
+        self._stack(RITUAL, quantity)
+        self.ritual_flag = True

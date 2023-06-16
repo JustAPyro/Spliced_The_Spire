@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from effects import EffectMixin, CURLUP, VULNERABLE
+from effects import EffectMixin, CURLUP, VULNERABLE, RITUAL
 from random import randint
 from functools import partial
 from typing import TYPE_CHECKING, Dict, Tuple, Optional
@@ -31,6 +31,8 @@ class AbstractEnemy(ABC, EffectMixin):
         self.ascension = ascension
         self.act = act
 
+        self.ritual_flag = False
+
         super().__init__()
 
     def is_dead(self):
@@ -61,10 +63,10 @@ class AbstractEnemy(ABC, EffectMixin):
         self.health = health
         self.clear_effects()
 
-        if effects not None:
+        if effects is not None:
             self.apply_all_effects(effects)
 
-        if intent not None:
+        if intent is not None:
             self.intent = intent
         return self
 
@@ -72,9 +74,18 @@ class AbstractEnemy(ABC, EffectMixin):
         pass
 
     def after_ability(self):
+        str_buff = 0
+
         for effect in self.effects:
             if effect == VULNERABLE:
                 self.decrease_effect(VULNERABLE, 1)
+            if effect == RITUAL:
+                str_buff = self.get_effect(RITUAL)
+
+        if not self.ritual_flag:
+            self.apply_strength(str_buff)
+        else:
+            self.ritual_flag = False
 
     @staticmethod
     def ability(func):
@@ -107,7 +118,13 @@ class Cultist(AbstractEnemy):
                          ascension=ascension,
                          act=1)
 
+    @AbstractEnemy.ability
+    def incantation(self, quantity: Optional[int] = None):
+        self.apply_ritual(quantity)
 
+    @AbstractEnemy.ability
+    def dark_strike(self, target, damage: Optional[int] = None):
+        target.take_damage(damage)
 
 
 class RedLouse(AbstractEnemy):
