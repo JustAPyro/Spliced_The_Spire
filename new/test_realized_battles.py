@@ -2,7 +2,7 @@ import unittest
 
 from actors import AbstractActor
 from cards import RedDefend, RedStrike, Bash
-from enemies import RedLouse
+from enemies import RedLouse, Cultist
 from classes import Ironclad
 from intents import Attack, Buff
 from effects import CURLUP, VULNERABLE, BLOCK, STRENGTH
@@ -66,5 +66,18 @@ class TestRealizedBattle(unittest.TestCase):
         self.assertEqual(right_louse.health, -1, 'damage applied correctly')
         self.assertTrue(right_louse.is_dead(), 'right louse is dead')
         self.assertEqual(player.energy, 1, 'player is at correct energy')
+
+    def test_battle_06_16_23_02(self):
+        player = AbstractActor(Ironclad).set_start(
+            health=88,
+            hand=[RedStrike(), RedDefend(), Bash(), RedStrike(), RedDefend()]
+        )
+        cultist = Cultist().set_start(
+            health=54,
+        )
+
+        self.assertEquals(88, player.health, 'player health check')
+        self.assertEquals(3, player.energy, 'player energy check')
+        self.assertEquals(54, cultist.health, 'enemy health check')
 
 
