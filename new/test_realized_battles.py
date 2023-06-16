@@ -5,7 +5,7 @@ from cards import RedDefend, RedStrike, Bash
 from enemies import RedLouse, Cultist
 from classes import Ironclad
 from intents import Attack, Buff
-from effects import CURLUP, VULNERABLE, BLOCK, STRENGTH
+from effects import CURLUP, VULNERABLE, BLOCK, STRENGTH, RITUAL
 
 
 class TestRealizedBattle(unittest.TestCase):
@@ -76,8 +76,51 @@ class TestRealizedBattle(unittest.TestCase):
             health=54,
         )
 
-        self.assertEquals(88, player.health, 'player health check')
-        self.assertEquals(3, player.energy, 'player energy check')
-        self.assertEquals(54, cultist.health, 'enemy health check')
+        self.assertEqual(88, player.health, 'player health check')
+        self.assertEqual(3, player.energy, 'player energy check')
+        self.assertEqual(54, cultist.health, 'enemy health check')
+
+        player.use_card(cultist, player.hand[2])
+        player.use_card(cultist, player.hand[0])
+        player.end_turn()
+
+        self.assertEqual(0, player.energy, 'player energy depleted')
+        self.assertEqual(37, cultist.health, 'enemy health check')
+        self.assertTrue(cultist.has_effect(VULNERABLE, 2))
+
+        cultist.incantation(3)
+
+        self.assertTrue(cultist.has_effect(RITUAL, 3))
+        self.assertTrue(cultist.has_effect(VULNERABLE, 1))
+        self.assertEqual(37, cultist.health)
+        self.assertEqual(88, player.health)
+        player.start_turn([RedDefend(), RedStrike(), RedStrike(), RedStrike(), RedDefend()])
+        player.use_card(cultist, player.hand[1])
+        player.use_card(cultist, player.hand[1])
+        player.use_card(cultist, player.hand[1])
+
+        self.assertEqual(len(player.hand), 2)
+        self.assertEqual(10, cultist.health)
+        self.assertTrue(cultist.has_effect(VULNERABLE, 1))
+
+        player.end_turn()
+        cultist.dark_strike(player, 6)
+        player.start_turn([RedStrike(), RedDefend(), Bash(), RedDefend(), RedStrike()])
+
+        self.assertFalse(cultist.has_effect(VULNERABLE))
+        self.assertEqual(82, player.health)
+        self.assertEqual(5, len(player.hand))
+        self.assertEqual(3, player.energy)
+        self.assertTrue(cultist.has_effect(STRENGTH, 3))
+        self.assertTrue(cultist.has_effect(RITUAL, 3))
+        player.use_card(cultist, player.hand[2])
+        player.use_card(cultist, player.hand[0])
+
+        self.assertEqual(-7, cultist.health)
+        self.assertTrue(cultist.has_effect(VULNERABLE, 2))
+        self.assertTrue(cultist.is_dead())
+
+
+
 
 
