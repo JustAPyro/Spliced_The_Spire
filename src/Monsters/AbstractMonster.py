@@ -12,7 +12,7 @@ def calculateHealth(max_health, ascension):
     { 1:(0, 100), 5:(100, 200) } -> Health(0, 100), A5+ Health(100, 200)
     Note: The first entry must be A1, otherwise Exception will be raised.
 
-    :param max_health: A dict in the format ascension: (low, high)
+    :param max_health: A dict in the format $ascension: ($low_health, $max_health))
     :param ascension: The ascension you want to generate health for
     :return: A random health in the range of provided ascension
     """
