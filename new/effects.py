@@ -24,6 +24,10 @@ class EffectMixin:
         if current > 1:
             self.set_effect(effect, current - quantity)
 
+    def clear_effects(self):
+        for effect in self.effects:
+            self.effects[effect] = 0
+
     def has_effect(self, effect, quantity=None):
         cur_quantity = self.effects.get(effect, 0)
         if quantity is None:

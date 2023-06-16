@@ -1,47 +1,17 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from random import randint
+
 from src.Effects import Strength, Ritual
 
-from random import randint
+
 from functools import partial
 
 
-# Calculates health by ascension
-def calculateHealth(max_health, ascension):
-    """ Calculates health based on the dict and provided ascension level
-    ex.
-    { 1:(0, 100), 5:(100, 200) } -> Health(0, 100), A5+ Health(100, 200)
-    Note: The first entry must be A1, otherwise Exception will be raised.
-
-    :param max_health: A dict in the format $ascension: ($low_health, $max_health))
-    :param ascension: The ascension you want to generate health for
-    :return: A random health in the range of provided ascension
-    """
-
-    # Start with a sorted list of the ascension bounds
-    ascensionBounds = list(max_health.keys())
-    ascensionBounds.sort()
-
-    # We need to have defined behavior for ascension 1+ at least
-    if ascensionBounds[0] != 1:
-        raise Exception
-
-    # starting from the second ascension, and increasing
-    for i in range(0, len(ascensionBounds)):
-
-        # Check if this ascension is lower than the next ascension
-        if ascension <= ascensionBounds[i]:
-            # If so, generate and return health based on the previous range
-            low, high = max_health[ascensionBounds[i]]
-            return randint(low, high)
-
-        # If it's not lower than the highest bound, then we know to use the last range
-        low, high = max_health[ascensionBounds[-1]]
-        return randint(low, high)
 
 
 class AbstractMonster(ABC):
 
-    def __init__(self, name, max_health, ascension, act=1):
+    def __init__(self, name, max_health, ascension=0, act=1):
         self.name = name
         self.ascension = ascension
         self.act = act
@@ -153,7 +123,7 @@ class AbstractMonster(ABC):
             history = self.actionHistory[-int(times.replace("X", "")):]
 
             # If we did this method last turn AND we've done the same method for each of the last turn
-            if len(history) > 1 and history[-1] == method and len(set(history)) <= 1:
+            if len(history) > 1 >= len(set(history)) and history[-1] == method:
                 # Reduce the total probability because we will not be allowing this to occur
                 totalProbability -= percent.replace("%", "")
                 bannedMethods.append(method)
@@ -182,7 +152,7 @@ class AbstractMonster(ABC):
         ascensionBounds.sort()
 
         # We need to have defined behavior for ascension 1+ at least
-        if ascensionBounds[0] != 1:
+        if ascensionBounds[0] != 0:
             raise Exception
 
         # starting from the second ascension, and increasing
