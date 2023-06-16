@@ -53,7 +53,7 @@ class AbstractMonster(ABC):
 
         else:
             # Otherwise, just use the provided value
-            max_health = max_health
+            self.max_health = max_health
 
         # Set all buffs to zero and initialize them
         self.effects = {

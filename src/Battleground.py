@@ -1,5 +1,6 @@
 from src.Monsters.AbstractMonster import AbstractMonster
 from src.Utility import Colors
+from src.Cards.Red import RedStrike
 
 
 # This class also handles making sure turns are being called properly
