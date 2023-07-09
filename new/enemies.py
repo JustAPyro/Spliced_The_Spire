@@ -25,13 +25,9 @@ class AbstractEnemy(ABC, EffectMixin):
         # Since this was just created current health should be full
         self.health = self.max_health
 
-        self.intent = None
-
         # Information about the environment that is relevant to the battle
         self.ascension = ascension
         self.act = act
-
-        self.ritual_flag = False
 
         super().__init__()
 
@@ -111,6 +107,11 @@ class Cultist(AbstractEnemy):
         0: (48, 54),  # A1- Health is 48-54
         7: (50, 56)  # A7+ Health is 50-56
     }
+    ritual_gain = {
+        +0: 3,  # A0-A1 gain 3 ritual
+        +2: 4,  # A2-A16 gain 4 ritual
+        17: 5,  # A17+ gain 5 ritual
+    }
 
     def __init__(self, ascension=0):
         super().__init__(name='Cultist',
@@ -120,11 +121,19 @@ class Cultist(AbstractEnemy):
 
     @AbstractEnemy.ability
     def incantation(self, quantity: Optional[int] = None):
-        self.apply_ritual(quantity)
+        self.apply_ritual(quantity if quantity is not None
+                          else AscensionBasedInt(self.ascension, Cultist.ritual_gain))
 
     @AbstractEnemy.ability
     def dark_strike(self, target, damage: Optional[int] = None):
-        target.take_damage(damage)
+        target.take_damage(damage if damage is not None else 6)
+
+    @AbstractEnemy.ability_pattern
+    def pattern(self):
+        # Simple pattern: casts incantation, then spams dark stroke.
+        yield self.incantation
+        while True:
+            yield self.dark_strike
 
 
 class RedLouse(AbstractEnemy):
@@ -170,12 +179,52 @@ class RedLouse(AbstractEnemy):
 
     @AbstractEnemy.ability_pattern
     def pattern(self):
-        ag = AbilityGenerator()
-        ag.condition(PercentChance(25, self.grow))
+        yield self.bite
 
-        NotInARow(3, (self.grow, self.bite))
-        Percent(25, self.grow),
-        Percent(75, self.bite)
 
-        if self.ascension > 17:
-            NotInARow(2, self.grow)
+class Jaw_Worm(AbstractEnemy):
+    max_health_range = {
+        0: (40, 44),  # A1- Health is 48-54
+        7: (42, 46)  # A7+ Health is 50-56
+    }
+
+    def __init__(self, ascension=0, act=1):
+        super().__init__(name='Jaw Worm',
+                         max_health=Jaw_Worm.max_health_range,
+                         ascension=ascension,
+                         act=act)
+
+    @AbstractEnemy.ability
+    def Chomp(self, target):
+        # Chomp: Deal 11 damage, or 12 on ascension 2+
+        target.take_damage(
+            AscensionBasedInt(self.ascension, {
+                0: 11,
+                2: 12
+            }))
+
+    @AbstractEnemy.ability
+    def Thrash(self, target):
+        # Thrash: Deal 7 damage, gain 5 block.
+        self.apply_block(5)
+        target.take_damage(7)
+
+    @AbstractEnemy.ability
+    def Bellow(self):
+        self.apply_strength(AscensionBasedInt(self.ascension, {
+            +0: 3,
+            +2: 4,
+            17: 5
+        }))
+        self.apply_block(AscensionBasedInt(self.ascension, {
+            +0: 6,
+            17: 9
+        }))
+
+
+    @AbstractEnemy.ability_pattern
+    def pattern(self):
+        # Simple pattern: casts incantation, then spams dark stroke.
+        yield self.incantation
+        while True:
+            yield self.dark_strike
