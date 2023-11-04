@@ -1,5 +1,5 @@
-from cards import *
-
+from new.cards import *
+from new.Relics import Burning_Blood
 
 class STSClass():
     pass
@@ -7,7 +7,22 @@ class STSClass():
 
 class Ironclad(STSClass):
     health = 80
-    # relic = BurningBlood()
+
+    start_relic = Burning_Blood()
+
+    start_cards = [
+        RedStrike(),
+        RedStrike(),
+        RedStrike(),
+        RedStrike(),
+        RedStrike(),
+        RedDefend(),
+        RedDefend(),
+        RedDefend(),
+        RedDefend(),
+        Bash(),
+    ]
+
     cards = (
         RedStrike(),
         RedStrike(),
