@@ -39,7 +39,7 @@ class AbstractActor(ABC):
     def modifyBlock(self):
         pass
 
-    def __draw_cards(self, number):
+    def draw(self, number):
         for i in range(number):
             self.__draw_card()
 

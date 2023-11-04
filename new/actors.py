@@ -21,11 +21,10 @@ class AbstractActor(EffectMixin):
         self.max_energy: int = 3
         self.energy: int = 3
 
-        self.draw_pile: list[AbstractCard] = random.sample(clas.start_cards, len(clas.start_cards))
+        self.draw_pile: list[AbstractCard] = clas.start_cards
+        self.hand_pile: list[AbstractCard] = []
         self.discard_pile: list[AbstractCard] = []
-        self.hand = []
-        for _ in range(5):
-            self.hand.append(self.draw_pile.pop())
+        self.exhaust_pile: list[AbstractCard] = []
 
     def set_start(self, health, hand):
         # TODO: Assert start
@@ -49,6 +48,20 @@ class AbstractActor(EffectMixin):
     def start_turn(self, draw=None):
         self.energy = self.max_energy
         self.hand = draw if draw else []
+
+    def draw(self, number):
+        for i in range(number):
+            self.__draw_card()
+
+    def __draw_card(self):
+        if len(self.draw_pile) > 0:
+            self.hand_pile.append(self.draw_pile.pop())
+        elif len(self.discard_pile) > 0:
+            self.draw_pile.extend(self.discard_pile)
+            self.discard_pile.clear()
+            random.shuffle(self.draw_pile)
+            self.hand_pile.append(self.draw_pile.pop())
+
 
 class StupidActor(AbstractActor):
     pass
