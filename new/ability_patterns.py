@@ -38,19 +38,3 @@ def hi():
 def bye():
     return False
 
-
-ag = AbilityGenerator()
-ag.condition(PercentChance(25, hi))
-ag.condition(PercentChance(75, bye))
-final = ag.finalize()
-
-t = 0
-f = 0
-for i in range(1000):
-    x = next(final)[0]
-    if x():
-        t += 1
-    else:
-        f += 1
-
-print(f'false: {f}, true: {t}')

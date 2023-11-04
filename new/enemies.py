@@ -1,16 +1,78 @@
 from abc import ABC, abstractmethod
-from effects import EffectMixin, CURLUP, VULNERABLE, RITUAL
+from new.effects import EffectMixin, CURLUP, VULNERABLE, RITUAL
 from random import randint
 from functools import partial
 from typing import TYPE_CHECKING, Dict, Tuple, Optional
 
-from abstraction_enforcement import protect
-from AscensionMapping import AscensionBasedInt
+from new.AscensionMapping import AscensionBasedInt
 from new.ability_patterns import AbilityGenerator
 
 if TYPE_CHECKING:
-    from intents import Intent
     from actors import AbstractActor
+
+from enum import Enum
+
+
+# https://slay-the-spire.fandom.com/wiki/Intent
+class IntentIcon(Enum):
+    DAGGER = 1
+    KNIFE = 2
+    SWORD = 3
+    SCIMITAR = 4
+    BUTCHER = 5
+    AXE = 6
+    SCYTHE = 7
+    SHIELD = 8
+    SMALL_DEBUFF = 9
+    BIG_DEBUFF = 10
+    BUFF = 11
+    DAGGER_DEBUFF = 12
+    SWORD_DEBUFF = 13
+    SCIMITAR_DEBUFF = 14
+    BUTCHER_DEBUFF = 15
+    AXE_DEBUFF = 16
+    DAGGER_BLOCK = 17
+    SWORD_BLOCK = 18
+    SCIMITAR_BLOCK = 19
+    SCYTHE_BLOCK = 20
+    SWORD_BUFF = 21
+    BLOCK_BUFF = 22
+    BLOCK_DEBUFF = 23
+    COWARDLY = 24
+    SLEEPING = 25
+    STUNNED = 26
+    UNKNOWN = 27
+
+
+class IntentType(Enum):
+    AGGRESSIVE = 1
+    DEFENSIVE = 2
+    DEBUFF = 3
+    BUFF = 4
+    AGGRESSIVE_DEBUFF = 5
+    AGGRESSIVE_DEFENSE = 6
+    AGGRESSIVE_BUFF = 7
+    DEFENSIVE_BUFF = 8
+    DEFENSIVE_DEBUFF = 9
+    COWARDLY = 10
+    SLEEPING = 11
+    STUNNED = 12
+    UNKNOWN = 13
+
+
+class Intent:
+    __damage_types = (
+        IntentType.AGGRESSIVE,
+        IntentType.AGGRESSIVE_DEBUFF,
+        IntentType.AGGRESSIVE_DEFENSE,
+        IntentType.AGGRESSIVE_BUFF,
+    )
+
+    def __init__(self, intent_type: IntentType, damage: int = None):
+        if intent_type in self.__damage_types and not damage:
+            raise ValueError("Aggressive Intent must have damage amount.")
+        self.intent_type = intent_type
+        self.damage = damage
 
 
 class AbstractEnemy(ABC, EffectMixin):
@@ -24,6 +86,11 @@ class AbstractEnemy(ABC, EffectMixin):
                            else AscensionBasedInt(ascension, max_health))
         # Since this was just created current health should be full
         self.health = self.max_health
+
+        # This stores the move pattern of the enemy,
+        # It will populate with a generator the first time
+        # that take_turn is called on this enemy
+        self.ability = self.pattern()
 
         # Information about the environment that is relevant to the battle
         self.ascension = ascension
@@ -50,8 +117,13 @@ class AbstractEnemy(ABC, EffectMixin):
             damage = damage * 1.5
         self.health -= damage
 
-    def deal_damage(self, damage: int):
-        pass
+    def deal_damage(self, damage: int, target, log):
+        extra = 0
+        if self.effects.get('STRENGTH'):
+            extra = extra + self.effects['STRENGTH']
+
+        log.append(f'used Dark Strike on {target.name} to deal {damage + extra} damage.')
+        target.take_damage(damage + extra if damage is not None else 6)
 
     def set_start(self, health, effects=None, intent=None):
         # TODO: Assert beginning
@@ -83,6 +155,10 @@ class AbstractEnemy(ABC, EffectMixin):
         else:
             self.ritual_flag = False
 
+    @property
+    def intent(self):
+        return None
+
     @staticmethod
     def ability(func):
         def wrapper(*args, **kwargs):
@@ -100,6 +176,15 @@ class AbstractEnemy(ABC, EffectMixin):
             func(*args, **kwargs)
 
         return wrapper
+
+    @abstractmethod
+    def pattern(self):
+        raise NotImplementedError
+
+    def take_turn(self, actor):
+        log = []
+        next(self.ability)(actor, None, log)
+        return log[0]
 
 
 class Cultist(AbstractEnemy):
@@ -120,15 +205,17 @@ class Cultist(AbstractEnemy):
                          act=1)
 
     @AbstractEnemy.ability
-    def incantation(self, quantity: Optional[int] = None):
+    def incantation(self, target, quantity: Optional[int] = None, log=[]):
+        log.append('used incantation')
         self.apply_ritual(quantity if quantity is not None
                           else AscensionBasedInt(self.ascension, Cultist.ritual_gain))
 
     @AbstractEnemy.ability
-    def dark_strike(self, target, damage: Optional[int] = None):
-        target.take_damage(damage if damage is not None else 6)
+    def dark_strike(self, target, damage: Optional[int] = None, log=[]):
+        damage = 6
+        self.deal_damage(damage, target, log)
 
-    @AbstractEnemy.ability_pattern
+
     def pattern(self):
         # Simple pattern: casts incantation, then spams dark stroke.
         yield self.incantation
@@ -220,7 +307,6 @@ class Jaw_Worm(AbstractEnemy):
             +0: 6,
             17: 9
         }))
-
 
     @AbstractEnemy.ability_pattern
     def pattern(self):
