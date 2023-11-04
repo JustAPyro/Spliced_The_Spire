@@ -14,7 +14,7 @@ class AI(AbstractActor):
 
 
 class Simulation:
-    def __init__(self, actor, enemies: AbstractEnemy, hero, relics, deck, ascension):
+    def __init__(self, actor: type[AbstractActor], enemies: AbstractEnemy, hero, relics, deck, ascension):
         self.actor = actor(hero)
         self.deck = deck
         self.hand = []
@@ -29,20 +29,15 @@ class Simulation:
         print("Starting Simulation:")
 
         while self.actor.health > 0 and self.enemies.health > 0:
-            for i in range(5):
-                if len(self.deck) == 0:
-                    self.deck.extend(self.discard_pile)
-                    self.actor.discard_pile.clear()
 
+            self.actor.draw(5)
+            print(f'Actor drew {self.actor.hand_pile} and has {self.actor.health} health and {self.actor.energy} energy')
 
-                self.hand.append(self.deck.pop())
-            print(f'Actor drew {self.actor.hand} and has {self.actor.health} health and {self.actor.energy} energy')
-
-            turn = self.actor.take_turn(self.actor.hand, self.enemies)
+            turn = self.actor.take_turn(self.actor.hand_pile, self.enemies)
             print('Actor', turn)
 
-            self.discard_pile.extend(self.actor.hand)
-            self.hand.clear()
+            self.actor.discard_pile.extend(self.actor.hand_pile)
+            self.actor.hand_pile.clear()
 
             print(f'Cultists turn! Health: {self.enemies.health}, effects: {self.enemies.effects}')
             turn=self.enemies.take_turn(self.actor)
