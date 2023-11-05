@@ -111,9 +111,11 @@ class AbstractEnemy(ABC, EffectMixin):
             self.negate_effect(CURLUP)
 
     def take_damage(self, damage: int):
+        for effect in self.effects.values():
+            modification = effect.modify_damage_taken(damage)
+            if modification:
+                damage = damage + modification
         self._trigger_before_damage(damage)
-        if self.has_effect(VULNERABLE):
-            damage = damage * 1.5
         self.health -= damage
 
     def deal_damage(self, damage: int, target, log):
