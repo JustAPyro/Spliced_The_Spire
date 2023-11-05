@@ -5,6 +5,7 @@ from new.cards import AbstractCard
 from new.effects import EffectMixin
 from copy import copy
 from typing import TYPE_CHECKING
+from lutil import C
 
 if TYPE_CHECKING:
     from enemies import AbstractEnemy
@@ -38,6 +39,7 @@ class AbstractActor(EffectMixin):
 
     def use_card(self, target: AbstractEnemy, card: AbstractCard):
         if card in self.hand_pile:
+            self.discard_pile.append(card)
             self.hand_pile.remove(card)
         self.energy -= card.energyCost
         card.use(self, target)
@@ -51,12 +53,18 @@ class AbstractActor(EffectMixin):
     def get_playable_cards(self) -> list[AbstractCard]:
         playable = []
         for card in self.hand_pile:
+            # TODO: This is a sketchy patch
+            if card is None:
+                continue
             if self.energy >= card.energyCost:
                 playable.append(card)
         return playable
 
 
     def take_damage(self, damage):
+        for effect in self.effects.values():
+            modification = effect.modify_damage_taken(damage)
+            damage = damage + modification
         self.health -= damage
 
     def end_turn(self):
@@ -67,7 +75,8 @@ class AbstractActor(EffectMixin):
         self.draw(5)
         self.turn_log.append({
             'initial_draw': tuple(self.hand_pile),
-            'starting_energy': copy(self.energy),
+            'initial_energy': copy(self.energy),
+            'initial_health': copy(self.health),
             'turn_actions': []
         })
 
@@ -91,11 +100,26 @@ class AbstractActor(EffectMixin):
     def turn_logic(self, hand, enemies):
         raise NotImplementedError
 
-    def turn_impl(self, hand, enemies):
+    def turn_impl(self, hand, enemies, verbose: bool):
         self.start_turn()
-        result = self.turn_logic(hand, enemies)
-        hand = self.hand_pile.copy()
+
+        if verbose:
+            log = self.turn_log[-1]
+            print(f'{C.GREEN}Actor\'s turn:'
+                  f'\n\t drew {log["initial_draw"]} '
+                  f'\n\t has {log["initial_health"]} health / {log["initial_energy"]} energy'
+                  f'\n\t these effects: {self.get_effects_dict()}')
+
+        self.turn_logic(hand, enemies)
+
+        if verbose:
+            print(C.GREEN, end='')
+            for action in self.turn_log[-1]['turn_actions']:
+                print(action['message'])
+            print(C.END, end='')
+
         self.end_turn()
+
         return self.turn_log[-1]
 
 

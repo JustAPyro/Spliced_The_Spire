@@ -2,6 +2,7 @@ from new.rooms import EnemyRoom
 from new.enemies import Cultist, AbstractEnemy
 from new.actors import PlayerActor, AbstractActor
 from new.classes import Ironclad
+from lutil import C
 
 
 class AI(AbstractActor):
@@ -31,16 +32,16 @@ class Simulation:
 
     def run(self):
         print("Starting Simulation:")
-
+        print(f'Fighting {self.enemies.name} with {self.enemies.health} health')
         while self.actor.health > 0 and self.enemies.health > 0:
-            turn_log = self.actor.turn_impl(self.actor.hand_pile, self.enemies)
-            print(f'Actor drew {turn_log["initial_draw"]} and has {self.actor.health} health and {self.actor.energy} energy')
-            for action in turn_log['turn_actions']:
-                print(action['message'])
+            turn_log = self.actor.turn_impl(self.actor.hand_pile, self.enemies, verbose=True)
 
-            print(f'Cultists turn! Health: {self.enemies.health}, effects: {self.enemies.effects}')
+            if self.enemies.health <= 0:
+                break
+
+            print(f'{C.RED}Cultists turn! Health: {self.enemies.health}, effects: {self.enemies.get_effects_dict()}')
             turn = self.enemies.take_turn(self.actor)
-            print(self.enemies.name, turn)
+            print(f'{C.RED}{self.enemies.name} {turn}{C.END}')
 
         if self.actor.health <= 0:
             print("Actor LOST")
