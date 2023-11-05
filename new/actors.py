@@ -3,7 +3,7 @@ import random
 from new.enemies import AbstractEnemy
 from new.cards import AbstractCard
 from new.effects import EffectMixin
-
+from copy import copy
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class AbstractActor(EffectMixin):
-    def __init__(self, clas):
+    def __init__(self, clas, cards: list[AbstractCard] = None):
         super().__init__()
         self.name = "Actor"
         self.max_health: int = clas.health
@@ -21,10 +21,13 @@ class AbstractActor(EffectMixin):
         self.max_energy: int = 3
         self.energy: int = 3
 
-        self.draw_pile: list[AbstractCard] = clas.start_cards
+        self.draw_pile: list[AbstractCard] = (clas.start_cards if cards is None else cards)
         self.hand_pile: list[AbstractCard] = []
         self.discard_pile: list[AbstractCard] = []
         self.exhaust_pile: list[AbstractCard] = []
+
+        # This log contains what the actor did each turn
+        self.turn_log = []
 
     def set_start(self, health, hand):
         # TODO: Assert start
@@ -34,20 +37,39 @@ class AbstractActor(EffectMixin):
         return self
 
     def use_card(self, target: AbstractEnemy, card: AbstractCard):
-        if card in self.hand:
-            self.hand.remove(card)
+        if card in self.hand_pile:
+            self.hand_pile.remove(card)
         self.energy -= card.energyCost
         card.use(self, target)
+        self.turn_log[-1]['turn_actions'].append({
+            'type': 'use_card',
+            'card': card,
+            'target': target,
+            'message': f'{self.name} used {card.name} on {target.name}'
+        })
+
+    def get_playable_cards(self) -> list[AbstractCard]:
+        playable = []
+        for card in self.hand_pile:
+            if self.energy >= card.energyCost:
+                playable.append(card)
+        return playable
+
 
     def take_damage(self, damage):
         self.health -= damage
 
     def end_turn(self):
-        pass
+        self.discard()
 
     def start_turn(self, draw=None):
         self.energy = self.max_energy
-        self.hand = draw if draw else []
+        self.draw(5)
+        self.turn_log.append({
+            'initial_draw': tuple(self.hand_pile),
+            'starting_energy': copy(self.energy),
+            'turn_actions': []
+        })
 
     def draw(self, number):
         for i in range(number):
@@ -62,9 +84,24 @@ class AbstractActor(EffectMixin):
             random.shuffle(self.draw_pile)
             self.hand_pile.append(self.draw_pile.pop())
 
+    def discard(self):
+        self.discard_pile.extend(self.hand_pile)
+        self.hand_pile.clear()
+
+    def turn_logic(self, hand, enemies):
+        raise NotImplementedError
+
+    def turn_impl(self, hand, enemies):
+        self.start_turn()
+        result = self.turn_logic(hand, enemies)
+        hand = self.hand_pile.copy()
+        self.end_turn()
+        return self.turn_log[-1]
+
 
 class StupidActor(AbstractActor):
     pass
+
 
 class PlayerActor(AbstractActor):
     pass

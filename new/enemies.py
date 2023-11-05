@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from new.effects import EffectMixin, CURLUP, VULNERABLE, RITUAL
 from random import randint
-from functools import partial
 from typing import TYPE_CHECKING, Dict, Tuple, Optional
 
 from new.AscensionMapping import AscensionBasedInt
@@ -214,7 +213,6 @@ class Cultist(AbstractEnemy):
     def dark_strike(self, target, damage: Optional[int] = None, log=[]):
         damage = 6
         self.deal_damage(damage, target, log)
-
 
     def pattern(self):
         # Simple pattern: casts incantation, then spams dark stroke.
