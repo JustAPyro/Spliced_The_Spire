@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-from new.effects import EffectMixin, CURLUP, VULNERABLE, RITUAL
+from copy import copy
+
+from new.effects import EffectMixin, Vulnerable, Ritual
 from random import randint
 from typing import TYPE_CHECKING, Dict, Tuple, Optional
 
@@ -100,22 +102,13 @@ class AbstractEnemy(ABC, EffectMixin):
     def is_dead(self):
         return self.health <= 0
 
-    def _trigger_before_damage(self, damage: int):
-        curl = False
-        for effect in self.effects:
-            if effect == CURLUP:
-                curl = True
 
-        if curl:
-            self.apply_block(self.effects[CURLUP])
-            self.negate_effect(CURLUP)
 
     def take_damage(self, damage: int):
         for effect in self.effects.values():
             modification = effect.modify_damage_taken(damage)
             if modification:
                 damage = damage + modification
-        self._trigger_before_damage(damage)
         self.health -= damage
 
     def deal_damage(self, damage: int, target, log):
@@ -145,11 +138,11 @@ class AbstractEnemy(ABC, EffectMixin):
     def after_ability(self):
         str_buff = 0
 
-        for effect in self.effects:
-            if effect == VULNERABLE:
-                self.decrease_effect(VULNERABLE, 1)
-            if effect == RITUAL:
-                str_buff = self.get_effect(RITUAL)
+        for effect in self.effects.values():
+            if effect == Vulnerable:
+                effect.decrease_effect(Vulnerable, 1)
+            if effect == Ritual:
+                str_buff = effect.stacks
 
         if not self.ritual_flag:
             self.apply_strength(str_buff)
@@ -185,6 +178,8 @@ class AbstractEnemy(ABC, EffectMixin):
     def take_turn(self, actor):
         log = []
         next(self.ability)(actor, None, log)
+        for effect in copy(self.effects):
+            self.effects[effect].on_end_turn(self)
         return log[0]
 
 

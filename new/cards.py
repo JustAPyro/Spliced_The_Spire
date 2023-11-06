@@ -36,7 +36,8 @@ class RedStrike(AbstractCard, ABC):
         super().__init__(name='Strike', energy_cost=1)
 
     def use(self, caller, target):
-        target.take_damage(self.damage)
+        caller.deal_damage(target, self.damage)
+
 
 
 class RedDefend(AbstractCard, ABC):
