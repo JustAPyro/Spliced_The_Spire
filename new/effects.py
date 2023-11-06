@@ -1,29 +1,30 @@
 from __future__ import annotations
-
-from abc import abstractmethod
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from actors import AbstractActor
     from enemies import AbstractEnemy
 
-BLOCK = 'BLOCK'
-CURLUP = 'CURLUP'
-VULNERABLE = 'VULNERABLE'
-STRENGTH = 'STRENGTH'
-RITUAL = 'RITUAL'
 
+# ===================
+# === Abstraction ===
+# ===================
 
 class AbstractEffect:
+    """
+    This abstraction allows the easy creation of Effects.
+    An effect in this context is a Slay The Spire Buff,
+    Debuff, or block.
+    """
+
     def __init__(self):
-        self.stacks = 0
+        self.stacks = 0  # Number of stacks of this effect
 
     def decrease_stacks(self: AbstractEffect, quantity: int = 1) -> int:
         """Decrease the number of stacks of this effect by quantity. Return the number removed."""
-        # Refactored 11/5/2023, LH
 
         # If this resulted in negative set to 0
-        # And say we removed the number that existed
+        # And say we removed however many existed
         if self.stacks - quantity < 0:
             removed = self.stacks
             self.stacks = 0
@@ -35,13 +36,37 @@ class AbstractEffect:
         return quantity
 
     def increase_stacks(self: AbstractEffect, quantity: int = 1):
+        """Increase the number of stacks of this effect by quantity."""
         self.stacks += quantity
 
-    # API METHODS
+    # === API/SANDBOX METHODS ===
 
     def modify_damage_taken(self, damage: int) -> int:
+        """
+        Effects overriding this can modify the damage taken by an actor or enemy.
+        The return value of this method will be added to the damage, you can lower the damage
+        received by returning a negative value.
+        """
         pass
 
+    def modify_damage_dealt(self, damage: int) -> int:
+        """
+            Effects overriding this can modify the damage dealt by an actor or enemy.
+            The return value of this method will be added to the damage, you can lower the damage
+            dealt by returning a negative value.
+        """
+        pass
+
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+        """
+        Effects overriding this can cause things to happen on the end of turn.
+        """
+        pass
+
+
+# =======================
+# === Implementations ===
+# =======================
 
 class Block(AbstractEffect):
     def modify_damage_taken(self: AbstractEffect, damage: int) -> int:
@@ -55,27 +80,48 @@ class Block(AbstractEffect):
 
 
 class Vulnerable(AbstractEffect):
+    def on_end_turn(self, owner: AbstractActor | AbstractEnemy):
+        owner.apply_vulnerable(-1)
+
     def modify_damage_taken(self, damage: int) -> int:
         # Vulnerable adds 50% damage
         return int(damage * .5)
 
-class Ritual(AbstractEffect):
-    pass
 
+# TODO:
 class Strength(AbstractEffect):
-    pass
+    def modify_damage_dealt(self, damage: int) -> int:
+        return self.stacks
+
+
+# TODO:
+class Ritual(AbstractEffect):
+    def on_end_turn(self, owner: AbstractActor | AbstractEnemy):
+        owner.apply_strength(self.stacks)
+
+
+# ===================================
+# === Effect Management and Mixin ===
+# ===================================
 
 class EffectMixin:
     """
     This EffectMixin class is added to both the actors and the enemies, and allows for
     managing different effects.
     """
+
     def __init__(self):
-        self.damage_prevention = 0
         self.ritual_flag: bool = False
         self.effects: dict[type[AbstractEffect], AbstractEffect] = {}
 
-    def get_effects_dict(self):
+    def process_effects(self: AbstractActor | AbstractEnemy, method: callable):
+        """This method will"""
+        # TODO: Simplify processing all effects
+        pass
+
+
+    def get_effects_dict(self) -> dict[str, int]:
+        """Returns a dictionary of effects in the format {"effect name": stack}"""
         effects_dict = {}
         for effect in self.effects:
             effects_dict[effect.__name__] = self.effects[effect].stacks
@@ -96,7 +142,6 @@ class EffectMixin:
         if effect_str not in self.effects:
             return 0
         return self.effects[effect_str].decrease_stacks(quantity)
-
 
     def clear_effects(self):
         self.effects.clear()

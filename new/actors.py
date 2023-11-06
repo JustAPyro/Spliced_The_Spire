@@ -60,6 +60,12 @@ class AbstractActor(EffectMixin):
                 playable.append(card)
         return playable
 
+    def deal_damage(self, target, damage):
+        for effect in self.effects.values():
+            modification = effect.modify_damage_dealt(damage)
+            if modification:
+                damage = damage + modification
+        target.take_damage(damage)
 
     def take_damage(self, damage):
         for effect in self.effects.values():
@@ -68,6 +74,8 @@ class AbstractActor(EffectMixin):
         self.health -= damage
 
     def end_turn(self):
+        for effect in self.effects.values():
+            effect.on_end_turn(self)
         self.discard()
 
     def start_turn(self, draw=None):
