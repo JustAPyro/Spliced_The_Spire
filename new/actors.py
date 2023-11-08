@@ -57,7 +57,7 @@ class AbstractActor(EffectMixin):
             # TODO: This is a sketchy patch
             if card is None:
                 continue
-            if self.energy >= card.energy_cost:
+            if self.energy >= card.energy_cost and card.is_playable(self):
                 playable.append(card)
         return playable
 
@@ -153,9 +153,8 @@ class LeftToRightAI(AbstractActor):
         super().__init__(clas, cards=cards)
 
     def turn_logic(self, hand, enemies):
-        while self.energy > 0:
-            choices = self.get_playable_cards()
-            if len(choices) == 0:
-                break
+        choices = self.get_playable_cards()
+        while len(choices) > 0:
             self.use_card(enemies, choices[0])
+            choices = self.get_playable_cards()
 

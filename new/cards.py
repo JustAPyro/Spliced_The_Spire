@@ -54,6 +54,9 @@ class AbstractCard(ABC):
         """Overriding this method provides the behavior of the card on upgrade."""
         pass
 
+    def is_playable(self, caller):
+        return True
+
     # Override the str() method so printing it returns the name
     def __str__(self):
         return self.name
@@ -138,8 +141,27 @@ class BodySlam(AbstractCard, ABC):
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         # TODO: Implement "caller.get_stacks(Block)"
-        if (caller.effects.get(Block)):
+        if caller.effects.get(Block):
             target.take_damage(caller.effects.get(Block).stacks)
 
     def upgrade_logic(self):
         self.energy_cost = 0
+
+
+class Clash(AbstractCard, ABC):
+
+    def __init__(self):
+        self.damage = 14
+        super().__init__("Clash", energy_cost=0, card_type=CardType.ATTACK)
+
+    def use(self, caller, target):
+        target.take_damage(self.damage)
+
+    def upgrade_logic(self):
+        self.damage = 18
+
+    def is_playable(self, caller):
+        for card in caller.hand_pile:
+            if card.card_type != CardType.ATTACK:
+                return False
+        return True
