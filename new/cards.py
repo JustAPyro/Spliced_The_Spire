@@ -30,8 +30,16 @@ class AbstractCard(ABC):
         """Overriding this method provides the default behavior of a card."""
         pass
 
-    @abstractmethod
     def upgrade(self):
+        if self.upgraded:
+            return
+
+        self.name = self.name + "+"
+        self.upgraded = True
+        self.upgrade_logic()
+
+    @abstractmethod
+    def upgrade_logic(self):
         """Overriding this method provides the behavior of the card on upgrade."""
         pass
 
@@ -52,8 +60,7 @@ class RedStrike(AbstractCard, ABC):
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.deal_damage(target, self.damage)
 
-    def upgrade(self):
-        self.name = "Strike +"
+    def upgrade_logic(self):
         self.damage = 9
 
 
@@ -65,8 +72,7 @@ class RedDefend(AbstractCard, ABC):
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.apply_block(self.block)
 
-    def upgrade(self):
-        self.name = "Defend +"
+    def upgrade_logic(self):
         self.block = 8
 
 
@@ -80,8 +86,7 @@ class Bash(AbstractCard, ABC):
         target.take_damage(self.damage)
         target.apply_vulnerable(self.vulnerable)
 
-    def upgrade(self):
-        self.name = "Bash +"
+    def upgrade_logic(self):
         self.damage = 10
         self.vulnerable = 3
 
@@ -95,8 +100,7 @@ class Anger(AbstractCard, ABC):
         target.take_damage(self.damage)
         caller.discard_pile.append(Anger())
 
-    def upgrade(self):
-        self.name = "Anger +"
+    def upgrade_logic(self):
         self.damage = 8
 
 
@@ -113,8 +117,7 @@ class Armaments(AbstractCard, ABC):
             return
         random.choice(caller.hand_pile).upgrade()
 
-    def upgrade(self):
-        self.name = "Armaments +"
+    def upgrade_logic(self):
         self.upgraded = True
 
 
@@ -124,9 +127,8 @@ class BodySlam(AbstractCard, ABC):
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         # TODO: Implement "caller.get_stacks(Block)"
-        if(caller.effects.get(Block)):
+        if (caller.effects.get(Block)):
             target.take_damage(caller.effects.get(Block).stacks)
 
-    def upgrade(self):
-        self.name = "BodySlam +"
+    def upgrade_logic(self):
         self.energy_cost = 0
