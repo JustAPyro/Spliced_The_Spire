@@ -73,10 +73,14 @@ class Block(AbstractEffect):
         # This tries to decrease the number of block by the damage,
         # and returns how many block were actually removed
         stacks_removed = self.decrease_stacks(damage)
+        print(stacks_removed)
 
         # To modify damage by the number of stacks we return the
         # negative of that
         return -1 * stacks_removed
+
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+        owner.set_effect(Block, 0)
 
 
 class Vulnerable(AbstractEffect):
@@ -119,7 +123,6 @@ class EffectMixin:
         # TODO: Simplify processing all effects
         pass
 
-
     def get_effects_dict(self) -> dict[str, int]:
         """Returns a dictionary of effects in the format {"effect name": stack}"""
         effects_dict = {}
@@ -136,6 +139,9 @@ class EffectMixin:
         """Remove the effect entirely and return the number of stacks removed."""
         actor_effect = self.effects.pop(effect_str, None)
         return actor_effect.stacks if actor_effect is not None else 0
+
+    def remove_effect(self, effect: type[AbstractEffect]):
+        self.effects.pop(effect)
 
     def decrease_effect(self, effect_str: str, quantity: int) -> int:
         """Decrease the stacks of this effect on the player by quantity. Return the stacks removed."""
@@ -156,7 +162,7 @@ class EffectMixin:
         return self.effects.get(effect, 0)
 
     def set_effect(self, effect, value):
-        self.effects[effect] = value
+        self.effects.get(effect).stacks = value
 
     def _apply(self: AbstractActor | AbstractEnemy, effect, quantity):
         if effect not in self.effects:

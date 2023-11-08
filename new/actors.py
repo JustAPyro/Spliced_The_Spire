@@ -116,7 +116,9 @@ class AbstractActor(EffectMixin):
             print(f'{C.GREEN}Actor\'s turn:'
                   f'\n\t drew {log["initial_draw"]} '
                   f'\n\t has {log["initial_health"]} health / {log["initial_energy"]} energy'
-                  f'\n\t these effects: {self.get_effects_dict()}')
+                  f'\n\t these effects: {self.get_effects_dict()}'
+                  f'\n\t Draw Pile: {self.draw_pile}'
+                  f'\n\t Discard Pile: {self.discard_pile}')
 
         self.turn_logic(hand, enemies)
 
