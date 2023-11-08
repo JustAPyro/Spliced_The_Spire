@@ -2,7 +2,7 @@ import random
 from abc import ABC, abstractmethod
 
 from typing import TYPE_CHECKING
-
+from enum import Enum
 from new.effects import Block
 
 if TYPE_CHECKING:
@@ -10,12 +10,20 @@ if TYPE_CHECKING:
     from enemies import AbstractEnemy
 
 
+class CardType(Enum):
+    ATTACK = 1
+    SKILL = 2
+    POWER = 3
+    STATUS = 4
+    CURSE = 5
+
+
 class AbstractCard(ABC):
     """
     Abstract card class is the blueprint for all cards.
     """
 
-    def __init__(self, name: str, energy_cost: int, upgraded: bool = False):
+    def __init__(self, name: str, energy_cost: int, card_type: CardType, upgraded: bool = False):
         # Name of the card
         self.name: str = name
 
@@ -24,6 +32,9 @@ class AbstractCard(ABC):
 
         # If the card is upgraded or not
         self.upgraded: bool = upgraded
+
+        # Type of card
+        self.card_type: CardType = card_type
 
     @abstractmethod
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
@@ -55,7 +66,7 @@ class AbstractCard(ABC):
 class RedStrike(AbstractCard, ABC):
     def __init__(self):
         self.damage = 6
-        super().__init__(name='Strike', energy_cost=1)
+        super().__init__(name='Strike', energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.deal_damage(target, self.damage)
@@ -67,7 +78,7 @@ class RedStrike(AbstractCard, ABC):
 class RedDefend(AbstractCard, ABC):
     def __init__(self):
         self.block = 5
-        super().__init__(name='Defend', energy_cost=1)
+        super().__init__(name='Defend', energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.apply_block(self.block)
@@ -80,7 +91,7 @@ class Bash(AbstractCard, ABC):
     def __init__(self):
         self.damage = 8
         self.vulnerable = 2
-        super().__init__(name='Bash', energy_cost=2)
+        super().__init__(name='Bash', energy_cost=2, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         target.take_damage(self.damage)
@@ -94,7 +105,7 @@ class Bash(AbstractCard, ABC):
 class Anger(AbstractCard, ABC):
     def __init__(self):
         self.damage = 6
-        super().__init__(name='Anger', energy_cost=0)
+        super().__init__(name='Anger', energy_cost=0, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         target.take_damage(self.damage)
@@ -107,7 +118,7 @@ class Anger(AbstractCard, ABC):
 class Armaments(AbstractCard, ABC):
     def __init__(self):
         self.block = 5
-        super().__init__("Armaments", energy_cost=1)
+        super().__init__("Armaments", energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller, target):
         caller.apply_block(self.block)
@@ -123,7 +134,7 @@ class Armaments(AbstractCard, ABC):
 
 class BodySlam(AbstractCard, ABC):
     def __init__(self):
-        super().__init__("Body Slam", energy_cost=1)
+        super().__init__("Body Slam", energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         # TODO: Implement "caller.get_stacks(Block)"

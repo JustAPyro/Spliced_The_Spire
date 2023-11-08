@@ -91,6 +91,7 @@ class AbstractActor(EffectMixin):
             effect.on_start_turn(self) #TODO Add this to enemies
 
 
+
     def draw(self, number):
         for i in range(number):
             self.__draw_card()
