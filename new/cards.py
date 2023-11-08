@@ -14,15 +14,25 @@ class AbstractCard(ABC):
     Abstract card class is the blueprint for all cards.
     """
 
-    def __init__(self, name: str, energy_cost: int):
+    def __init__(self, name: str, energy_cost: int, upgraded: bool = False):
         # Name of the card
-        self.name = name
+        self.name: str = name
 
         # normal energy cost of card ("cost" int)
-        self.energyCost = energy_cost
+        self.energyCost: int = energy_cost
+
+        # If the card is upgraded or not
+        self.upgraded: bool = upgraded
 
     @abstractmethod
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'): pass
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
+        """Overriding this method provides the default behavior of a card."""
+        pass
+
+    @abstractmethod
+    def upgrade(self):
+        """Overriding this method provides the behavior of the card on upgrade."""
+        pass
 
     # Override the str() method so printing it returns the name
     def __str__(self):
@@ -41,6 +51,9 @@ class RedStrike(AbstractCard, ABC):
     def use(self, caller, target):
         caller.deal_damage(target, self.damage)
 
+    def upgrade(self):
+        self.damage = 9
+
 
 class RedDefend(AbstractCard, ABC):
     def __init__(self):
@@ -50,23 +63,36 @@ class RedDefend(AbstractCard, ABC):
     def use(self, caller, target):
         caller.apply_block(self.block)
 
+    def upgrade(self):
+        self.block = 8
+
 
 class Bash(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 8
+        self.vulnerable = 2
         super().__init__(name='Bash', energy_cost=2)
 
     def use(self, caller, target):
-        target.take_damage(8)
-        target.apply_vulnerable(2)
+        target.take_damage(self.damage)
+        target.apply_vulnerable(self.vulnerable)
+
+    def upgrade(self):
+        self.damage = 10
+        self.vulnerable = 3
 
 
 class Anger(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 6
         super().__init__(name='Anger', energy_cost=0)
 
     def use(self, caller, target):
         target.take_damage(2)
         caller.discard_pile.append(Anger())
+
+    def upgrade(self):
+        self.damage = 8
 
 
 class BodySlam(AbstractCard, ABC):
@@ -76,3 +102,6 @@ class BodySlam(AbstractCard, ABC):
     def use(self, caller, target):
         # TODO: Implement "caller.get_stacks(Block)"
         target.take_damage(caller.effects.get(Block).stacks)
+
+    def upgrade(self):
+        self.energyCost = 0

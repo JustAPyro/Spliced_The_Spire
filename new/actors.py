@@ -74,8 +74,7 @@ class AbstractActor(EffectMixin):
         self.health -= damage
 
     def end_turn(self):
-        for effect in self.effects.values():
-            effect.on_end_turn(self)
+        self.process_effects('on_end_turn')
         self.discard()
 
     def start_turn(self, draw=None):
