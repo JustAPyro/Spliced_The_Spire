@@ -1,4 +1,4 @@
-from new.cards import Anger, RedDefend, BodySlam
+from new.cards import *
 from new.enemies import Cultist, AbstractEnemy
 from new.actors import AbstractActor, LeftToRightAI
 from new.classes import Ironclad
@@ -33,6 +33,6 @@ sim = Simulation(actor=LeftToRightAI,
                  enemies=Cultist(),
                  hero=Ironclad,
                  relics=[Ironclad.start_relic],
-                 deck=[RedDefend(), RedDefend(), RedDefend(), RedDefend(), RedDefend()],
+                 deck=[RedDefend(), RedDefend(), Armaments(), Armaments(), Armaments(), Anger(), BodySlam()],
                  ascension=0)
 sim.run()
