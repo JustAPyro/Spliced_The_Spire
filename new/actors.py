@@ -87,6 +87,9 @@ class AbstractActor(EffectMixin):
             'initial_health': copy(self.health),
             'turn_actions': []
         })
+        for effect in self.effects.values():
+            effect.on_start_turn(self) #TODO Add this to enemies
+
 
     def draw(self, number):
         for i in range(number):
@@ -129,6 +132,8 @@ class AbstractActor(EffectMixin):
             print(C.END, end='')
 
         self.end_turn()
+
+        print(f'Effects after turn: {self.get_effects_dict()}')
 
         return self.turn_log[-1]
 

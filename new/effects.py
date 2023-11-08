@@ -63,6 +63,12 @@ class AbstractEffect:
         """
         pass
 
+    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+        """
+        Effects overriding this can cause things to happen on the end of turn.
+        """
+        pass
+
 
 # =======================
 # === Implementations ===
@@ -79,7 +85,7 @@ class Block(AbstractEffect):
         # negative of that
         return -1 * stacks_removed
 
-    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
         owner.set_effect(Block, 0)
 
 
