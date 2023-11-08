@@ -19,7 +19,7 @@ class AbstractCard(ABC):
         self.name: str = name
 
         # normal energy cost of card ("cost" int)
-        self.energyCost: int = energy_cost
+        self.energy_cost: int = energy_cost
 
         # If the card is upgraded or not
         self.upgraded: bool = upgraded
@@ -48,7 +48,7 @@ class RedStrike(AbstractCard, ABC):
         self.damage = 6
         super().__init__(name='Strike', energy_cost=1)
 
-    def use(self, caller, target):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.deal_damage(target, self.damage)
 
     def upgrade(self):
@@ -60,7 +60,7 @@ class RedDefend(AbstractCard, ABC):
         self.block = 5
         super().__init__(name='Defend', energy_cost=1)
 
-    def use(self, caller, target):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.apply_block(self.block)
 
     def upgrade(self):
@@ -73,7 +73,7 @@ class Bash(AbstractCard, ABC):
         self.vulnerable = 2
         super().__init__(name='Bash', energy_cost=2)
 
-    def use(self, caller, target):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         target.take_damage(self.damage)
         target.apply_vulnerable(self.vulnerable)
 
@@ -87,7 +87,7 @@ class Anger(AbstractCard, ABC):
         self.damage = 6
         super().__init__(name='Anger', energy_cost=0)
 
-    def use(self, caller, target):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         target.take_damage(2)
         caller.discard_pile.append(Anger())
 
@@ -99,9 +99,9 @@ class BodySlam(AbstractCard, ABC):
     def __init__(self):
         super().__init__("Body Slam", energy_cost=1)
 
-    def use(self, caller, target):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         # TODO: Implement "caller.get_stacks(Block)"
         target.take_damage(caller.effects.get(Block).stacks)
 
     def upgrade(self):
-        self.energyCost = 0
+        self.energy_cost = 0
