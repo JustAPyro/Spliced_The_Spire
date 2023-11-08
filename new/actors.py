@@ -41,7 +41,7 @@ class AbstractActor(EffectMixin):
         if card in self.hand_pile:
             self.discard_pile.append(card)
             self.hand_pile.remove(card)
-        self.energy -= card.energyCost
+        self.energy -= card.energy_cost
         card.use(self, target)
         self.turn_log[-1]['turn_actions'].append({
             'type': 'use_card',
@@ -56,7 +56,7 @@ class AbstractActor(EffectMixin):
             # TODO: This is a sketchy patch
             if card is None:
                 continue
-            if self.energy >= card.energyCost:
+            if self.energy >= card.energy_cost:
                 playable.append(card)
         return playable
 
