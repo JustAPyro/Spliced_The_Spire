@@ -1,4 +1,5 @@
 import random
+from abc import abstractmethod
 
 from new.enemies import AbstractEnemy
 from new.cards import AbstractCard
@@ -25,7 +26,7 @@ class AbstractActor(EffectMixin):
         self.draw_pile: list[AbstractCard] = (clas.start_cards if cards is None else cards)
         self.hand_pile: list[AbstractCard] = []
         self.discard_pile: list[AbstractCard] = []
-        self.exhaust_pile: list[AbstractCard] = []
+        self._exhaust_pile: list[AbstractCard] = []
 
         # This log contains what the actor did each turn
         self.turn_log = []
@@ -75,12 +76,13 @@ class AbstractActor(EffectMixin):
 
     def end_turn(self):
         self.process_effects('on_end_turn')
-        self.discard()
+        self.discard_pile.extend(self.hand_pile)
+        self.hand_pile.clear()
 
     def start_turn(self, draw=None):
         self.energy = self.max_energy
         random.shuffle(self.draw_pile)
-        self.draw(5)
+        self.draw_card(5)
         self.turn_log.append({
             'initial_draw': tuple(self.hand_pile),
             'initial_energy': copy(self.energy),
@@ -90,27 +92,27 @@ class AbstractActor(EffectMixin):
         for effect in self.effects.values():
             effect.on_start_turn(self) #TODO Add this to enemies
 
+    def exhaust_card(self, card: AbstractCard):
+        """Exhausts the selected card. If the card is not in the players hand, throws an error."""
+        if card not in self.hand_pile:
+            raise RuntimeError("Tried to exhaust card not in hand?")
 
+        self.hand_pile.remove(card)
+        self._exhaust_pile.append(card)
 
-    def draw(self, number):
-        for i in range(number):
-            self.__draw_card()
+    def draw_card(self, quantity: int):
+        """Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard."""
+        for i in range(quantity):
+            if len(self.draw_pile) > 0:
+                self.hand_pile.append(self.draw_pile.pop())
+            elif len(self.discard_pile) > 0:
+                self.draw_pile.extend(self.discard_pile)
+                self.discard_pile.clear()
+                random.shuffle(self.draw_pile)
+                self.hand_pile.append(self.draw_pile.pop())
 
-    def __draw_card(self):
-        if len(self.draw_pile) > 0:
-            self.hand_pile.append(self.draw_pile.pop())
-        elif len(self.discard_pile) > 0:
-            self.draw_pile.extend(self.discard_pile)
-            self.discard_pile.clear()
-            random.shuffle(self.draw_pile)
-            self.hand_pile.append(self.draw_pile.pop())
-
-    def discard(self):
-        self.discard_pile.extend(self.hand_pile)
-        self.hand_pile.clear()
-
-    def turn_logic(self, hand, enemies):
-        raise NotImplementedError
+    @abstractmethod
+    def turn_logic(self, hand, enemies): pass
 
     def turn_impl(self, hand, enemies, verbose: bool):
         self.start_turn()
