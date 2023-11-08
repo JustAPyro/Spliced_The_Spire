@@ -14,11 +14,11 @@ if TYPE_CHECKING:
 class AbstractActor(EffectMixin):
     def __init__(self, clas, cards: list[AbstractCard] = None):
         super().__init__()
-        self.name = "Actor"
+        self.name: str = "Actor"
         self.max_health: int = clas.health
         self.health: int = clas.health
         self.gold: int = 99
-        # self.relics = [clas.relic]
+        # self.relics: list[AbstractRelics] = [clas.relic]
         self.max_energy: int = 3
         self.energy: int = 3
 
@@ -137,10 +137,22 @@ class AbstractActor(EffectMixin):
 
         return self.turn_log[-1]
 
+class AI(AbstractActor):
+    def __init__(self, clas, cards):
+        super().__init__(clas, cards=cards)
 
-class StupidActor(AbstractActor):
-    pass
+    def turn_logic(self, hand, enemies):
+        return 'ended turn'
 
 
-class PlayerActor(AbstractActor):
-    pass
+class LeftToRightAI(AbstractActor):
+    def __init__(self, clas, cards):
+        super().__init__(clas, cards=cards)
+
+    def turn_logic(self, hand, enemies):
+        while self.energy > 0:
+            choices = self.get_playable_cards()
+            if len(choices) == 0:
+                break
+            self.use_card(enemies, choices[0])
+

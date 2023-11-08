@@ -121,8 +121,9 @@ class EffectMixin:
     """
 
     def __init__(self):
-        self.ritual_flag: bool = False
+        # This is the primary dictionary of effects on an entity
         self.effects: dict[type[AbstractEffect], AbstractEffect] = {}
+        self.ritual_flag: bool = False
 
     def process_effects(self: AbstractActor | AbstractEnemy, method: callable):
         """This method will"""
@@ -130,30 +131,17 @@ class EffectMixin:
         pass
 
     def get_effects_dict(self) -> dict[str, int]:
-        """Returns a dictionary of effects in the format {"effect name": stack}"""
+        """
+        Returns a dictionary of effects in the format {"effect name": stacks}
+        This is primarily used for displaying information about all the stacks on an entity.
+        """
+        # Start with an empty dictionary
         effects_dict = {}
         for effect in self.effects:
+            # Add a dictionary entry using the name of the effect as key and stacks as qty
             effects_dict[effect.__name__] = self.effects[effect].stacks
+        # Return the final dict
         return effects_dict
-
-    def get_effect_stacks(self: AbstractActor, effect_str: str) -> int:
-        """Return the number of stacks of the given effect"""
-        actor_effect = self.effects.get(effect_str, None)
-        return actor_effect.stacks if actor_effect is not None else 0
-
-    def negate_effect(self: AbstractActor, effect_str: str) -> int:
-        """Remove the effect entirely and return the number of stacks removed."""
-        actor_effect = self.effects.pop(effect_str, None)
-        return actor_effect.stacks if actor_effect is not None else 0
-
-    def remove_effect(self, effect: type[AbstractEffect]):
-        self.effects.pop(effect)
-
-    def decrease_effect(self, effect_str: str, quantity: int) -> int:
-        """Decrease the stacks of this effect on the player by quantity. Return the stacks removed."""
-        if effect_str not in self.effects:
-            return 0
-        return self.effects[effect_str].decrease_stacks(quantity)
 
     def clear_effects(self):
         self.effects.clear()
@@ -163,9 +151,6 @@ class EffectMixin:
             return effect in self.effects
         else:
             return effect.stacks >= quantity
-
-    def get_effect(self, effect) -> int:
-        return self.effects.get(effect, 0)
 
     def set_effect(self, effect, value):
         self.effects.get(effect).stacks = value

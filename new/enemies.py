@@ -6,7 +6,6 @@ from random import randint
 from typing import TYPE_CHECKING, Dict, Tuple, Optional
 
 from lutil import ascension_based_int
-from new.ability_patterns import AbilityGenerator
 
 if TYPE_CHECKING:
     from actors import AbstractActor

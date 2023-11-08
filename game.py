@@ -1,28 +1,8 @@
 from new.cards import Anger, RedDefend, BodySlam
 from new.enemies import Cultist, AbstractEnemy
-from new.actors import PlayerActor, AbstractActor
+from new.actors import AbstractActor, LeftToRightAI
 from new.classes import Ironclad
 from lutil import C
-
-
-class AI(AbstractActor):
-    def __init__(self, clas, cards):
-        super().__init__(clas, cards=cards)
-
-    def turn_logic(self, hand, enemies):
-        return 'ended turn'
-
-
-class LeftToRightAI(AbstractActor):
-    def __init__(self, clas, cards):
-        super().__init__(clas, cards=cards)
-
-    def turn_logic(self, hand, enemies):
-        while self.energy > 0:
-            choices = self.get_playable_cards()
-            if len(choices) == 0:
-                break
-            self.use_card(enemies, choices[0])
 
 
 class Simulation:
@@ -47,6 +27,7 @@ class Simulation:
             print("Actor LOST")
         else:
             print("Actor WON")
+
 
 sim = Simulation(actor=LeftToRightAI,
                  enemies=Cultist(),
