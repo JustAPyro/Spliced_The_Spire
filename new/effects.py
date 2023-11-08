@@ -128,6 +128,7 @@ class EffectMixin:
     - entity.set_effects(effect, qty) -> sets the stacks of effect to qty
     - entity.has_effect(effect) -> Returns true if entity has effect
     - entity.has_effect(effect, qty) -> returns true if entity has at least qty stacks of effect
+    - entity.get_stacks(effect) -> Returns the number of stacks of effect
     """
 
     def __init__(self):
