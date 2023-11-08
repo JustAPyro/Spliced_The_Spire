@@ -118,6 +118,16 @@ class EffectMixin:
     """
     This EffectMixin class is added to both the actors and the enemies, and allows for
     managing different effects.
+
+    Below are listed common API methods you are encouraged to use in the development
+    of cards, enemies, relics, and effects. (Note that entity in this case means a player
+    or enemy)
+
+    - entity.clear_effects() -> Remove all effects from an entity
+    - entity.add_effects(effect, qty) -> increments stacks of effect by qty
+    - entity.set_effects(effect, qty) -> sets the stacks of effect to qty
+    - entity.has_effect(effect) -> Returns true if entity has effect
+    - entity.has_effect(effect, qty) -> returns true if entity has at least qty stacks of effect
     """
 
     def __init__(self):
@@ -125,10 +135,19 @@ class EffectMixin:
         self.effects: dict[type[AbstractEffect], AbstractEffect] = {}
         self.ritual_flag: bool = False
 
-    def process_effects(self: AbstractActor | AbstractEnemy, method: callable):
-        """This method will"""
-        # TODO: Simplify processing all effects
-        pass
+    def process_effects(self: AbstractActor | AbstractEnemy, method_name: str):
+        """
+        This method streamlines the processing of effects by allowing you to quickly
+        call a given method on all effects. It is
+        """
+        for effect in list(self.effects):
+            # Note: func = getattr(obj, method_name); func;
+            # is essentially the same as doing obj.method_name()
+            # This is somewhat brittle since we take method name as
+            # a string, but I think it simplifies enough to be worth it
+            # TODO: Only call on methods where it exists
+            func = getattr(self.effects.get(effect), method_name)
+            func(self)
 
     def get_effects_dict(self) -> dict[str, int]:
         """
@@ -144,13 +163,16 @@ class EffectMixin:
         return effects_dict
 
     def clear_effects(self):
+        """
+        Removes all effects from the owner.
+        """
         self.effects.clear()
 
     def has_effect(self, effect, quantity=None):
         if quantity is None:
             return effect in self.effects
         else:
-            return effect.stacks >= quantity
+            return self.effect.get >= quantity
 
     def set_effect(self, effect, value):
         self.effects.get(effect).stacks = value
