@@ -1,4 +1,4 @@
-from new.rooms import EnemyRoom
+from new.cards import Anger, RedDefend, BodySlam
 from new.enemies import Cultist, AbstractEnemy
 from new.actors import PlayerActor, AbstractActor
 from new.classes import Ironclad
@@ -6,16 +6,16 @@ from lutil import C
 
 
 class AI(AbstractActor):
-    def __init__(self, clas):
-        super().__init__(clas)
+    def __init__(self, clas, cards):
+        super().__init__(clas, cards=cards)
 
     def turn_logic(self, hand, enemies):
         return 'ended turn'
 
 
 class LeftToRightAI(AbstractActor):
-    def __init__(self, clas):
-        super().__init__(clas)
+    def __init__(self, clas, cards):
+        super().__init__(clas, cards=cards)
 
     def turn_logic(self, hand, enemies):
         while self.energy > 0:
@@ -27,7 +27,7 @@ class LeftToRightAI(AbstractActor):
 
 class Simulation:
     def __init__(self, actor: type[AbstractActor], enemies: AbstractEnemy, hero, relics, deck, ascension):
-        self.actor = actor(hero)
+        self.actor = actor(hero, cards=deck)
         self.enemies = enemies
 
     def run(self):
@@ -48,11 +48,10 @@ class Simulation:
         else:
             print("Actor WON")
 
-
 sim = Simulation(actor=LeftToRightAI,
                  enemies=Cultist(),
                  hero=Ironclad,
                  relics=[Ironclad.start_relic],
-                 deck=Ironclad.start_cards,
+                 deck=[RedDefend(), RedDefend(), RedDefend(), RedDefend(), RedDefend()],
                  ascension=0)
 sim.run()

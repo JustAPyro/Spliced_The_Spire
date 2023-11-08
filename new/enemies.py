@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from copy import copy
 
-from new.effects import EffectMixin, Vulnerable, Ritual
+from new.effects import EffectMixin, Vulnerable, Ritual, Strength
 from random import randint
 from typing import TYPE_CHECKING, Dict, Tuple, Optional
 
-from new.AscensionMapping import AscensionBasedInt
+from lutil import ascension_based_int
 from new.ability_patterns import AbilityGenerator
 
 if TYPE_CHECKING:
@@ -84,7 +84,7 @@ class AbstractEnemy(ABC, EffectMixin):
         # if a dict is provided we calculate a random appropriate max health
         # based on ascension.
         self.max_health = (self.max_health if type(max_health) is not dict
-                           else AscensionBasedInt(ascension, max_health))
+                           else ascension_based_int(ascension, max_health))
         # Since this was just created current health should be full
         self.health = self.max_health
 
@@ -102,8 +102,6 @@ class AbstractEnemy(ABC, EffectMixin):
     def is_dead(self):
         return self.health <= 0
 
-
-
     def take_damage(self, damage: int):
         for effect in self.effects.values():
             modification = effect.modify_damage_taken(damage)
@@ -113,8 +111,8 @@ class AbstractEnemy(ABC, EffectMixin):
 
     def deal_damage(self, damage: int, target, log):
         extra = 0
-        if self.effects.get('STRENGTH'):
-            extra = extra + self.effects['STRENGTH']
+        if self.effects.get(Strength):
+            extra = extra + self.effects.get(Strength).stacks
 
         log.append(f'used Dark Strike on {target.name} to deal {damage + extra} damage.')
         target.take_damage(damage + extra if damage is not None else 6)
@@ -204,7 +202,7 @@ class Cultist(AbstractEnemy):
     def incantation(self, target, quantity: Optional[int] = None, log=[]):
         log.append('used incantation')
         self.apply_ritual(quantity if quantity is not None
-                          else AscensionBasedInt(self.ascension, Cultist.ritual_gain))
+                          else ascension_based_int(self.ascension, Cultist.ritual_gain))
 
     @AbstractEnemy.ability
     def dark_strike(self, target, damage: Optional[int] = None, log=[]):
@@ -244,7 +242,7 @@ class RedLouse(AbstractEnemy):
                          act=1)
 
         # Calculate a random curl up power based on value map
-        self.set_effect(CURLUP, AscensionBasedInt(ascension, RedLouse.curl_up_power))
+        self.set_effect(CURLUP, ascension_based_int(ascension, RedLouse.curl_up_power))
 
         # TODO: Confirm this? "Between 5  and 7" Inclusive or exclusive?
         self.damage = randint(5, 7)
@@ -252,12 +250,12 @@ class RedLouse(AbstractEnemy):
     @AbstractEnemy.ability
     def bite(self, target=None, damage: Optional[int] = None):
         target.take_damage(damage if damage is not None else
-                           self.damage + AscensionBasedInt(self.ascension, RedLouse.bite_value))
+                           self.damage + ascension_based_int(self.ascension, RedLouse.bite_value))
 
     @AbstractEnemy.ability
     def grow(self, quantity: Optional[int] = None):
         self.apply_strength(quantity if quantity is not None else
-                            AscensionBasedInt(self.ascension, RedLouse.grow_value))
+                            ascension_based_int(self.ascension, RedLouse.grow_value))
 
     @AbstractEnemy.ability_pattern
     def pattern(self):
@@ -280,7 +278,7 @@ class Jaw_Worm(AbstractEnemy):
     def Chomp(self, target):
         # Chomp: Deal 11 damage, or 12 on ascension 2+
         target.take_damage(
-            AscensionBasedInt(self.ascension, {
+            ascension_based_int(self.ascension, {
                 0: 11,
                 2: 12
             }))
@@ -293,12 +291,12 @@ class Jaw_Worm(AbstractEnemy):
 
     @AbstractEnemy.ability
     def Bellow(self):
-        self.apply_strength(AscensionBasedInt(self.ascension, {
+        self.apply_strength(ascension_based_int(self.ascension, {
             +0: 3,
             +2: 4,
             17: 5
         }))
-        self.apply_block(AscensionBasedInt(self.ascension, {
+        self.apply_block(ascension_based_int(self.ascension, {
             +0: 6,
             17: 9
         }))

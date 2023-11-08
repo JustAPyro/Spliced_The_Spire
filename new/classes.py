@@ -1,5 +1,5 @@
 from new.cards import *
-from new.Relics import Burning_Blood
+from new.relics import Burning_Blood
 
 class STSClass():
     pass
