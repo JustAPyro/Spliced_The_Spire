@@ -45,7 +45,7 @@ class AbstractCard(ABC):
 
 class RedStrike(AbstractCard, ABC):
     def __init__(self):
-        self.damage = 6
+        self.damage = 66
         super().__init__(name='Strike', energy_cost=1)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
