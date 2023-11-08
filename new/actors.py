@@ -79,6 +79,7 @@ class AbstractActor(EffectMixin):
 
     def start_turn(self, draw=None):
         self.energy = self.max_energy
+        random.shuffle(self.draw_pile)
         self.draw(5)
         self.turn_log.append({
             'initial_draw': tuple(self.hand_pile),
