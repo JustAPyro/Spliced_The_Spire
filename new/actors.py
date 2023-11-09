@@ -90,7 +90,7 @@ class AbstractActor(EffectMixin):
             'turn_actions': []
         })
         for effect in self.effects.values():
-            effect.on_start_turn(self) #TODO Add this to enemies
+            effect.on_start_turn(self)  # TODO Add this to enemies
 
     def exhaust_card(self, card: AbstractCard):
         """Exhausts the selected card. If the card is not in the players hand, throws an error."""
@@ -112,9 +112,10 @@ class AbstractActor(EffectMixin):
                 self.hand_pile.append(self.draw_pile.pop())
 
     @abstractmethod
-    def turn_logic(self, hand, enemies): pass
+    def turn_logic(self, hand: list[AbstractCard], enemies: list[AbstractEnemy]):
+        pass
 
-    def turn_impl(self, hand, enemies, verbose: bool):
+    def turn_impl(self, hand: list[AbstractCard], enemies: list[AbstractEnemy], verbose: bool):
         self.start_turn()
 
         if verbose:
@@ -140,21 +141,25 @@ class AbstractActor(EffectMixin):
 
         return self.turn_log[-1]
 
-class AI(AbstractActor):
-    def __init__(self, clas, cards):
-        super().__init__(clas, cards=cards)
-
-    def turn_logic(self, hand, enemies):
-        return 'ended turn'
-
 
 class LeftToRightAI(AbstractActor):
     def __init__(self, clas, cards):
         super().__init__(clas, cards=cards)
 
     def turn_logic(self, hand, enemies):
+
+        # Pic
         choices = self.get_playable_cards()
         while len(choices) > 0:
-            self.use_card(enemies, choices[0])
-            choices = self.get_playable_cards()
+            # Find a valid enemy with health remaining
+            valid_enemy = None
+            for enemy in enemies:
+                if enemy.health > 0:
+                    valid_enemy = enemy
 
+            # ??? If no valid, end turn
+            if not valid_enemy:
+                break
+
+            self.use_card(valid_enemy, choices[0])
+            choices = self.get_playable_cards()
