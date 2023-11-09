@@ -79,7 +79,6 @@ class Block(AbstractEffect):
         # This tries to decrease the number of block by the damage,
         # and returns how many block were actually removed
         stacks_removed = self.decrease_stacks(damage)
-        print(stacks_removed)
 
         # To modify damage by the number of stacks we return the
         # negative of that

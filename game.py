@@ -14,14 +14,18 @@ class Simulation:
         print("Starting Simulation:")
         print(f'Fighting {self.get_names()} with {self.get_healths()} health')
         while self.actor.health > 0:
-            turn_log = self.actor.turn_impl(self.actor.hand_pile, self.enemies, verbose=True)
+            self.actor.turn_impl(self.actor.hand_pile, self.enemies, verbose=True)
 
             if self.enemies_dead():
                 break
 
-            print(f'{C.RED}Cultists turn! Health: {self.get_healths()}, effects: {self.enemies.get_effects_dict()}')
-            turn = self.enemies.take_turn(self.actor)
-            print(f'{C.RED}{self.get_names()} {turn}{C.END}')
+            print(f'{C.RED}Enemy turn!')
+            for enemy in self.enemies:
+                print(f'{enemy.name}\'s turn. \n{enemy.name} has {enemy.health} health'
+                      f' and the following effects: {enemy.get_effects_dict()}')
+
+                turn = enemy.take_turn(self.actor)
+                print(f'{enemy.name} {turn}')
 
         if self.actor.health <= 0:
             print("Actor LOST")
@@ -30,7 +34,7 @@ class Simulation:
 
     def enemies_dead(self):
         for enemy in self.enemies:
-            if enemy.health >= 0:
+            if enemy.health > 0:
                 return False
         return True
 
@@ -47,8 +51,11 @@ class Simulation:
         return healths
 
 
+c2 = Cultist()
+c2.name = 'Cultist #2'
+
 sim = Simulation(actor=LeftToRightAI,
-                 enemies=[Cultist(), Cultist()],
+                 enemies=[Cultist(), c2],
                  hero=Ironclad,
                  relics=[Ironclad.start_relic],
                  deck=[RedDefend(), Clash(), Clash(), RedStrike(), RedStrike(), RedStrike()],
