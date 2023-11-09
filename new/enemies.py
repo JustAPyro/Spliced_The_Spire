@@ -109,12 +109,13 @@ class AbstractEnemy(ABC, EffectMixin):
         self.health -= damage
 
     def deal_damage(self, damage: int, target, log):
-        extra = 0
-        if self.effects.get(Strength):
-            extra = extra + self.effects.get(Strength).stacks
+        for effect in self.effects.values():
+            modification = effect.modify_damage_dealt(damage)
+            if modification:
+                damage = damage + modification
 
-        log.append(f'used Dark Strike on {target.name} to deal {damage + extra} damage.')
-        target.take_damage(damage + extra if damage is not None else 6)
+        log.append(f'used Dark Strike on {target.name} to deal {damage} damage.')
+        target.take_damage(damage)
 
     def set_start(self, health, effects=None, intent=None):
         # TODO: Assert beginning
@@ -205,8 +206,7 @@ class Cultist(AbstractEnemy):
 
     @AbstractEnemy.ability
     def dark_strike(self, target, damage: Optional[int] = None, log=[]):
-        damage = 6
-        self.deal_damage(damage, target, log)
+        self.deal_damage(6, target, log)
 
     def pattern(self):
         # Simple pattern: casts incantation, then spams dark stroke.

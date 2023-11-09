@@ -38,12 +38,12 @@ class AbstractActor(EffectMixin):
         self.hand = hand
         return self
 
-    def use_card(self, target: AbstractEnemy, card: AbstractCard):
+    def use_card(self, target: AbstractEnemy, card: AbstractCard, all_enemies: list[AbstractEnemy]):
         if card in self.hand_pile:
             self.discard_pile.append(card)
             self.hand_pile.remove(card)
         self.energy -= card.energy_cost
-        card.use(self, target)
+        card.use(self, target, all_enemies)
         self.turn_log[-1]['turn_actions'].append({
             'type': 'use_card',
             'card': card,
@@ -162,5 +162,5 @@ class LeftToRightAI(AbstractActor):
             if not valid_enemy:
                 break
 
-            self.use_card(valid_enemy, choices[0])
+            self.use_card(valid_enemy, choices[0], enemies)
             choices = self.get_playable_cards()

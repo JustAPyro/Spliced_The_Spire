@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import math
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -97,16 +99,20 @@ class Vulnerable(AbstractEffect):
         return int(damage * .5)
 
 
-# TODO:
 class Strength(AbstractEffect):
     def modify_damage_dealt(self, damage: int) -> int:
         return self.stacks
 
 
-# TODO:
 class Ritual(AbstractEffect):
     def on_end_turn(self, owner: AbstractActor | AbstractEnemy):
         owner.apply_strength(self.stacks)
+
+
+class Weak(AbstractEffect):
+    # TODO: Consider a "set_damage_dealt" method
+    def modify_damage_dealt(self, damage: int):
+        return (damage - math.floor(damage * 0.75)) * -1
 
 
 # ===================================
@@ -182,26 +188,14 @@ class EffectMixin:
             self.effects[effect] = effect()
         self.effects[effect].increase_stacks(quantity)
 
-    def _stack(self: AbstractActor | AbstractEnemy, effect_str: str, quantity: int):
-        """Adds the effect to actor if missing and increases the stacks by quantity."""
-        existing = self.effects.get(effect_str, None)
-        self.effects[effect_str]
-
-    def apply_all_effects(self: AbstractActor | AbstractEnemy, effects: list[tuple[str, int]]):
-        for effect, quantity in effects:
-            self._stack(effect, quantity)
-
-    def apply_effect(self: AbstractActor | AbstractEnemy, effect: str, quantity: int):
-        self._stack(effect, quantity)
+    def apply_effect(self: AbstractActor | AbstractEnemy, effect: type[AbstractEffect], quantity: int):
+        self._apply(effect, quantity)
 
     def apply_block(self: AbstractActor | AbstractEnemy, quantity: int):
         self._apply(Block, quantity)
 
     def apply_vulnerable(self: AbstractActor | AbstractEnemy, quantity: int):
         self._apply(Vulnerable, quantity)
-
-    def apply_curlup(self: AbstractActor | AbstractEnemy, quantity: int):
-        self._stack(CURLUP, quantity)
 
     def apply_strength(self: AbstractActor | AbstractEnemy, quantity: int):
         self._apply(Strength, quantity)

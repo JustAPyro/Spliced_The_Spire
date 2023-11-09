@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 from typing import TYPE_CHECKING
 from enum import Enum
-from new.effects import Block
+from new.effects import Block, Weak
 
 if TYPE_CHECKING:
     from actors import AbstractActor
@@ -23,9 +23,11 @@ class AbstractCard(ABC):
     Abstract card class is the blueprint for all cards.
     """
 
-    def __init__(self, name: str, energy_cost: int, card_type: CardType, upgraded: bool = False):
+    def __init__(self, energy_cost: int, card_type: CardType, upgraded: bool = False, name: str = None):
+
         # Name of the card
-        self.name: str = name
+        if name is None:
+            self.name: str = type(self).__name__
 
         # normal energy cost of card ("cost" int)
         self.energy_cost: int = energy_cost
@@ -37,7 +39,7 @@ class AbstractCard(ABC):
         self.card_type: CardType = card_type
 
     @abstractmethod
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
         """Overriding this method provides the default behavior of a card."""
         pass
 
@@ -71,7 +73,7 @@ class RedStrike(AbstractCard, ABC):
         self.damage = 6
         super().__init__(name='Strike', energy_cost=1, card_type=CardType.ATTACK)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
         caller.deal_damage(target, self.damage)
 
     def upgrade_logic(self):
@@ -83,7 +85,7 @@ class RedDefend(AbstractCard, ABC):
         self.block = 5
         super().__init__(name='Defend', energy_cost=1, card_type=CardType.SKILL)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
         caller.apply_block(self.block)
 
     def upgrade_logic(self):
@@ -94,9 +96,9 @@ class Bash(AbstractCard, ABC):
     def __init__(self):
         self.damage = 8
         self.vulnerable = 2
-        super().__init__(name='Bash', energy_cost=2, card_type=CardType.ATTACK)
+        super().__init__(energy_cost=2, card_type=CardType.ATTACK)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
         target.take_damage(self.damage)
         target.apply_vulnerable(self.vulnerable)
 
@@ -108,9 +110,9 @@ class Bash(AbstractCard, ABC):
 class Anger(AbstractCard, ABC):
     def __init__(self):
         self.damage = 6
-        super().__init__(name='Anger', energy_cost=0, card_type=CardType.ATTACK)
+        super().__init__(energy_cost=0, card_type=CardType.ATTACK)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
         target.take_damage(self.damage)
         caller.discard_pile.append(Anger())
 
@@ -121,9 +123,9 @@ class Anger(AbstractCard, ABC):
 class Armaments(AbstractCard, ABC):
     def __init__(self):
         self.block = 5
-        super().__init__("Armaments", energy_cost=1, card_type=CardType.SKILL)
+        super().__init__(energy_cost=1, card_type=CardType.SKILL)
 
-    def use(self, caller, target):
+    def use(self, caller, target, enemies):
         caller.apply_block(self.block)
         if self.upgraded:
             for card in caller.hand_pile:
@@ -137,9 +139,9 @@ class Armaments(AbstractCard, ABC):
 
 class BodySlam(AbstractCard, ABC):
     def __init__(self):
-        super().__init__("Body Slam", energy_cost=1, card_type=CardType.ATTACK)
+        super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
         # TODO: Implement "caller.get_stacks(Block)"
         if caller.effects.get(Block):
             target.take_damage(caller.effects.get(Block).stacks)
@@ -152,9 +154,9 @@ class Clash(AbstractCard, ABC):
 
     def __init__(self):
         self.damage = 14
-        super().__init__("Clash", energy_cost=0, card_type=CardType.ATTACK)
+        super().__init__(energy_cost=0, card_type=CardType.ATTACK)
 
-    def use(self, caller, target):
+    def use(self, caller, target, enemies):
         target.take_damage(self.damage)
 
     def upgrade_logic(self):
@@ -165,3 +167,32 @@ class Clash(AbstractCard, ABC):
             if card.card_type != CardType.ATTACK:
                 return False
         return True
+
+
+class Cleave(AbstractCard, ABC):
+    def __init__(self):
+        self.damage = 8
+        super().__init__(energy_cost=1, card_type=CardType.ATTACK)
+
+    def use(self, caller, target, enemies):
+        for enemy in enemies:
+            enemy.take_damage(self.damage)
+
+    def upgrade_logic(self):
+        self.damage = 11
+
+
+class Clothesline(AbstractCard, ABC):
+    def __init__(self):
+        self.damage = 12
+        self.qty_weak = 2
+        super().__init__(energy_cost=2, card_type=CardType.ATTACK)
+
+    def use(self, caller, target, enemies):
+        target.take_damage(self.damage)
+        target.apply_effect(Weak, self.qty_weak)
+
+    def upgrade_logic(self):
+        self.damage = 14
+        self.qty_weak = 3
+
