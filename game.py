@@ -58,9 +58,9 @@ c3 = Cultist()
 c3.name = 'Cultist #3'
 
 sim = Simulation(actor=LeftToRightAI,
-                 enemies=[Cultist(), c2, c3],
+                 enemies=[Cultist()],
                  hero=Ironclad,
                  relics=[Ironclad.start_relic],
-                 deck=[RedDefend(), Clash(), Clash(), RedStrike(), RedStrike(), RedStrike()],
+                 deck=[Clothesline() for x in range(10)],
                  ascension=0)
 sim.run()
