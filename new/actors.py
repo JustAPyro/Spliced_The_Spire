@@ -156,6 +156,7 @@ class LeftToRightAI(AbstractActor):
             for enemy in enemies:
                 if enemy.health > 0:
                     valid_enemy = enemy
+                    break
 
             # ??? If no valid, end turn
             if not valid_enemy:

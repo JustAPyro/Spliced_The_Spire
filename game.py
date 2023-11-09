@@ -54,8 +54,11 @@ class Simulation:
 c2 = Cultist()
 c2.name = 'Cultist #2'
 
+c3 = Cultist()
+c3.name = 'Cultist #3'
+
 sim = Simulation(actor=LeftToRightAI,
-                 enemies=[Cultist(), c2],
+                 enemies=[Cultist(), c2, c3],
                  hero=Ironclad,
                  relics=[Ironclad.start_relic],
                  deck=[RedDefend(), Clash(), Clash(), RedStrike(), RedStrike(), RedStrike()],
