@@ -34,9 +34,9 @@ class AbstractEffect:
 
     def modify_damage_dealt(self, damage: int) -> int:
         """
-            Effects overriding this can modify the damage dealt by an actor or enemy.
-            The return value of this method will be added to the damage, you can lower the damage
-            dealt by returning a negative value.
+        Effects overriding this can modify the damage dealt by an actor or enemy.
+        The return value of this method will be added to the damage, you can lower the damage
+        dealt by returning a negative value.
         """
         pass
 

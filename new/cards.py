@@ -20,7 +20,10 @@ class CardType(Enum):
 
 class AbstractCard(ABC):
     """
-    Abstract card class is the blueprint for all cards.
+    Abstract card class is the blueprint for all cards. The goal for this class
+    is to allow simple, quick implementation of Slay the Spire cards. To use write an implementation
+    for a card, write a class that inherits this class as well as ABC, then implement an __init__,
+    use, and upgrade_logic methods.
     """
 
     def __init__(self, energy_cost: int, card_type: CardType, upgraded: bool = False, name: str = None):
@@ -133,7 +136,7 @@ class Armaments(AbstractCard, ABC):
             for card in caller.hand_pile:
                 card.upgrade()
             return
-        random.choice(caller.hand_pile).upgrade()
+        random.choice(caller.get_hand()).upgrade()
 
     def upgrade_logic(self):
         self.upgraded = True
@@ -165,7 +168,7 @@ class Clash(AbstractCard, ABC):
         self.damage = 18
 
     def is_playable(self, caller):
-        for card in caller.hand_pile:
+        for card in caller.get_hand():
             if card.card_type != CardType.ATTACK:
                 return False
         return True
