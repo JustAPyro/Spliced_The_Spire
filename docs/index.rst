@@ -10,7 +10,8 @@ Welcome to Spliced The Spire's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   contributing
+   contributing/how
+
    abstractions
 
 

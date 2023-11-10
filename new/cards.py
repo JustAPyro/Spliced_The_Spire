@@ -57,6 +57,10 @@ class AbstractCard(ABC):
         pass
 
     def is_playable(self, caller):
+        """
+        Overriding this method allows you to declare when a card is or is not playable.
+        The default implementation of this will always return true.
+        """
         return True
 
     # Override the str() method so printing it returns the name
