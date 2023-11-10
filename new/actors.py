@@ -100,7 +100,7 @@ class AbstractActor(EffectMixin):
                   f'\n\t has {log["initial_health"]} health / {log["initial_energy"]} energy'
                   f'\n\t these effects: {self.get_effects_dict()}'
                   f'\n\t Draw Pile: {self.get_draw()}'
-                  f'\n\t Discard Pile: {self.get_discard_pile()}')
+                  f'\n\t Discard Pile: {self.get_discard()}')
 
         self.turn_logic(hand, enemies)
 
@@ -148,8 +148,8 @@ class AbstractActor(EffectMixin):
                 raise RuntimeWarning('Tried to draw a card but had none in draw and none in discard pile.')
             return card
 
-    def get_discard_pile(self) -> list[AbstractCard]:
-        """Provides access to the discard pile."""
+    def get_discard(self) -> list[AbstractCard]:
+        """Returns all the cards currently in the players discard pile."""
         return self._discard_pile
 
     def discard_card(self, card: AbstractCard):
@@ -174,9 +174,11 @@ class AbstractActor(EffectMixin):
         without expending energy or initiating any of its use effects.
         If the card is not in your hand this will throw a runtime error.
         """
+        # First make sure we have the card
         if card not in self._hand_pile:
             raise RuntimeError("Tried to exhaust card not in hand?")
 
+        # Then move it to the exhaust pile
         self._hand_pile.remove(card)
         self._exhaust_pile.append(card)
 

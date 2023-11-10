@@ -11,7 +11,7 @@ Welcome to Spliced The Spire's documentation!
    :caption: Contents:
 
    contributing/how
-
+   useful
    abstractions
 
 

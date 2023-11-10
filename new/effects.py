@@ -151,30 +151,42 @@ class EffectMixin:
         # Return the final dict
         return effects_dict
 
-    def clear_effects(self):
+    def has_effect(self, effect: type[AbstractEffect], quantity: int = None) -> bool:
         """
-        Removes all effects from the owner.
+        This API has two behaviors depending on if the quantity value was specified or not.
+        If the quantity was not specified, this will check if the player has any number of stacks
+        of a given effect, and return true if they do. If the quantity value is specified however, this
+        will only return true if the player has *at least* that number of stacks of the given effect.
         """
-        self.effects.clear()
-
-    def has_effect(self, effect, quantity=None):
         if quantity is None:
-            return effect in self.effects
+            return effect in self.effects and self.effects.get(effect).stacks != 0
         else:
-            return effect.stacks >= quantity
+            return effect in self.effects and self.effects.get(effect).stacks >= quantity
+
+    def stacks_of_effect(self, effect: type[AbstractEffect]) -> int:
+        """Returns the current number of stacks of a given effect."""
+        # If this effect hasn't been instantiated yet just return 0
+        if effect not in self.effects:
+            return 0
+
+        # Otherwise, return the number of stacks
+        return self.effects.get(effect).stacks
 
     def _check_instantiate_effect(self, effect):
         if effect not in self.effects:
             self.effects[effect] = effect()
 
-    def set_effect(self, effect, value):
+    def set_effect(self, effect: type[AbstractEffect], value: int):
+        """Set the number of stacks of this effect to the value provided."""
         self._check_instantiate_effect(effect)
         self.effects.get(effect).stacks = value
 
-    def increase_effect(self, effect, value):
+    def increase_effect(self, effect: type[AbstractEffect], value: int):
+        """Increase the stacks of this effect by the value provided."""
         self._check_instantiate_effect(effect)
         self.effects.get(effect).stacks += value
 
-    def decrease_effect(self, effect, value):
+    def decrease_effect(self, effect: type[AbstractEffect], value: int):
+        """Decreases the stacks of this effect by the value provided."""
         self._check_instantiate_effect(effect)
         self.effects.get(effect).stacks -= value

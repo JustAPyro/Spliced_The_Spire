@@ -7,6 +7,7 @@ The following are abstractions:
    :members:
 |
 |
+
 .. autoclass:: new.actors.AbstractActor
     :members:
 |
