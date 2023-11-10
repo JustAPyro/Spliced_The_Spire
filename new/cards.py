@@ -20,7 +20,10 @@ class CardType(Enum):
 
 class AbstractCard(ABC):
     """
-    Abstract card class is the blueprint for all cards.
+    Abstract card class is the blueprint for all cards. The goal for this class
+    is to allow simple, quick implementation of Slay the Spire cards. To use write an implementation
+    for a card, write a class that inherits this class as well as ABC, then implement an __init__,
+    use, and upgrade_logic methods.
     """
 
     def __init__(self, energy_cost: int, card_type: CardType, upgraded: bool = False, name: str = None):
@@ -28,6 +31,8 @@ class AbstractCard(ABC):
         # Name of the card
         if name is None:
             self.name: str = type(self).__name__
+        else:
+            self.name = name
 
         # normal energy cost of card ("cost" int)
         self.energy_cost: int = energy_cost
@@ -90,7 +95,7 @@ class RedDefend(AbstractCard, ABC):
         super().__init__(name='Defend', energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        caller.apply_block(self.block)
+        caller.increase_effect(Block, self.block)
 
     def upgrade_logic(self):
         self.block = 8
@@ -135,7 +140,7 @@ class Armaments(AbstractCard, ABC):
             for card in caller.hand_pile:
                 card.upgrade()
             return
-        random.choice(caller.hand_pile).upgrade()
+        random.choice(caller.get_hand()).upgrade()
 
     def upgrade_logic(self):
         self.upgraded = True
@@ -167,7 +172,7 @@ class Clash(AbstractCard, ABC):
         self.damage = 18
 
     def is_playable(self, caller):
-        for card in caller.hand_pile:
+        for card in caller.get_hand():
             if card.card_type != CardType.ATTACK:
                 return False
         return True
@@ -194,9 +199,8 @@ class Clothesline(AbstractCard, ABC):
 
     def use(self, caller, target, enemies):
         target.take_damage(self.damage)
-        target.apply_effect(Weak, self.qty_weak)
+        target.increase_effect(Weak, self.qty_weak)
 
     def upgrade_logic(self):
         self.damage = 14
         self.qty_weak = 3
-

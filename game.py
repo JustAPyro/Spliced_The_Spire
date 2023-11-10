@@ -14,7 +14,7 @@ class Simulation:
         print("Starting Simulation:")
         print(f'Fighting {self.get_names()} with {self.get_healths()} health')
         while self.actor.health > 0:
-            self.actor.turn_impl(self.actor.hand_pile, self.enemies, verbose=True)
+            self.actor.turn_impl(self.actor.get_hand(), self.enemies, verbose=True)
 
             if self.enemies_dead():
                 break
@@ -61,6 +61,6 @@ sim = Simulation(actor=LeftToRightAI,
                  enemies=[Cultist()],
                  hero=Ironclad,
                  relics=[Ironclad.start_relic],
-                 deck=[Clothesline() for x in range(10)],
+                 deck=[Clothesline(), RedDefend(), RedDefend(), RedStrike(), RedDefend()],
                  ascension=0)
 sim.run()

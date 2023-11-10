@@ -22,25 +22,6 @@ class AbstractEffect:
     def __init__(self):
         self.stacks = 0  # Number of stacks of this effect
 
-    def decrease_stacks(self: AbstractEffect, quantity: int = 1) -> int:
-        """Decrease the number of stacks of this effect by quantity. Return the number removed."""
-
-        # If this resulted in negative set to 0
-        # And say we removed however many existed
-        if self.stacks - quantity < 0:
-            removed = self.stacks
-            self.stacks = 0
-            return removed
-
-        # Otherwise we reduce it by quantity
-        # and return that
-        self.stacks = self.stacks - quantity
-        return quantity
-
-    def increase_stacks(self: AbstractEffect, quantity: int = 1):
-        """Increase the number of stacks of this effect by quantity."""
-        self.stacks += quantity
-
     # === API/SANDBOX METHODS ===
 
     def modify_damage_taken(self, damage: int) -> int:
@@ -53,9 +34,9 @@ class AbstractEffect:
 
     def modify_damage_dealt(self, damage: int) -> int:
         """
-            Effects overriding this can modify the damage dealt by an actor or enemy.
-            The return value of this method will be added to the damage, you can lower the damage
-            dealt by returning a negative value.
+        Effects overriding this can modify the damage dealt by an actor or enemy.
+        The return value of this method will be added to the damage, you can lower the damage
+        dealt by returning a negative value.
         """
         pass
 
@@ -78,13 +59,12 @@ class AbstractEffect:
 
 class Block(AbstractEffect):
     def modify_damage_taken(self: AbstractEffect, damage: int) -> int:
-        # This tries to decrease the number of block by the damage,
-        # and returns how many block were actually removed
-        stacks_removed = self.decrease_stacks(damage)
+        if self.stacks >= damage:
+            blocked = damage
+        else:
+            blocked = self.stacks
 
-        # To modify damage by the number of stacks we return the
-        # negative of that
-        return -1 * stacks_removed
+        return blocked * -1
 
     def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
         owner.set_effect(Block, 0)
@@ -92,7 +72,7 @@ class Block(AbstractEffect):
 
 class Vulnerable(AbstractEffect):
     def on_end_turn(self, owner: AbstractActor | AbstractEnemy):
-        owner.apply_vulnerable(-1)
+        owner.decrease_effect(Vulnerable, 1)
 
     def modify_damage_taken(self, damage: int) -> int:
         # Vulnerable adds 50% damage
@@ -106,13 +86,16 @@ class Strength(AbstractEffect):
 
 class Ritual(AbstractEffect):
     def on_end_turn(self, owner: AbstractActor | AbstractEnemy):
-        owner.apply_strength(self.stacks)
+        owner.increase_effect(Strength, 3)
 
 
 class Weak(AbstractEffect):
     # TODO: Consider a "set_damage_dealt" method
     def modify_damage_dealt(self, damage: int):
         return (damage - math.floor(damage * 0.75)) * -1
+
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+        owner.decrease_effect(Weak, 1)
 
 
 # ===================================
@@ -178,28 +161,20 @@ class EffectMixin:
         if quantity is None:
             return effect in self.effects
         else:
-            return self.effect.get >= quantity
+            return effect.stacks >= quantity
 
-    def set_effect(self, effect, value):
-        self.effects.get(effect).stacks = value
-
-    def _apply(self: AbstractActor | AbstractEnemy, effect, quantity):
+    def _check_instantiate_effect(self, effect):
         if effect not in self.effects:
             self.effects[effect] = effect()
-        self.effects[effect].increase_stacks(quantity)
 
-    def apply_effect(self: AbstractActor | AbstractEnemy, effect: type[AbstractEffect], quantity: int):
-        self._apply(effect, quantity)
+    def set_effect(self, effect, value):
+        self._check_instantiate_effect(effect)
+        self.effects.get(effect).stacks = value
 
-    def apply_block(self: AbstractActor | AbstractEnemy, quantity: int):
-        self._apply(Block, quantity)
+    def increase_effect(self, effect, value):
+        self._check_instantiate_effect(effect)
+        self.effects.get(effect).stacks += value
 
-    def apply_vulnerable(self: AbstractActor | AbstractEnemy, quantity: int):
-        self._apply(Vulnerable, quantity)
-
-    def apply_strength(self: AbstractActor | AbstractEnemy, quantity: int):
-        self._apply(Strength, quantity)
-
-    def apply_ritual(self: AbstractActor | AbstractEnemy, quantity: int):
-        self._apply(Ritual, quantity)
-        self.ritual_flag = True
+    def decrease_effect(self, effect, value):
+        self._check_instantiate_effect(effect)
+        self.effects.get(effect).stacks -= value
