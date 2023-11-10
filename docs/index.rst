@@ -11,6 +11,7 @@ Welcome to Spliced The Spire's documentation!
    :caption: Contents:
 
    contributing
+   abstractions
 
 
 Indices and tables
