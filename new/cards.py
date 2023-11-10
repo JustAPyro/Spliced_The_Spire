@@ -28,6 +28,8 @@ class AbstractCard(ABC):
         # Name of the card
         if name is None:
             self.name: str = type(self).__name__
+        else:
+            self.name = name
 
         # normal energy cost of card ("cost" int)
         self.energy_cost: int = energy_cost
@@ -86,7 +88,7 @@ class RedDefend(AbstractCard, ABC):
         super().__init__(name='Defend', energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        caller.apply_block(self.block)
+        caller.increase_effect(Block, self.block)
 
     def upgrade_logic(self):
         self.block = 8
@@ -190,9 +192,8 @@ class Clothesline(AbstractCard, ABC):
 
     def use(self, caller, target, enemies):
         target.take_damage(self.damage)
-        target.apply_effect(Weak, self.qty_weak)
+        target.increase_effect(Weak, self.qty_weak)
 
     def upgrade_logic(self):
         self.damage = 14
         self.qty_weak = 3
-

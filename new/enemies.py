@@ -82,7 +82,7 @@ class AbstractEnemy(ABC, EffectMixin):
         # Here we assign max health. We use the provided value but
         # if a dict is provided we calculate a random appropriate max health
         # based on ascension.
-        self.max_health = (self.max_health if type(max_health) is not dict
+        self.max_health = (max_health if type(max_health) is not dict
                            else ascension_based_int(ascension, max_health))
         # Since this was just created current health should be full
         self.health = self.max_health
@@ -117,35 +117,11 @@ class AbstractEnemy(ABC, EffectMixin):
         log.append(f'used Dark Strike on {target.name} to deal {damage} damage.')
         target.take_damage(damage)
 
-    def set_start(self, health, effects=None, intent=None):
-        # TODO: Assert beginning
-        self.max_health = health
-        self.health = health
-        self.clear_effects()
-
-        if effects is not None:
-            self.apply_all_effects(effects)
-
-        if intent is not None:
-            self.intent = intent
-        return self
-
     def before_ability(self):
         pass
 
     def after_ability(self):
-        str_buff = 0
-
-        for effect in self.effects.values():
-            if effect == Vulnerable:
-                effect.decrease_effect(Vulnerable, 1)
-            if effect == Ritual:
-                str_buff = effect.stacks
-
-        if not self.ritual_flag:
-            self.apply_strength(str_buff)
-        else:
-            self.ritual_flag = False
+        pass
 
     @property
     def intent(self):
@@ -201,8 +177,8 @@ class Cultist(AbstractEnemy):
     @AbstractEnemy.ability
     def incantation(self, target, quantity: Optional[int] = None, log=[]):
         log.append('used incantation')
-        self.apply_ritual(quantity if quantity is not None
-                          else ascension_based_int(self.ascension, Cultist.ritual_gain))
+        self.increase_effect(Ritual, quantity if quantity is not None
+                else ascension_based_int(self.ascension, Cultist.ritual_gain))
 
     @AbstractEnemy.ability
     def dark_strike(self, target, damage: Optional[int] = None, log=[]):
