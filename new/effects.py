@@ -81,6 +81,7 @@ class Vulnerable(AbstractEffect):
 
 class Strength(AbstractEffect):
     def modify_damage_dealt(self, damage: int) -> int:
+        print(damage)
         return self.stacks
 
 
@@ -96,6 +97,13 @@ class Weak(AbstractEffect):
 
     def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
         owner.decrease_effect(Weak, 1)
+
+
+class StrengthDown(AbstractEffect):
+
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+        owner.decrease_effect(Strength, self.stacks)
+        owner.set_effect(StrengthDown, 0)
 
 
 # ===================================
@@ -124,19 +132,32 @@ class EffectMixin:
         self.effects: dict[type[AbstractEffect], AbstractEffect] = {}
         self.ritual_flag: bool = False
 
-    def process_effects(self: AbstractActor | AbstractEnemy, method_name: str):
+    def process_effects(self: AbstractActor | AbstractEnemy, method_name: str, parameter=None):
         """
         This method streamlines the processing of effects by allowing you to quickly
         call a given method on all effects. It is
         """
-        for effect in list(self.effects):
-            # Note: func = getattr(obj, method_name); func;
-            # is essentially the same as doing obj.method_name()
-            # This is somewhat brittle since we take method name as
-            # a string, but I think it simplifies enough to be worth it
-            # TODO: Only call on methods where it exists
-            func = getattr(self.effects.get(effect), method_name)
-            func(self)
+        # Note: func = getattr(obj, method_name); func;
+        # is essentially the same as doing obj.method_name()
+        # This is somewhat brittle since we take method name as
+        # a string, but I think it simplifies enough to be worth it
+        # TODO: Only call on methods where it exists
+
+        remove_effects = []
+        for effect_name, effect in self.effects.items():
+            func = getattr(self.effects.get(effect_name), method_name)
+            if parameter:
+                modification = func(parameter)
+                parameter = parameter + modification
+            else:
+                func(self)
+            if effect.stacks <= 0:
+                remove_effects.append(effect_name)
+
+        for i in range(len(remove_effects)):
+            self.effects.pop(remove_effects[i])
+
+        return parameter
 
     def get_effects_dict(self) -> dict[str, int]:
         """
