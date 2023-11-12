@@ -213,3 +213,17 @@ class Flex(AbstractCard, ABC):
 
     def upgrade_logic(self):
         self.strength_amount = 4
+
+
+class Havoc(AbstractCard, ABC):
+    def __init__(self):
+        super().__init__(energy_cost=1, card_type=CardType.SKILL)
+
+    def use(self, caller, target, enemies):
+        did_we_draw_card = caller.draw_card(1)
+        if did_we_draw_card:
+            caller.use_card(target, caller.hand_pile[-1], enemies, is_free=True, will_discard=False)
+            caller.exhaust_card(caller.hand_pile[-1])
+
+    def upgrade_logic(self):
+        self.energy_cost = 0

@@ -23,22 +23,31 @@ class AbstractActor(EffectMixin):
         self.max_energy: int = 3
         self.energy: int = 3
 
-        self._draw_pile: list[AbstractCard] = (clas.start_cards if cards is None else cards)
-        self._hand_pile: list[AbstractCard] = []
-        self._discard_pile: list[AbstractCard] = []
+        self.draw_pile: list[AbstractCard] = (clas.start_cards if cards is None else cards)
+        self.hand_pile: list[AbstractCard] = []
+        self.discard_pile: list[AbstractCard] = []
         self._exhaust_pile: list[AbstractCard] = []
 
         # This log contains what the actor did each turn
         self.turn_log = []
 
-    def use_card(self, target: AbstractEnemy, card: AbstractCard, all_enemies: list[AbstractEnemy]):
-        if card in self.get_hand():
-            self.discard_card(card)
-        else:
-            raise RuntimeError('Attempted to use card not in hand!')
+    def set_start(self, health, hand):
+        # TODO: Assert start
+        self.max_health = health
+        self.health = health
+        self.hand = hand
+        return self
 
-        self.energy -= card.energy_cost
+    def use_card(self, target: AbstractEnemy, card: AbstractCard, all_enemies: list[AbstractEnemy], is_free=False, will_discard=True):
+        if card not in self.hand_pile:
+            raise RuntimeError("Tried to play card not in hand")
         card.use(self, target, all_enemies)
+        if card in self.hand_pile and will_discard:
+            self.discard_pile.append(card)
+            self.hand_pile.remove(card)
+        if not is_free:
+            self.energy -= card.energy_cost
+
         self.turn_log[-1]['turn_actions'].append({
             'type': 'use_card',
             'card': card,
@@ -48,7 +57,7 @@ class AbstractActor(EffectMixin):
 
     def get_playable_cards(self) -> list[AbstractCard]:
         playable = []
-        for card in self.get_hand():
+        for card in self.hand_pile:
             # TODO: This is a sketchy patch
             if card is None:
                 continue
@@ -58,25 +67,23 @@ class AbstractActor(EffectMixin):
 
     def deal_damage(self, target, damage):
         actual_damage = self.process_effects('modify_damage_dealt', damage)
-        target.take_damage(5)
+        target.take_damage(actual_damage)
 
     def take_damage(self, damage):
-        for effect in self.effects.values():
-            modification = effect.modify_damage_taken(damage)
-            if modification:
-                damage = damage + modification
-        self.health -= damage
+        actual_damage = self.process_effects('modify_damage_taken', damage)
+        self.health -= actual_damage
 
     def end_turn(self):
         self.process_effects('on_end_turn')
-        self.discard_hand()
+        self.discard_pile.extend(self.hand_pile)
+        self.hand_pile.clear()
 
     def start_turn(self, draw=None):
         self.energy = self.max_energy
-        random.shuffle(self._draw_pile)
+        random.shuffle(self.draw_pile)
         self.draw_card(5)
         self.turn_log.append({
-            'initial_draw': tuple(self.get_hand()),
+            'initial_draw': tuple(self.hand_pile),
             'initial_energy': copy(self.energy),
             'initial_health': copy(self.health),
             'turn_actions': []
@@ -84,6 +91,28 @@ class AbstractActor(EffectMixin):
 
         self.process_effects('on_start_turn')
 
+    def exhaust_card(self, card: AbstractCard):
+        """Exhausts the selected card. If the card is not in the players hand, throws an error."""
+        if card not in self.hand_pile:
+            raise RuntimeError("Tried to exhaust card not in hand?")
+
+        self.hand_pile.remove(card)
+        self._exhaust_pile.append(card)
+
+    def draw_card(self, quantity: int):
+        """Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard."""
+        print("HELLO")
+        if len(self.draw_pile) == 0 and len(self.discard_pile) == 0:
+            return False
+        for i in range(quantity):
+            if len(self.draw_pile) > 0:
+                self.hand_pile.append(self.draw_pile.pop())
+            elif len(self.discard_pile) > 0:
+                self.draw_pile.extend(self.discard_pile)
+                self.discard_pile.clear()
+                random.shuffle(self.draw_pile)
+                self.hand_pile.append(self.draw_pile.pop())
+        return True
     @abstractmethod
     def turn_logic(self, hand: list[AbstractCard], enemies: list[AbstractEnemy]):
         pass
@@ -97,8 +126,8 @@ class AbstractActor(EffectMixin):
                   f'\n\t drew {log["initial_draw"]} '
                   f'\n\t has {log["initial_health"]} health / {log["initial_energy"]} energy'
                   f'\n\t these effects: {self.get_effects_dict()}'
-                  f'\n\t Draw Pile: {self.get_draw()}'
-                  f'\n\t Discard Pile: {self.get_discard_pile()}')
+                  f'\n\t Draw Pile: {self.draw_pile}'
+                  f'\n\t Discard Pile: {self.discard_pile}')
 
         self.turn_logic(hand, enemies)
 
@@ -113,70 +142,6 @@ class AbstractActor(EffectMixin):
         print(f'Effects after turn: {self.get_effects_dict()}')
 
         return self.turn_log[-1]
-
-    # API METHODS
-    def get_draw(self) -> list[AbstractCard]:
-        """Returns all the cards currently in the players draw pile."""
-        return self._draw_pile
-
-    def get_hand(self) -> list[AbstractCard]:
-        """Returns all the cards currently in the players hand."""
-        return self._hand_pile
-
-    def draw_card(self, quantity: int = 1) -> AbstractCard:
-        """
-        Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard.
-        If card quantity is not specified this will draw 1 card.
-        This will return the card that is drawn.
-        """
-        for i in range(quantity):
-            card = None
-            # If we can draw a card just do that
-            if len(self._draw_pile) > 0:
-                card = self._draw_pile.pop()
-                self._hand_pile.append(card)
-            # If we don't but have draw but have discard shuffle and draw
-            elif len(self._discard_pile) > 0:
-                self._draw_pile.extend(self._discard_pile)
-                self._discard_pile.clear()
-                random.shuffle(self._draw_pile)
-                card = self._draw_pile.pop()
-                self._hand_pile.append(card)
-            else:  # If we still can't, something weird is up. Throw an error for investigation
-                raise RuntimeWarning('Tried to draw a card but had none in draw and none in discard pile.')
-            return card
-
-    def get_discard_pile(self) -> list[AbstractCard]:
-        """Provides access to the discard pile."""
-        return self._discard_pile
-
-    def discard_card(self, card: AbstractCard):
-        """
-        This method allows you to discard a card. This will move it from your hand
-        to the discard pile without expending energy or initiating any of its use effects.
-        """
-        self._discard_pile.append(card)
-        self._hand_pile.remove(card)
-
-    def discard_hand(self):
-        """
-        Discard your entire hand. This is the same discard that is used on end of turn,
-        All the players cards will be moved to the discard pile.
-        """
-        for card in self._hand_pile:
-            self.discard_card(card)
-
-    def exhaust_card(self, card: AbstractCard):
-        """
-        This method allows you to exhaust a card. This moves it to the exhaust pile
-        without expending energy or initiating any of its use effects.
-        If the card is not in your hand this will throw a runtime error.
-        """
-        if card not in self._hand_pile:
-            raise RuntimeError("Tried to exhaust card not in hand?")
-
-        self._hand_pile.remove(card)
-        self._exhaust_pile.append(card)
 
 
 class LeftToRightAI(AbstractActor):

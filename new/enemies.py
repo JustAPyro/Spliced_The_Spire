@@ -102,18 +102,11 @@ class AbstractEnemy(ABC, EffectMixin):
         return self.health <= 0
 
     def take_damage(self, damage: int):
-        for effect in self.effects.values():
-            modification = effect.modify_damage_taken(damage)
-            if modification:
-                damage = damage + modification
+        damage = self.process_effects('modify_damage_taken', damage)
         self.health -= damage
 
     def deal_damage(self, damage: int, target, log):
-        for effect in self.effects.values():
-            modification = effect.modify_damage_dealt(damage)
-            if modification:
-                damage = damage + modification
-
+        damage = self.process_effects('modify_damage_dealt', damage)
         log.append(f'used Dark Strike on {target.name} to deal {damage} damage.')
         target.take_damage(damage)
 
