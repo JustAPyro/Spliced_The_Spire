@@ -57,16 +57,14 @@ class AbstractActor(EffectMixin):
         return playable
 
     def deal_damage(self, target, damage):
-        for effect in self.effects.values():
-            modification = effect.modify_damage_dealt(damage)
-            if modification:
-                damage = damage + modification
-        target.take_damage(damage)
+        actual_damage = self.process_effects('modify_damage_dealt', damage)
+        target.take_damage(5)
 
     def take_damage(self, damage):
         for effect in self.effects.values():
             modification = effect.modify_damage_taken(damage)
-            damage = damage + modification
+            if modification:
+                damage = damage + modification
         self.health -= damage
 
     def end_turn(self):
@@ -83,8 +81,8 @@ class AbstractActor(EffectMixin):
             'initial_health': copy(self.health),
             'turn_actions': []
         })
-        for effect in self.effects.values():
-            effect.on_start_turn(self)  # TODO Add this to enemies
+
+        self.process_effects('on_start_turn')
 
     @abstractmethod
     def turn_logic(self, hand: list[AbstractCard], enemies: list[AbstractEnemy]):
