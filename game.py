@@ -13,6 +13,7 @@ class Simulation:
     def run(self):
         print("Starting Simulation:")
         print(f'Fighting {self.get_names()} with {self.get_healths()} health')
+        print(f'Starting draw order: {self.actor.draw_pile}')
         while self.actor.health > 0:
             self.actor.turn_impl(self.actor.get_hand(), self.enemies, verbose=True)
 
@@ -51,6 +52,7 @@ class Simulation:
         return healths
 
 
+
 c2 = Cultist()
 c2.name = 'Cultist #2'
 
@@ -61,6 +63,6 @@ sim = Simulation(actor=LeftToRightAI,
                  enemies=[Cultist()],
                  hero=Ironclad,
                  relics=[Ironclad.start_relic],
-                 deck=[Flex(), RedDefend(), RedDefend(), RedStrike(), RedDefend(), RedDefend(), RedDefend(), Havoc()],
+                 deck=[RedDefend(), RedStrike(), RedDefend(), Headbutt(), RedDefend()],
                  ascension=0)
 sim.run()

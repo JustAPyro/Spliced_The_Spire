@@ -227,3 +227,20 @@ class Havoc(AbstractCard, ABC):
 
     def upgrade_logic(self):
         self.energy_cost = 0
+
+
+class Headbutt(AbstractCard, ABC):
+    def __init__(self):
+        self.damage = 9
+        super().__init__(energy_cost=1, card_type=CardType.ATTACK)
+
+    def use(self, caller, target, enemies):
+        target.take_damage(self.damage)
+
+        if caller.discard_pile:
+            card = caller.select_card(caller.discard_pile)
+            caller.draw_pile.append(card)
+            caller.discard_pile.remove(card)
+
+    def upgrade_logic(self):
+        self.damage = 12
