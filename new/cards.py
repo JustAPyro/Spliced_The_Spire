@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 from typing import TYPE_CHECKING
 from enum import Enum
-from new.effects import Block, Weak
+from new.effects import *
 
 if TYPE_CHECKING:
     from actors import AbstractActor
@@ -131,7 +131,7 @@ class Armaments(AbstractCard, ABC):
         super().__init__(energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller, target, enemies):
-        caller.apply_block(self.block)
+        caller.increase_effect(Block, self.block)
         if self.upgraded:
             for card in caller.hand_pile:
                 card.upgrade()
@@ -200,3 +200,16 @@ class Clothesline(AbstractCard, ABC):
     def upgrade_logic(self):
         self.damage = 14
         self.qty_weak = 3
+
+
+class Flex(AbstractCard, ABC):
+    def __init__(self):
+        self.strength_amount = 2
+        super().__init__(energy_cost=0, card_type=CardType.SKILL)
+
+    def use(self, caller, target, enemies):
+        caller.increase_effect(Strength, self.strength_amount)
+        caller.increase_effect(StrengthDown, self.strength_amount)
+
+    def upgrade_logic(self):
+        self.strength_amount = 4
