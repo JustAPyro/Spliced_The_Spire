@@ -55,6 +55,9 @@ class AbstractActor(EffectMixin):
             'message': f'{self.name} used {card.name} on {target.name}'
         })
 
+    def get_hand(self):
+        return self.hand_pile
+
     def get_playable_cards(self) -> list[AbstractCard]:
         playable = []
         for card in self.hand_pile:
@@ -80,7 +83,6 @@ class AbstractActor(EffectMixin):
 
     def start_turn(self, draw=None):
         self.energy = self.max_energy
-        random.shuffle(self.draw_pile)
         self.draw_card(5)
         self.turn_log.append({
             'initial_draw': tuple(self.hand_pile),
@@ -101,7 +103,6 @@ class AbstractActor(EffectMixin):
 
     def draw_card(self, quantity: int):
         """Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard."""
-        print("HELLO")
         if len(self.draw_pile) == 0 and len(self.discard_pile) == 0:
             return False
         for i in range(quantity):
@@ -116,6 +117,11 @@ class AbstractActor(EffectMixin):
     @abstractmethod
     def turn_logic(self, hand: list[AbstractCard], enemies: list[AbstractEnemy]):
         pass
+
+    @abstractmethod
+    def select_card(self, options: list[AbstractCard]) -> AbstractCard:
+        pass
+
 
     def turn_impl(self, hand: list[AbstractCard], enemies: list[AbstractEnemy], verbose: bool):
         self.start_turn()
@@ -140,6 +146,8 @@ class AbstractActor(EffectMixin):
         self.end_turn()
 
         print(f'Effects after turn: {self.get_effects_dict()}')
+        print(f'Draw Pile: {self.draw_pile}'
+              f'\nDiscard Pile: {self.discard_pile}')
 
         return self.turn_log[-1]
 
@@ -166,3 +174,6 @@ class LeftToRightAI(AbstractActor):
 
             self.use_card(valid_enemy, choices[0], enemies)
             choices = self.get_playable_cards()
+
+    def select_card(self, options: list[AbstractCard]) -> AbstractCard:
+        return options[0]
