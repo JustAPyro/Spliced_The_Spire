@@ -72,6 +72,10 @@ class AbstractCard(ABC):
     def __repr__(self):
         return self.name
 
+    ### API METHODS ###
+    def deal_damage(self, target, damage):
+        pass
+
 
 class RedStrike(AbstractCard, ABC):
     def __init__(self):
@@ -104,8 +108,8 @@ class Bash(AbstractCard, ABC):
         super().__init__(energy_cost=2, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        target.take_damage(self.damage)
-        target.apply_vulnerable(self.vulnerable)
+        caller.deal_damage(target, self.damage)
+        target.increase_effect(Vulnerable, self.vulnerable)
 
     def upgrade_logic(self):
         self.damage = 10
@@ -118,7 +122,7 @@ class Anger(AbstractCard, ABC):
         super().__init__(energy_cost=0, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        target.take_damage(self.damage)
+        caller.deal_damage(target, self.damage)
         caller.discard_pile.append(Anger())
 
     def upgrade_logic(self):
@@ -147,9 +151,8 @@ class BodySlam(AbstractCard, ABC):
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        # TODO: Implement "caller.get_stacks(Block)"
         if caller.effects.get(Block):
-            target.take_damage(caller.effects.get(Block).stacks)
+            caller.deal_damage(target, caller.get_effect_stacks(Block))
 
     def upgrade_logic(self):
         self.energy_cost = 0
@@ -162,7 +165,7 @@ class Clash(AbstractCard, ABC):
         super().__init__(energy_cost=0, card_type=CardType.ATTACK)
 
     def use(self, caller, target, enemies):
-        target.take_damage(self.damage)
+        caller.deal_damage(target, self.damage)
 
     def upgrade_logic(self):
         self.damage = 18
@@ -181,7 +184,7 @@ class Cleave(AbstractCard, ABC):
 
     def use(self, caller, target, enemies):
         for enemy in enemies:
-            enemy.take_damage(self.damage)
+            caller.deal_damage(enemy, self.damage)
 
     def upgrade_logic(self):
         self.damage = 11
@@ -193,8 +196,9 @@ class Clothesline(AbstractCard, ABC):
         self.qty_weak = 2
         super().__init__(energy_cost=2, card_type=CardType.ATTACK)
 
+    # TODO: make caller.take_damage a mangled method
     def use(self, caller, target, enemies):
-        target.take_damage(self.damage)
+        caller.deal_damage(target, self.damage)
         target.increase_effect(Weak, self.qty_weak)
 
     def upgrade_logic(self):
@@ -235,7 +239,7 @@ class Headbutt(AbstractCard, ABC):
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller, target, enemies):
-        target.take_damage(self.damage)
+        caller.deal_damage(target, self.damage)
 
         if caller.discard_pile:
             card = caller.select_card(caller.discard_pile)
@@ -244,3 +248,30 @@ class Headbutt(AbstractCard, ABC):
 
     def upgrade_logic(self):
         self.damage = 12
+
+
+class HeavyBlade(AbstractCard, ABC):
+    def __init__(self):
+        self.extra_strength_multiplier = 3
+        super().__init__(energy_cost=2, card_type=CardType.ATTACK)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
+        caller.deal_damage(target, 14 + (caller.get_effect_stacks(Strength) * (self.extra_strength_multiplier-1)))
+
+    def upgrade_logic(self):
+        self.extra_strength_multiplier = 5
+
+
+class IronWave(AbstractCard, ABC):
+    def __init__(self):
+        self.damage = 5
+        self.block = 5
+        super().__init__(energy_cost=1, card_type=CardType.ATTACK)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
+        caller.deal_damage(target, self.damage)
+        caller.increase_effect(Block, self.block)
+
+    def upgrade_logic(self):
+        self.damage = 7
+        self.block = 7
