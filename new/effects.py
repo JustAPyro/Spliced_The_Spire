@@ -142,21 +142,19 @@ class EffectMixin:
         # a string, but I think it simplifies enough to be worth it
         # TODO: Only call on methods where it exists
 
-        remove_effects = []
-        for effect_name, effect in self.effects.items():
+        for effect_name in list(self.effects):
+            if effect_name == StrengthDown:
+                print("hello")
             func = getattr(self.effects.get(effect_name), method_name)
             if parameter is not None:
-                modification = func(effect, parameter)
+                modification = func(self.effects.get(effect_name), parameter)
                 if modification is not None:
                     parameter = parameter + modification
             else:
                 func(self)
-
-            if effect.stacks <= 0:
-                remove_effects.append(effect_name)
-
-        for i in range(len(remove_effects)):
-            self.effects.pop(remove_effects[i])
+            for effect in list(self.effects):
+                if self.effects.get(effect).stacks <= 0:
+                    self.effects.pop(effect)
 
         return parameter
 
