@@ -29,6 +29,7 @@ class AbstractActor(EffectMixin):
         self._exhaust_pile: list[AbstractCard] = []
 
         # This log contains what the actor did each turn
+        self.logging: bool = True
         self.turn_log = []
 
     def set_start(self, health, hand):
@@ -38,7 +39,8 @@ class AbstractActor(EffectMixin):
         self.hand = hand
         return self
 
-    def use_card(self, target: AbstractEnemy, card: AbstractCard, all_enemies: list[AbstractEnemy], is_free=False, will_discard=True):
+    def use_card(self, target: AbstractEnemy, card: AbstractCard, all_enemies: list[AbstractEnemy], is_free=False,
+                 will_discard=True):
         if card not in self.hand_pile:
             raise RuntimeError("Tried to play card not in hand")
         card.use(self, target, all_enemies)
@@ -47,13 +49,13 @@ class AbstractActor(EffectMixin):
             self.hand_pile.remove(card)
         if not is_free:
             self.energy -= card.energy_cost
-
-        self.turn_log[-1]['turn_actions'].append({
-            'type': 'use_card',
-            'card': card,
-            'target': target,
-            'message': f'{self.name} used {card.name} on {target.name}'
-        })
+        if self.logging:
+            self.turn_log[-1]['turn_actions'].append({
+                'type': 'use_card',
+                'card': card,
+                'target': target,
+                'message': f'{self.name} used {card.name} on {target.name}'
+            })
 
     def get_hand(self):
         return self.hand_pile
@@ -114,6 +116,7 @@ class AbstractActor(EffectMixin):
                 random.shuffle(self.draw_pile)
                 self.hand_pile.append(self.draw_pile.pop())
         return True
+
     @abstractmethod
     def turn_logic(self, hand: list[AbstractCard], enemies: list[AbstractEnemy]):
         pass
@@ -121,7 +124,6 @@ class AbstractActor(EffectMixin):
     @abstractmethod
     def select_card(self, options: list[AbstractCard]) -> AbstractCard:
         pass
-
 
     def turn_impl(self, hand: list[AbstractCard], enemies: list[AbstractEnemy], verbose: bool):
         self.start_turn()
@@ -150,6 +152,20 @@ class AbstractActor(EffectMixin):
               f'\nDiscard Pile: {self.discard_pile}')
 
         return self.turn_log[-1]
+
+
+class DummyActor(AbstractActor):
+    def __init__(self, clas, cards, health, hand, energy):
+        super().__init__(clas, cards=cards)
+        self.health = health
+        self.max_health = health
+
+        self.energy = energy
+        self.max_energy = energy
+
+        self.hand_pile = hand
+
+        self.logging = False
 
 
 class LeftToRightAI(AbstractActor):

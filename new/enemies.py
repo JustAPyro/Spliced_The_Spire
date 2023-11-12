@@ -150,6 +150,17 @@ class AbstractEnemy(ABC, EffectMixin):
         return log[0]
 
 
+class DummyEnemy(AbstractEnemy, ABC):
+    def __init__(self, health=10, ascension=0):
+        super().__init__(name='Dummy',
+                         max_health=health,
+                         ascension=ascension,
+                         act=1)
+
+    def pattern(self):
+        pass
+
+
 class Cultist(AbstractEnemy):
     max_health_range = {
         0: (48, 54),  # A1- Health is 48-54
@@ -171,7 +182,7 @@ class Cultist(AbstractEnemy):
     def incantation(self, target, quantity: Optional[int] = None, log=[]):
         log.append('used incantation')
         self.increase_effect(Ritual, quantity if quantity is not None
-                else ascension_based_int(self.ascension, Cultist.ritual_gain))
+        else ascension_based_int(self.ascension, Cultist.ritual_gain))
 
     @AbstractEnemy.ability
     def dark_strike(self, target, damage: Optional[int] = None, log=[]):
