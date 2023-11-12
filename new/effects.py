@@ -24,7 +24,7 @@ class AbstractEffect:
 
     # === API/SANDBOX METHODS ===
 
-    def modify_damage_taken(self, damage: int) -> int:
+    def modify_damage_taken(self, owner, damage: int) -> int:
         """
         Effects overriding this can modify the damage taken by an actor or enemy.
         The return value of this method will be added to the damage, you can lower the damage
@@ -32,7 +32,7 @@ class AbstractEffect:
         """
         pass
 
-    def modify_damage_dealt(self, damage: int) -> int:
+    def modify_damage_dealt(self, owner, damage: int) -> int:
         """
             Effects overriding this can modify the damage dealt by an actor or enemy.
             The return value of this method will be added to the damage, you can lower the damage
@@ -58,7 +58,7 @@ class AbstractEffect:
 # =======================
 
 class Block(AbstractEffect):
-    def modify_damage_taken(self: AbstractEffect, damage: int) -> int:
+    def modify_damage_taken(self: AbstractEffect, owner, damage: int) -> int:
         if self.stacks >= damage:
             blocked = damage
         else:
@@ -74,14 +74,13 @@ class Vulnerable(AbstractEffect):
     def on_end_turn(self, owner: AbstractActor | AbstractEnemy):
         owner.decrease_effect(Vulnerable, 1)
 
-    def modify_damage_taken(self, damage: int) -> int:
+    def modify_damage_taken(self, owner, damage: int) -> int:
         # Vulnerable adds 50% damage
         return int(damage * .5)
 
 
 class Strength(AbstractEffect):
-    def modify_damage_dealt(self, damage: int) -> int:
-        print(damage)
+    def modify_damage_dealt(self, owner, damage: int) -> int:
         return self.stacks
 
 
@@ -92,7 +91,7 @@ class Ritual(AbstractEffect):
 
 class Weak(AbstractEffect):
     # TODO: Consider a "set_damage_dealt" method
-    def modify_damage_dealt(self, damage: int):
+    def modify_damage_dealt(self, owner, damage: int):
         return (damage - math.floor(damage * 0.75)) * -1
 
     def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
@@ -146,11 +145,13 @@ class EffectMixin:
         remove_effects = []
         for effect_name, effect in self.effects.items():
             func = getattr(self.effects.get(effect_name), method_name)
-            if parameter:
-                modification = func(parameter)
-                parameter = parameter + modification
+            if parameter is not None:
+                modification = func(effect, parameter)
+                if modification is not None:
+                    parameter = parameter + modification
             else:
                 func(self)
+
             if effect.stacks <= 0:
                 remove_effects.append(effect_name)
 
