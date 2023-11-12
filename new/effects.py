@@ -143,8 +143,6 @@ class EffectMixin:
         # TODO: Only call on methods where it exists
 
         for effect_name in list(self.effects):
-            if effect_name == StrengthDown:
-                print("hello")
             func = getattr(self.effects.get(effect_name), method_name)
             if parameter is not None:
                 modification = func(self.effects.get(effect_name), parameter)

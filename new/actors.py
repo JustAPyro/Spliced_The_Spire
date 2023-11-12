@@ -38,12 +38,16 @@ class AbstractActor(EffectMixin):
         self.hand = hand
         return self
 
-    def use_card(self, target: AbstractEnemy, card: AbstractCard, all_enemies: list[AbstractEnemy]):
-        if card in self.hand_pile:
+    def use_card(self, target: AbstractEnemy, card: AbstractCard, all_enemies: list[AbstractEnemy], is_free=False, will_discard=True):
+        if card not in self.hand_pile:
+            raise RuntimeError("Tried to play card not in hand")
+        card.use(self, target, all_enemies)
+        if card in self.hand_pile and will_discard:
             self.discard_pile.append(card)
             self.hand_pile.remove(card)
-        self.energy -= card.energy_cost
-        card.use(self, target, all_enemies)
+        if not is_free:
+            self.energy -= card.energy_cost
+
         self.turn_log[-1]['turn_actions'].append({
             'type': 'use_card',
             'card': card,
@@ -97,6 +101,9 @@ class AbstractActor(EffectMixin):
 
     def draw_card(self, quantity: int):
         """Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard."""
+        print("HELLO")
+        if len(self.draw_pile) == 0 and len(self.discard_pile) == 0:
+            return False
         for i in range(quantity):
             if len(self.draw_pile) > 0:
                 self.hand_pile.append(self.draw_pile.pop())
@@ -105,7 +112,7 @@ class AbstractActor(EffectMixin):
                 self.discard_pile.clear()
                 random.shuffle(self.draw_pile)
                 self.hand_pile.append(self.draw_pile.pop())
-
+        return True
     @abstractmethod
     def turn_logic(self, hand: list[AbstractCard], enemies: list[AbstractEnemy]):
         pass
