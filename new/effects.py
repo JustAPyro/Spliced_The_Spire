@@ -196,3 +196,7 @@ class EffectMixin:
     def decrease_effect(self, effect, value):
         self._check_instantiate_effect(effect)
         self.effects.get(effect).stacks -= value
+
+    def get_effect_stacks(self, effect):
+        self._check_instantiate_effect(effect)
+        return self.effects.get(effect).stacks
