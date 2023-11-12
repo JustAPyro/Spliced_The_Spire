@@ -1,12 +1,7 @@
-class Parent():
-    def __init__(self):
-        self.name = type(self).__name__
+x = {1: 'one', 2: 'two'}
 
+for i in list(x):
+    if i == 1:
+        x.pop(i)
 
-class Child(Parent):
-    def __init__(self):
-        super().__init__()
-
-
-x = Child()
-print(x.name)
+print(x)

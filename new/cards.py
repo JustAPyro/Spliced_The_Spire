@@ -27,12 +27,18 @@ class AbstractCard(ABC):
     """
 
     def __init__(self, energy_cost: int, card_type: CardType, upgraded: bool = False, name: str = None):
-
         # Name of the card
         if name is None:
-            self.name: str = type(self).__name__
+            class_name = type(self).__name__
+            final_name = ''
+
+            for char in class_name:
+                if char.isupper():
+                    final_name += ' '
+                final_name += char
+            self.name: str = final_name[1:]
         else:
-            self.name = name
+            self.name: str = name
 
         # normal energy cost of card ("cost" int)
         self.energy_cost: int = energy_cost
@@ -71,10 +77,6 @@ class AbstractCard(ABC):
     # Override the repr() method so arrays print neatly
     def __repr__(self):
         return self.name
-
-    ### API METHODS ###
-    def deal_damage(self, target, damage):
-        pass
 
 
 class RedStrike(AbstractCard, ABC):
@@ -256,7 +258,7 @@ class HeavyBlade(AbstractCard, ABC):
         super().__init__(energy_cost=2, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
-        caller.deal_damage(target, 14 + (caller.get_effect_stacks(Strength) * (self.extra_strength_multiplier-1)))
+        caller.deal_damage(target, 14 + (caller.get_effect_stacks(Strength) * (self.extra_strength_multiplier - 1)))
 
     def upgrade_logic(self):
         self.extra_strength_multiplier = 5
