@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 from enum import Enum
 from new.effects import *
-
+from new.actors import SelectEvent
 if TYPE_CHECKING:
     from actors import AbstractActor
     from enemies import AbstractEnemy
@@ -345,35 +345,47 @@ class SwordBoomerang(AbstractCard, ABC):
 
 class Thunderclap(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 4
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        for enemy in enemies:
+            caller.deal_damage(enemy, self.damage)
+            caller.increase_effect(Vulnerable, 1)
+
 
     def upgrade_logic(self):
-        pass
+        self.damage = 7
 
 
 class TrueGrit(AbstractCard, ABC):
     def __init__(self):
+        self.block = 7
         super().__init__(energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        caller.increase_effect(Block, self.block)
+        if self.upgraded:
+            caller.exhaust_card(caller.select_card(caller.hand_pile, SelectEvent.EXHAUST))
+        else:
+            caller.exhaust_card(random.choice(caller.hand_pile))
+
 
     def upgrade_logic(self):
-        pass
+        self.block = 9
     
     
 class TwinStrike(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 5
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
     
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        for _ in range(2):
+            caller.deal_damage(target, self.damage)
         
     def upgrade_logic(self):
-        pass
+        self.damage = 7
     
     
 class Warcry(AbstractCard, ABC):
