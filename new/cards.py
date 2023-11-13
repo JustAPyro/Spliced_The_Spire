@@ -277,3 +277,18 @@ class IronWave(AbstractCard, ABC):
     def upgrade_logic(self):
         self.damage = 7
         self.block = 7
+
+
+class SwordBoomerang(AbstractCard, ABC):
+    def __init__(self):
+        self.damage_times = 3
+        super().__init__(energy_cost=1, card_type=CardType.ATTACK)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
+        for _ in range(self.damage_times):
+            caller.deal_damage(random.choice(all_enemies), 3)
+
+    def upgrade_logic(self):
+        self.damage_times = 4
+
+
