@@ -125,6 +125,9 @@ class AbstractActor(EffectMixin):
     def select_card(self, options: list[AbstractCard]) -> AbstractCard:
         pass
 
+    def get_combat_deck(self):
+        return set().union(self.draw_pile, self.hand_pile, self.discard_pile)
+
     def turn_impl(self, hand: list[AbstractCard], enemies: list[AbstractEnemy], verbose: bool):
         self.start_turn()
 
