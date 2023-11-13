@@ -11,6 +11,9 @@ from lutil import C
 if TYPE_CHECKING:
     from enemies import AbstractEnemy
 
+class SelectEvent(Enum):
+    DRAW = 1
+    EXHAUST = 2
 
 class AbstractActor(EffectMixin):
     def __init__(self, clas, cards: list[AbstractCard] = None):
@@ -122,7 +125,7 @@ class AbstractActor(EffectMixin):
         pass
 
     @abstractmethod
-    def select_card(self, options: list[AbstractCard]) -> AbstractCard:
+    def select_card(self, options: list[AbstractCard], event_type: SelectEvent) -> AbstractCard:
         pass
 
     def get_combat_deck(self):
@@ -194,5 +197,5 @@ class LeftToRightAI(AbstractActor):
             self.use_card(valid_enemy, choices[0], enemies)
             choices = self.get_playable_cards()
 
-    def select_card(self, options: list[AbstractCard]) -> AbstractCard:
+    def select_card(self, options: list[AbstractCard], event_type: SelectEvent) -> AbstractCard:
         return options[0]
