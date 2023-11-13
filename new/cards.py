@@ -142,10 +142,12 @@ class Armaments(AbstractCard, ABC):
             for card in caller.hand_pile:
                 card.upgrade()
             return
+        caller.hand_pile.remove(self)
         random.choice(caller.get_hand()).upgrade()
+        caller.hand_pile.append(self)
 
     def upgrade_logic(self):
-        self.upgraded = True
+        pass
 
 
 class BodySlam(AbstractCard, ABC):
@@ -277,3 +279,48 @@ class IronWave(AbstractCard, ABC):
     def upgrade_logic(self):
         self.damage = 7
         self.block = 7
+
+
+class PerfectedStrike(AbstractCard, ABC):
+    def __init__(self):
+        self.base_damage = 6
+        self.increase = 2
+        super().__init__(energy_cost=2, card_type=CardType.ATTACK)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
+        damage = self.base_damage
+        for card in caller.get_combat_deck():
+            if 'Strike' in card.name:
+                damage += self.increase
+        caller.deal_damage(target, damage)
+
+    def upgrade_logic(self):
+        self.increase = 3
+
+
+class PommelStrike(AbstractCard, ABC):
+    def __init__(self):
+        self.damage = 9
+        self.draw = 1
+        super().__init__(energy_cost=1, card_type=CardType.ATTACK)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
+        caller.deal_damage(target, self.damage)
+        caller.draw_card(self.draw)
+
+    def upgrade_logic(self):
+        self.damage = 10
+        self.draw = 2
+
+
+class ShrugItOff(AbstractCard, ABC):
+    def __init__(self):
+        self.block = 8
+        super().__init__(energy_cost=1, card_type=CardType.ATTACK)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
+        caller.increase_effect(Block, self.block)
+        caller.draw_card(1)
+
+    def upgrade_logic(self):
+        self.block = 11
