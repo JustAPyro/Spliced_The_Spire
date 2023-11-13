@@ -63,6 +63,6 @@ sim = Simulation(actor=LeftToRightAI,
                  enemies=[Cultist()],
                  hero=Ironclad,
                  relics=[Ironclad.start_relic],
-                 deck=[RedDefend(), RedDefend(), RedDefend(), RedDefend(), IronWave()],
+                 deck=[RedDefend(), RedStrike(), RedStrike(), RedStrike(), RedStrike(), RedStrike(), RedStrike(), PerfectedStrike(), RedStrike()],
                  ascension=0)
 sim.run()
