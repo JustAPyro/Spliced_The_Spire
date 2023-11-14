@@ -25,7 +25,17 @@ def generate_random_path(node):
 
 
 start = random.randint(0, 6)
+second_start = start
+while second_start == start:
+    second_start = random.randint(0, 6)
 generate_random_path((start, 0))
+generate_random_path((second_start, 0))
+for _ in range(4):
+    start = random.randint(0, 6)
+    generate_random_path((start, 0))
+
+# Casted to a list to get around a weird error (per guy on stackexchange)
+G.remove_nodes_from(list(nx.isolates(G)))
 
 plt.figure(figsize=(6, 6))
 pos = {(x, y): (x, y) for x, y in G.nodes()}
