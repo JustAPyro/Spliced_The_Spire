@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 class SelectEvent(Enum):
     DRAW = 1
     EXHAUST = 2
+    PLACE_ON_DRAWPILE = 3
 
 
 class CardType(Enum):
@@ -399,13 +400,17 @@ class TwinStrike(AbstractCard, ABC):
 
 class Warcry(AbstractCard, ABC):
     def __init__(self):
+        self.draw_num = 1
         super().__init__(energy_cost=0, card_type=CardType.SKILL, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        caller.draw_card(self.draw_num)
+        options = list(caller.hand_pile)
+        options.remove(self)
+        caller.draw_pile.append(caller.select_card(options, SelectEvent.PLACE_ON_DRAWPILE))
 
     def upgrade_logic(self):
-        pass
+        self.draw_num = 2
 
 
 class WildStrike(AbstractCard, ABC):
