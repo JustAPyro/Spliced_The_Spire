@@ -41,11 +41,11 @@ def generate_random_path(node):
         D.add_edge(node, choice)
         generate_random_path(choice)
 
+nums = [x for x in range(0, 6)]
+start = random.choice(nums)
+nums.remove(start)
+second_start = random.choice(nums)
 
-start = random.randint(0, 6)
-second_start = start
-while second_start == start:
-    second_start = random.randint(0, 6)
 generate_random_path((start, 0))
 generate_random_path((second_start, 0))
 for _ in range(4):

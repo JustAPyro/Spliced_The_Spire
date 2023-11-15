@@ -11,9 +11,11 @@ from lutil import C
 if TYPE_CHECKING:
     from enemies import AbstractEnemy
 
+
 class SelectEvent(Enum):
     DRAW = 1
     EXHAUST = 2
+
 
 class AbstractActor(EffectMixin):
     def __init__(self, clas, cards: list[AbstractCard] = None):
@@ -47,7 +49,12 @@ class AbstractActor(EffectMixin):
         if card not in self.hand_pile:
             raise RuntimeError("Tried to play card not in hand")
         card.use(self, target, all_enemies)
-        if card in self.hand_pile and will_discard:
+        # If card.exhaust:
+        # Do exhaust logic
+
+        if card in self.hand_pile and card.exhaust:
+            self.exhaust_card(card)
+        elif card in self.hand_pile and will_discard:
             self.discard_pile.append(card)
             self.hand_pile.remove(card)
         if not is_free:
