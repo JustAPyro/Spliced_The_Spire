@@ -62,6 +62,14 @@ class AbstractActor(EffectMixin):
                 'message': f'{self.name} used {card.name} on {target.name}'
             })
 
+    def add_card_to_draw(self, card, shuffle=False):
+        if shuffle:
+            insert_at = random.randint(0, len(self.draw_pile))
+            self.draw_pile.insert(insert_at, card)
+        else:
+            raise NotImplementedError
+
+
     def get_hand(self):
         return self.hand_pile
 
@@ -97,7 +105,6 @@ class AbstractActor(EffectMixin):
             'initial_health': copy(self.health),
             'turn_actions': []
         })
-
         self.process_effects('on_start_turn')
 
     def exhaust_card(self, card: AbstractCard):
@@ -110,6 +117,10 @@ class AbstractActor(EffectMixin):
 
     def draw_card(self, quantity: int):
         """Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard."""
+        modify_card_draw = self.process_effects('modify_draw_quantity', quantity)
+        if modify_card_draw is None:
+            modify_card_draw = 0
+        quantity = quantity + modify_card_draw
         if len(self.draw_pile) == 0 and len(self.discard_pile) == 0:
             return False
         for i in range(quantity):

@@ -52,6 +52,12 @@ class AbstractEffect:
         """
         pass
 
+    def modify_draw_quantity(self: AbstractEffect, owner, quantity):
+        """
+        Effects overriding this will modify the number of cards drawn
+        """
+        return 0
+
 
 # =======================
 # === Implementations ===
@@ -103,6 +109,14 @@ class StrengthDown(AbstractEffect):
     def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
         owner.decrease_effect(Strength, self.stacks)
         owner.set_effect(StrengthDown, 0)
+
+
+class NoDraw(AbstractEffect):
+    def modify_draw_quantity(self, owner, draw):
+        return -1*draw
+
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+        owner.set_effect(NoDraw, 0)
 
 
 # ===================================
