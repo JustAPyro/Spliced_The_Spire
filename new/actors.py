@@ -120,7 +120,7 @@ class AbstractActor(EffectMixin):
         modify_card_draw = self.process_effects('modify_draw_quantity', quantity)
         if modify_card_draw is None:
             modify_card_draw = 0
-        quantity = quantity + modify_card_draw
+        quantity = modify_card_draw
         if len(self.draw_pile) == 0 and len(self.discard_pile) == 0:
             return False
         for i in range(quantity):
