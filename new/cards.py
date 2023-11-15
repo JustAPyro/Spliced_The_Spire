@@ -89,6 +89,20 @@ class AbstractCard(ABC):
         return self.name
 
 
+class Wound(AbstractCard, ABC):
+    def __init__(self):
+        super().__init__(name='Wound', energy_cost=0, card_type=CardType.STATUS)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
+        pass
+
+    def upgrade_logic(self):
+        pass
+
+    def is_playable(self, caller):
+        return False
+
+
 class RedStrike(AbstractCard, ABC):
     def __init__(self):
         self.damage = 6
@@ -415,24 +429,28 @@ class Warcry(AbstractCard, ABC):
 
 class WildStrike(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 12
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        caller.deal_damage(target, self.damage)
+        caller.add_card_to_draw(Wound(), shuffle=True)
 
     def upgrade_logic(self):
-        pass
+        self.damage = 17
 
 
 class BattleTrance(AbstractCard, ABC):
     def __init__(self):
+        self.draw_qty = 3
         super().__init__(energy_cost=0, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        caller.draw_card(self.draw_qty)
+        caller.set_effect(NoDraw, 1)
 
     def upgrade_logic(self):
-        pass
+        self.draw_qty = 4
 
 
 class BloodForBlood(AbstractCard, ABC):
