@@ -2,7 +2,7 @@ import random
 from abc import abstractmethod
 
 from new.enemies import AbstractEnemy
-from new.cards import AbstractCard
+from new.cards import AbstractCard, SelectEvent
 from new.effects import EffectMixin
 from copy import copy
 from typing import TYPE_CHECKING
@@ -10,11 +10,6 @@ from lutil import C
 
 if TYPE_CHECKING:
     from enemies import AbstractEnemy
-
-
-class SelectEvent(Enum):
-    DRAW = 1
-    EXHAUST = 2
 
 
 class AbstractActor(EffectMixin):
