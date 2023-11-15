@@ -143,7 +143,13 @@ print(unfilled_nodes)
 # in room_bucket that follows the rules
 if len(unfilled_nodes) > 0:
     # iterate through unfilled_nodes and fill with whatever passes the rules
-    pass
+    room_options = ["Monster", "Event", "Elite", "Rest", "Shop"]
+    for node in unfilled_nodes:
+        for i in range(len(room_options)):
+            if (rule1(node, room_options[i]) and rule2(node, room_options[i])
+                    and rule3(node, room_options[i]) and rule4(node, room_options[i])):
+                D.nodes[node]["room"] = room_options[i]
+    unfilled_nodes.clear()
 
 plt.figure(figsize=(6, 6))
 pos = {(x, y): (x, y) for x, y in D.nodes()}
