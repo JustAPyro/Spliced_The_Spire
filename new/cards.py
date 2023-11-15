@@ -26,7 +26,7 @@ class AbstractCard(ABC):
     use, and upgrade_logic methods.
     """
 
-    def __init__(self, energy_cost: int, card_type: CardType, upgraded: bool = False, name: str = None):
+    def __init__(self, energy_cost: int, card_type: CardType, upgraded: bool = False, name: str = None, exhaust: bool = False):
         # Name of the card
         if name is None:
             class_name = type(self).__name__
@@ -48,6 +48,9 @@ class AbstractCard(ABC):
 
         # Type of card
         self.card_type: CardType = card_type
+
+        # If card exhausts
+        self.exhaust: bool = exhaust
 
     @abstractmethod
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
@@ -392,7 +395,7 @@ class TwinStrike(AbstractCard, ABC):
     
 class Warcry(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(energy_cost=0, card_type=CardType.SKILL)
+        super().__init__(energy_cost=0, card_type=CardType.SKILL, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
         pass
