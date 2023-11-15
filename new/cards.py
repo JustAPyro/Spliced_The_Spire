@@ -4,10 +4,15 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 from enum import Enum
 from new.effects import *
-from new.actors import SelectEvent
+
 if TYPE_CHECKING:
     from actors import AbstractActor
     from enemies import AbstractEnemy
+
+
+class SelectEvent(Enum):
+    DRAW = 1
+    EXHAUST = 2
 
 
 class CardType(Enum):
@@ -26,7 +31,8 @@ class AbstractCard(ABC):
     use, and upgrade_logic methods.
     """
 
-    def __init__(self, energy_cost: int, card_type: CardType, upgraded: bool = False, name: str = None, exhaust: bool = False):
+    def __init__(self, energy_cost: int, card_type: CardType, upgraded: bool = False, name: str = None,
+                 exhaust: bool = False):
         # Name of the card
         if name is None:
             class_name = type(self).__name__
@@ -356,7 +362,6 @@ class Thunderclap(AbstractCard, ABC):
             caller.deal_damage(enemy, self.damage)
             caller.increase_effect(Vulnerable, 1)
 
-
     def upgrade_logic(self):
         self.damage = 7
 
@@ -373,11 +378,10 @@ class TrueGrit(AbstractCard, ABC):
         else:
             caller.exhaust_card(random.choice(caller.hand_pile))
 
-
     def upgrade_logic(self):
         self.block = 9
-    
-    
+
+
 class TwinStrike(AbstractCard, ABC):
     def __init__(self):
         self.damage = 5
@@ -391,8 +395,8 @@ class TwinStrike(AbstractCard, ABC):
 
     def upgrade_logic(self):
         self.damage = 7
-    
-    
+
+
 class Warcry(AbstractCard, ABC):
     def __init__(self):
         super().__init__(energy_cost=0, card_type=CardType.SKILL, exhaust=True)
