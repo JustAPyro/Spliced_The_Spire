@@ -58,9 +58,16 @@ class AbstractCard(ABC):
         # Type of card
         self.card_type: CardType = card_type
 
-        # If card exhausts
+        # Card behavior
         self.exhaust: bool = exhaust
         self.ethereal: bool = ethereal
+        self.poof: bool = False
+
+        # Setup for power type cards
+        if self.card_type is CardType.POWER:
+            self.poof = True
+            if self.exhaust or self.ethereal:
+                raise RuntimeError('WAT? (Power card with exhaust/ethereal found)')
 
     @abstractmethod
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
