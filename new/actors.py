@@ -13,8 +13,9 @@ if TYPE_CHECKING:
 
 
 class AbstractActor(EffectMixin):
-    def __init__(self, clas, cards: list[AbstractCard] = None):
+    def __init__(self, clas, environment, cards: list[AbstractCard] = None):
         super().__init__()
+        self.times_received_damage: int = 0
         self.name: str = "Actor"
         self.max_health: int = clas.health
         self.health: int = clas.health
@@ -31,6 +32,10 @@ class AbstractActor(EffectMixin):
         # This log contains what the actor did each turn
         self.logging: bool = True
         self.turn_log = []
+
+        # Save the environment to class and add self to it
+        self.environment = environment
+        self.environment['actor'] = self
 
     def set_start(self, health, hand):
         # TODO: Assert start
@@ -69,6 +74,10 @@ class AbstractActor(EffectMixin):
         else:
             raise NotImplementedError
 
+    def get_hand_without(self, card):
+        pile = list(self.hand_pile)
+        pile.remove(card)
+        return pile
 
     def get_hand(self):
         return self.hand_pile
@@ -79,20 +88,25 @@ class AbstractActor(EffectMixin):
             # TODO: This is a sketchy patch
             if card is None:
                 continue
-            if self.energy >= card.energy_cost and card.is_playable(self):
+            # TODO: We need some environment dict thingie
+            if self.energy >= card.cost(self) and card.is_playable(self):
                 playable.append(card)
         return playable
 
     def deal_damage(self, target, damage):
-        actual_damage = self.process_effects('modify_damage_dealt', damage)
+        actual_damage = self.process_effects('modify_damage_dealt', self.environment, damage)
         target.take_damage(actual_damage)
 
     def take_damage(self, damage):
-        actual_damage = self.process_effects('modify_damage_taken', damage)
+        actual_damage = self.process_effects('modify_damage_taken', self.environment, damage)
         self.health -= actual_damage
+        self.times_received_damage += 1
 
     def end_turn(self):
-        self.process_effects('on_end_turn')
+        self.process_effects('on_end_turn', self.environment)
+        for card in self.hand_pile:
+            if card.ethereal:
+                self.exhaust_card(card)
         self.discard_pile.extend(self.hand_pile)
         self.hand_pile.clear()
 
@@ -105,7 +119,7 @@ class AbstractActor(EffectMixin):
             'initial_health': copy(self.health),
             'turn_actions': []
         })
-        self.process_effects('on_start_turn')
+        self.process_effects('on_start_turn', self.environment)
 
     def exhaust_card(self, card: AbstractCard):
         """Exhausts the selected card. If the card is not in the players hand, throws an error."""
@@ -117,7 +131,7 @@ class AbstractActor(EffectMixin):
 
     def draw_card(self, quantity: int):
         """Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard."""
-        modify_card_draw = self.process_effects('modify_draw_quantity', quantity)
+        modify_card_draw = self.process_effects('modify_draw_quantity', self.environment, quantity)
         if modify_card_draw is None:
             modify_card_draw = 0
         quantity = modify_card_draw
@@ -134,7 +148,7 @@ class AbstractActor(EffectMixin):
         return True
 
     @abstractmethod
-    def turn_logic(self, hand: list[AbstractCard], enemies: list[AbstractEnemy]):
+    def turn_logic(self):
         pass
 
     @abstractmethod
@@ -144,7 +158,7 @@ class AbstractActor(EffectMixin):
     def get_combat_deck(self):
         return set().union(self.draw_pile, self.hand_pile, self.discard_pile)
 
-    def turn_impl(self, hand: list[AbstractCard], enemies: list[AbstractEnemy], verbose: bool):
+    def turn_impl(self, verbose: bool):
         self.start_turn()
 
         if verbose:
@@ -156,7 +170,7 @@ class AbstractActor(EffectMixin):
                   f'\n\t Draw Pile: {self.draw_pile}'
                   f'\n\t Discard Pile: {self.discard_pile}')
 
-        self.turn_logic(hand, enemies)
+        self.turn_logic()
 
         if verbose:
             print(C.GREEN, end='')
@@ -166,9 +180,11 @@ class AbstractActor(EffectMixin):
 
         self.end_turn()
 
-        print(f'Effects after turn: {self.get_effects_dict()}')
-        print(f'Draw Pile: {self.draw_pile}'
-              f'\nDiscard Pile: {self.discard_pile}')
+        if verbose:
+            print(f'Effects after turn: {self.get_effects_dict()}')
+            print(f'Draw Pile: {self.draw_pile}'
+                  f'\nDiscard Pile: {self.discard_pile}'
+                  f'\nExhaust Pile: {self._exhaust_pile}')
 
         return self.turn_log[-1]
 
@@ -188,17 +204,17 @@ class DummyActor(AbstractActor):
 
 
 class LeftToRightAI(AbstractActor):
-    def __init__(self, clas, cards):
-        super().__init__(clas, cards=cards)
+    def __init__(self, clas, environment, cards):
+        super().__init__(clas, environment, cards=cards)
 
-    def turn_logic(self, hand, enemies):
+    def turn_logic(self):
 
         # Pic
         choices = self.get_playable_cards()
         while len(choices) > 0:
             # Find a valid enemy with health remaining
             valid_enemy = None
-            for enemy in enemies:
+            for enemy in self.environment['enemies']:
                 if enemy.health > 0:
                     valid_enemy = enemy
                     break
@@ -207,7 +223,7 @@ class LeftToRightAI(AbstractActor):
             if not valid_enemy:
                 break
 
-            self.use_card(valid_enemy, choices[0], enemies)
+            self.use_card(valid_enemy, choices[0], self.environment['enemies'])
             choices = self.get_playable_cards()
 
     def select_card(self, options: list[AbstractCard], event_type: SelectEvent) -> AbstractCard:

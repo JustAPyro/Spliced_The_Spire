@@ -76,7 +76,7 @@ class Intent:
 
 
 class AbstractEnemy(ABC, EffectMixin):
-    def __init__(self, name, max_health, ascension=0, act=1):
+    def __init__(self, name, max_health, environment, ascension=0, act=1):
         self.name = name
 
         # Here we assign max health. We use the provided value but
@@ -96,17 +96,22 @@ class AbstractEnemy(ABC, EffectMixin):
         self.ascension = ascension
         self.act = act
 
+        # Add self to the environment
+        if environment:
+            self.environment = environment
+            self.environment['enemies'].append(self)
+
         super().__init__()
 
     def is_dead(self):
         return self.health <= 0
 
     def take_damage(self, damage: int):
-        damage = self.process_effects('modify_damage_taken', damage)
+        damage = self.process_effects('modify_damage_taken', self.environment, damage)
         self.health -= damage
 
     def deal_damage(self, damage: int, target, log):
-        damage = self.process_effects('modify_damage_dealt', damage)
+        damage = self.process_effects('modify_damage_dealt', self.environment, damage)
         log.append(f'used Dark Strike on {target.name} to deal {damage} damage.')
         target.take_damage(damage)
 
@@ -144,9 +149,9 @@ class AbstractEnemy(ABC, EffectMixin):
 
     def take_turn(self, actor):
         log = []
+        self.process_effects('on_start_turn', self.environment)
         next(self.ability)(actor, None, log)
-        for effect in copy(self.effects):
-            self.effects[effect].on_end_turn(self)
+        self.process_effects('on_end_turn', self.environment)
         return log[0]
 
 
@@ -172,9 +177,10 @@ class Cultist(AbstractEnemy):
         17: 5,  # A17+ gain 5 ritual
     }
 
-    def __init__(self, ascension=0):
+    def __init__(self, environment=None, ascension=0):
         super().__init__(name='Cultist',
                          max_health=Cultist.max_health_range,
+                         environment=environment,
                          ascension=ascension,
                          act=1)
 

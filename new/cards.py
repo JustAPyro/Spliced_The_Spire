@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 
 from typing import TYPE_CHECKING
 from enum import Enum
+
+from new import effects
 from new.effects import *
 
 if TYPE_CHECKING:
@@ -33,7 +35,7 @@ class AbstractCard(ABC):
     """
 
     def __init__(self, energy_cost: int, card_type: CardType, upgraded: bool = False, name: str = None,
-                 exhaust: bool = False):
+                 exhaust: bool = False, ethereal: bool = False):
         # Name of the card
         if name is None:
             class_name = type(self).__name__
@@ -58,6 +60,7 @@ class AbstractCard(ABC):
 
         # If card exhausts
         self.exhaust: bool = exhaust
+        self.ethereal: bool = ethereal
 
     @abstractmethod
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', all_enemies):
@@ -79,6 +82,9 @@ class AbstractCard(ABC):
 
     def is_playable(self, caller):
         return True
+
+    def cost(self, actor):
+        return self.energy_cost
 
     # Override the str() method so printing it returns the name
     def __str__(self):
@@ -389,7 +395,7 @@ class TrueGrit(AbstractCard, ABC):
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
         caller.increase_effect(Block, self.block)
         if self.upgraded:
-            caller.exhaust_card(caller.select_card(caller.hand_pile, SelectEvent.EXHAUST))
+            caller.exhaust_card(caller.select_card(caller.get_hand_without(self), SelectEvent.EXHAUST))
         else:
             caller.exhaust_card(random.choice(caller.hand_pile))
 
@@ -419,9 +425,7 @@ class Warcry(AbstractCard, ABC):
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
         caller.draw_card(self.draw_num)
-        options = list(caller.hand_pile)
-        options.remove(self)
-        caller.draw_pile.append(caller.select_card(options, SelectEvent.PLACE_ON_DRAWPILE))
+        caller.draw_pile.append(caller.select_card(caller.get_hand_without(self), SelectEvent.PLACE_ON_DRAWPILE))
 
     def upgrade_logic(self):
         self.draw_num = 2
@@ -455,57 +459,68 @@ class BattleTrance(AbstractCard, ABC):
 
 class BloodForBlood(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 18
         super().__init__(energy_cost=4, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        caller.deal_damage(target, self.damage)
 
     def upgrade_logic(self):
-        pass
+        self.energy_cost = 3
+        self.damage = 22
+
+    def cost(self, actor):
+        return self.energy_cost - actor.times_received_damage
 
 
 class Bloodletting(AbstractCard, ABC):
     def __init__(self):
+        self.energy_gain = 2
         super().__init__(energy_cost=0, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        caller.health = caller.health - 3
+        caller.energy = caller.energy + self.energy_gain
 
     def upgrade_logic(self):
-        pass
+        self.energy_gain = 3
 
 
 class BurningPact(AbstractCard, ABC):
     def __init__(self):
+        self.card_draw = 2
         super().__init__(energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        caller.draw_card(self.card_draw)
+        caller.exhaust_card(caller.select_card(caller.get_hand_without(self), SelectEvent.EXHAUST))
 
     def upgrade_logic(self):
-        pass
+        self.card_draw = 3
 
 
 class Carnage(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(energy_cost=2, card_type=CardType.ATTACK)
+        self.damage = 20
+        super().__init__(energy_cost=2, card_type=CardType.ATTACK, ethereal=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        caller.deal_damage(target, self.damage)
 
     def upgrade_logic(self):
-        pass
+        self.damage = 28
 
 
 class Combust(AbstractCard, ABC):
     def __init__(self):
+        self.stacks = 5
         super().__init__(energy_cost=1, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies):
-        pass
+        caller.increase_effect(effects.CombustEffect, self.stacks)
 
     def upgrade_logic(self):
-        pass
+        self.stacks = 7
 
 
 class DarkEmbrace(AbstractCard, ABC):

@@ -24,7 +24,7 @@ class AbstractEffect:
 
     # === API/SANDBOX METHODS ===
 
-    def modify_damage_taken(self, owner, damage: int) -> int:
+    def modify_damage_taken(self, owner, environment, damage: int) -> int:
         """
         Effects overriding this can modify the damage taken by an actor or enemy.
         The return value of this method will be added to the damage, you can lower the damage
@@ -32,7 +32,7 @@ class AbstractEffect:
         """
         pass
 
-    def modify_damage_dealt(self, owner, damage: int) -> int:
+    def modify_damage_dealt(self, owner, environment, damage: int) -> int:
         """
         Effects overriding this can modify the damage dealt by an actor or enemy.
         The return value of this method will be added to the damage, you can lower the damage
@@ -40,19 +40,19 @@ class AbstractEffect:
         """
         pass
 
-    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         """
         Effects overriding this can cause things to happen on the end of turn.
         """
         pass
 
-    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         """
         Effects overriding this can cause things to happen on the end of turn.
         """
         pass
 
-    def modify_draw_quantity(self: AbstractEffect, owner, quantity):
+    def modify_draw_quantity(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, quantity):
         """
         Effects overriding this will modify the number of cards drawn
         """
@@ -64,7 +64,7 @@ class AbstractEffect:
 # =======================
 
 class Block(AbstractEffect):
-    def modify_damage_taken(self: AbstractEffect, owner, damage: int) -> int:
+    def modify_damage_taken(self: AbstractEffect, owner, environment, damage: int) -> int:
         if self.stacks >= damage:
             blocked = damage
         else:
@@ -72,51 +72,58 @@ class Block(AbstractEffect):
 
         return blocked * -1
 
-    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         owner.set_effect(Block, 0)
 
 
 class Vulnerable(AbstractEffect):
-    def on_end_turn(self, owner: AbstractActor | AbstractEnemy):
+    def on_end_turn(self, owner, environment):
         owner.decrease_effect(Vulnerable, 1)
 
-    def modify_damage_taken(self, owner, damage: int) -> int:
+    def modify_damage_taken(self, owner, environment, damage: int) -> int:
         # Vulnerable adds 50% damage
         return int(damage * .5)
 
 
 class Strength(AbstractEffect):
-    def modify_damage_dealt(self, owner, damage: int) -> int:
+    def modify_damage_dealt(self, owner, environment, damage: int) -> int:
         return self.stacks
 
 
 class Ritual(AbstractEffect):
-    def on_end_turn(self, owner: AbstractActor | AbstractEnemy):
+    def on_end_turn(self, owner, environment):
         owner.increase_effect(Strength, 3)
 
 
 class Weak(AbstractEffect):
     # TODO: Consider a "set_damage_dealt" method
-    def modify_damage_dealt(self, owner, damage: int):
+    def modify_damage_dealt(self, owner, environment, damage: int):
         return (damage - math.floor(damage * 0.75)) * -1
 
-    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+    def on_end_turn(self: AbstractEffect, owner, environment):
         owner.decrease_effect(Weak, 1)
 
 
 class StrengthDown(AbstractEffect):
 
-    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+    def on_end_turn(self: AbstractEffect, owner, environment):
         owner.decrease_effect(Strength, self.stacks)
         owner.set_effect(StrengthDown, 0)
 
 
 class NoDraw(AbstractEffect):
-    def modify_draw_quantity(self, owner, draw):
-        return -1*draw
+    def modify_draw_quantity(self, owner, environment, draw):
+        return -1 * draw
 
-    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy):
+    def on_end_turn(self: AbstractEffect, owner, environment):
         owner.set_effect(NoDraw, 0)
+
+
+class CombustEffect(AbstractEffect):
+    def on_end_turn(self: AbstractEffect, owner, environment):
+        owner.health = owner.health - 1
+        for enemy in environment['enemies']:
+            enemy.health = enemy.health - self.stacks
 
 
 # ===================================
@@ -145,7 +152,7 @@ class EffectMixin:
         self.effects: dict[type[AbstractEffect], AbstractEffect] = {}
         self.ritual_flag: bool = False
 
-    def process_effects(self: AbstractActor | AbstractEnemy, method_name: str, parameter=None):
+    def process_effects(self: AbstractActor | AbstractEnemy, method_name: str, environment, parameter=None):
         """
         This method streamlines the processing of effects by allowing you to quickly
         call a given method on all effects. It is
@@ -159,11 +166,11 @@ class EffectMixin:
         for effect_name in list(self.effects):
             func = getattr(self.effects.get(effect_name), method_name)
             if parameter is not None:
-                modification = func(self.effects.get(effect_name), parameter)
+                modification = func(self.effects.get(effect_name), environment, parameter)
                 if modification is not None:
                     parameter = parameter + modification
             else:
-                func(self)
+                func(self, environment)
             for effect in list(self.effects):
                 if self.effects.get(effect).stacks <= 0:
                     self.effects.pop(effect)
