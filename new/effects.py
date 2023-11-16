@@ -3,6 +3,8 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING
 
+from new.enumerations import CardType
+
 if TYPE_CHECKING:
     from actors import AbstractActor
     from enemies import AbstractEnemy
@@ -50,6 +52,9 @@ class AbstractEffect:
         """
         Effects overriding this can cause things to happen on the end of turn.
         """
+        pass
+
+    def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
         pass
 
     def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
@@ -136,14 +141,23 @@ class DarkEmbraceEffect(AbstractEffect):
 
 class EvolveEffect(AbstractEffect):
     def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
-        print(card)
-        pass
+        if card.card_type == CardType.STATUS:
+            owner.draw_card(self.stacks)
 
 
 class FeelNoPainEffect(AbstractEffect):
     def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         owner.increase_effect(Block, self.stacks)
 
+
+class FireBreathingEffect(AbstractEffect):
+    def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
+        if card.card_type in (CardType.STATUS, CardType.CURSE):
+            for enemy in environment['enemies']:
+                enemy.health = enemy.health - self.stacks
+
+class FlameBarrier(AbstractEffect):
+    pass # Yikes here we go
 
 # ===================================
 # === Effect Management and Mixin ===

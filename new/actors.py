@@ -3,7 +3,8 @@ import random
 from abc import abstractmethod
 
 from new.enemies import AbstractEnemy
-from new.cards import AbstractCard, SelectEvent, CardPiles, CardType
+from new.enumerations import SelectEvent, CardPiles, CardType
+from new.cards import AbstractCard
 from new.effects import EffectMixin
 from copy import copy
 from typing import TYPE_CHECKING
