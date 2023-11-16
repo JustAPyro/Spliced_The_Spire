@@ -134,6 +134,17 @@ class DarkEmbraceEffect(AbstractEffect):
         owner.draw_card(self.stacks)
 
 
+class EvolveEffect(AbstractEffect):
+    def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
+        print(card)
+        pass
+
+
+class FeelNoPainEffect(AbstractEffect):
+    def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.increase_effect(Block, self.stacks)
+
+
 # ===================================
 # === Effect Management and Mixin ===
 # ===================================
