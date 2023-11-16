@@ -163,14 +163,16 @@ class AbstractActor(EffectMixin):
         if len(self.draw_pile) == 0 and len(self.discard_pile) == 0:
             return False
         for i in range(quantity):
-            print('card draw')
-            if len(self.draw_pile) > 0:
-                self.hand_pile.append(self.draw_pile.pop())
-            elif len(self.discard_pile) > 0:
+            # If we have cards in discard but not in draw, shuffle discard into draw
+            if len(self.draw_pile) <= 0 < len(self.discard_pile):
                 self.draw_pile.extend(self.discard_pile)
                 self.discard_pile.clear()
                 random.shuffle(self.draw_pile)
-                self.hand_pile.append(self.draw_pile.pop())
+            # Draw a card
+            card = self.draw_pile.pop()
+            self.hand_pile.append(card)
+            # Process effects related to card draw
+            self.process_effects('on_card_draw', self.environment, card)
         return True
 
     @abstractmethod
