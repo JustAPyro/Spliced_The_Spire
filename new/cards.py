@@ -1,5 +1,6 @@
 import random
 from abc import ABC, abstractmethod
+from copy import deepcopy
 
 from typing import TYPE_CHECKING
 from enum import Enum
@@ -16,6 +17,14 @@ class SelectEvent(Enum):
     DRAW = 1
     EXHAUST = 2
     PLACE_ON_DRAWPILE = 3
+    COPY = 4
+
+
+class CardPiles(Enum):
+    DRAW = 1
+    HAND = 2
+    DISCARD = 3
+    EXHAUST = 4
 
 
 class CardType(Enum):
@@ -543,24 +552,29 @@ class DarkEmbrace(AbstractCard, ABC):
 
 class Disarm(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(energy_cost=1, card_type=CardType.SKILL)
+        self.strength_loss = 2
+        super().__init__(energy_cost=1, card_type=CardType.SKILL, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        target.decrease_effect(Strength, self.strength_loss)
 
     def upgrade_logic(self):
-        pass
+        self.strength_loss = 3
 
 
 class Dropkick(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 5
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.deal_damage(target, self.damage)
+        if target.has_effect(Vulnerable):
+            caller.gain_energy()
+            caller.draw_card()
 
     def upgrade_logic(self):
-        pass
+        self.damage = 8
 
 
 class DuelWield(AbstractCard, ABC):
@@ -568,7 +582,19 @@ class DuelWield(AbstractCard, ABC):
         super().__init__(energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        # Have the actor select a valid card
+        card = caller.select_card(
+            event_type=SelectEvent.COPY,
+            options=caller.get_cards(
+                from_piles=[CardPiles.HAND],
+                card_types=[CardType.ATTACK, CardType.POWER]))
+
+        # Add one to hand
+        caller.add_card_to_hand(deepcopy(card))
+
+        # And if upgraded add a second
+        if self.upgraded:
+            caller.add_card_to_hand(deepcopy(card))
 
     def upgrade_logic(self):
         pass
@@ -579,10 +605,10 @@ class Entrench(AbstractCard, ABC):
         super().__init__(energy_cost=2, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(Block, caller.get_effect_stacks(Block))
 
     def upgrade_logic(self):
-        pass
+        self.energy_cost = 1
 
 
 class Evolve(AbstractCard, ABC):

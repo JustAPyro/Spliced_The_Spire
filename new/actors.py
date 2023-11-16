@@ -1,8 +1,9 @@
+import itertools
 import random
 from abc import abstractmethod
 
 from new.enemies import AbstractEnemy
-from new.cards import AbstractCard, SelectEvent
+from new.cards import AbstractCard, SelectEvent, CardPiles, CardType
 from new.effects import EffectMixin
 from copy import copy
 from typing import TYPE_CHECKING
@@ -28,6 +29,13 @@ class AbstractActor(EffectMixin):
         self.hand_pile: list[AbstractCard] = []
         self.discard_pile: list[AbstractCard] = []
         self._exhaust_pile: list[AbstractCard] = []
+
+        self.card_piles = {
+            CardPiles.DRAW: self.draw_pile,
+            CardPiles.HAND: self.hand_pile,
+            CardPiles.DISCARD: self.discard_pile,
+            CardPiles.EXHAUST: self._exhaust_pile
+        }
 
         # This log contains what the actor did each turn
         self.logging: bool = True
@@ -78,6 +86,18 @@ class AbstractActor(EffectMixin):
             self.draw_pile.insert(insert_at, card)
         else:
             raise NotImplementedError
+
+    def add_card_to_hand(self, card):
+        self.card_piles[CardPiles.HAND].append(card)
+
+    def get_cards(self, from_piles: list[CardPiles], card_types: list[CardType]):
+        # TODO: Might be broken? Investigate Duel Wield
+        valid_from_piles = set(itertools.chain([self.card_piles.get(pile) for pile in from_piles]))
+        valid_card_types = set([card for card in self.get_all_cards() if card.card_type in card_types])
+        return valid_from_piles & valid_card_types
+
+    def get_all_cards(self):
+        return set[itertools.chain(self.card_piles.values())]
 
     def get_hand_without(self, card):
         pile = list(self.hand_pile)
@@ -134,7 +154,7 @@ class AbstractActor(EffectMixin):
         self.hand_pile.remove(card)
         self._exhaust_pile.append(card)
 
-    def draw_card(self, quantity: int):
+    def draw_card(self, quantity: int = 1):
         """Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard."""
         modify_card_draw = self.process_effects('modify_card_draw', self.environment, quantity)
         if modify_card_draw is None:
@@ -160,6 +180,9 @@ class AbstractActor(EffectMixin):
     @abstractmethod
     def select_card(self, options: list[AbstractCard], event_type: SelectEvent) -> AbstractCard:
         pass
+
+    def gain_energy(self, qty=1):
+        self.energy = self.energy + qty
 
     def get_combat_deck(self):
         return set().union(self.draw_pile, self.hand_pile, self.discard_pile)

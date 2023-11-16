@@ -1,7 +1,14 @@
-x = {1: 'one', 2: 'two'}
+class foo:
+    def __init__(self, x):
+        self.x = x
 
-for i in list(x):
-    if i == 1:
-        x.pop(i)
+    def __str__(self):
+        return self.x
 
-print(x)
+a = foo(1)
+b = foo(2)
+c = foo(2)
+
+l1 = [a, b, c]
+l2 = [b, c]
+set([l1, l2])
