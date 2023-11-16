@@ -48,7 +48,7 @@ class AbstractActor(EffectMixin):
                  will_discard=True):
         if card not in self.hand_pile:
             raise RuntimeError("Tried to play card not in hand")
-        card.use(self, target, all_enemies)
+        card.use(self, target, self.environment)
         # If card.exhaust:
         # Do exhaust logic
 
