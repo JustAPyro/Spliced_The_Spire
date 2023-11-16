@@ -54,6 +54,8 @@ class AbstractActor(EffectMixin):
 
         if card in self.hand_pile and card.exhaust:
             self.exhaust_card(card)
+        elif card.poof:
+            self.hand_pile.remove(card)
         elif card in self.hand_pile and will_discard:
             self.discard_pile.append(card)
             self.hand_pile.remove(card)
