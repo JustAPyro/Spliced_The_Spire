@@ -52,7 +52,10 @@ class AbstractEffect:
         """
         pass
 
-    def modify_draw_quantity(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, quantity):
+    def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        pass
+
+    def modify_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, quantity):
         """
         Effects overriding this will modify the number of cards drawn
         """
@@ -112,7 +115,7 @@ class StrengthDown(AbstractEffect):
 
 
 class NoDraw(AbstractEffect):
-    def modify_draw_quantity(self, owner, environment, draw):
+    def modify_card_draw(self, owner, environment, draw):
         return -1 * draw
 
     def on_end_turn(self: AbstractEffect, owner, environment):
@@ -124,6 +127,11 @@ class CombustEffect(AbstractEffect):
         owner.health = owner.health - 1
         for enemy in environment['enemies']:
             enemy.health = enemy.health - self.stacks
+
+
+class DarkEmbraceEffect(AbstractEffect):
+    def on_card_exhaust(self: AbstractEffect, owner, environment):
+        owner.draw_card(self.stacks)
 
 
 # ===================================
@@ -166,6 +174,7 @@ class EffectMixin:
         for effect_name in list(self.effects):
             func = getattr(self.effects.get(effect_name), method_name)
             if parameter is not None:
+                # Bug here?
                 modification = func(self.effects.get(effect_name), environment, parameter)
                 if modification is not None:
                     parameter = parameter + modification
