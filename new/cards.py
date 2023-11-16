@@ -535,10 +535,10 @@ class DarkEmbrace(AbstractCard, ABC):
         super().__init__(energy_cost=2, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(DarkEmbraceEffect, 1)
 
     def upgrade_logic(self):
-        pass
+        self.energy_cost = 1
 
 
 class Disarm(AbstractCard, ABC):

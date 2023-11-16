@@ -52,8 +52,11 @@ class AbstractActor(EffectMixin):
         # If card.exhaust:
         # Do exhaust logic
 
+        # Exhaust Card logic
         if card in self.hand_pile and card.exhaust:
             self.exhaust_card(card)
+            self.process_effects('on_card_exhaust', self.environment)
+        # Poof card logic (powers)
         elif card.poof:
             self.hand_pile.remove(card)
         elif card in self.hand_pile and will_discard:
@@ -133,13 +136,14 @@ class AbstractActor(EffectMixin):
 
     def draw_card(self, quantity: int):
         """Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard."""
-        modify_card_draw = self.process_effects('modify_draw_quantity', self.environment, quantity)
+        modify_card_draw = self.process_effects('modify_card_draw', self.environment, quantity)
         if modify_card_draw is None:
             modify_card_draw = 0
         quantity = modify_card_draw
         if len(self.draw_pile) == 0 and len(self.discard_pile) == 0:
             return False
         for i in range(quantity):
+            print('card draw')
             if len(self.draw_pile) > 0:
                 self.hand_pile.append(self.draw_pile.pop())
             elif len(self.discard_pile) > 0:
