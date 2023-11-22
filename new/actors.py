@@ -123,10 +123,12 @@ class AbstractActor(EffectMixin):
         actual_damage = self.process_effects('modify_damage_dealt', self.environment, damage)
         target.take_damage(actual_damage)
 
-    def take_damage(self, damage):
+    def take_damage(self, damage, damaging_enemy):
         actual_damage = self.process_effects('modify_damage_taken', self.environment, damage)
         self.health -= actual_damage
-        self.times_received_damage += 1
+        if actual_damage > 0:
+            self.times_received_damage += 1
+            self.process_effects('on_take_damage', self.environment, damaging_enemy)
 
     def end_turn(self):
         self.process_effects('on_end_turn', self.environment)
