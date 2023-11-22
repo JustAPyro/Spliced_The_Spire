@@ -113,7 +113,7 @@ class AbstractEnemy(ABC, EffectMixin):
     def deal_damage(self, damage: int, target, log):
         damage = self.process_effects('modify_damage_dealt', self.environment, damage)
         log.append(f'used Dark Strike on {target.name} to deal {damage} damage.')
-        target.take_damage(damage)
+        target.take_damage(damage, self)
 
     def before_ability(self):
         pass

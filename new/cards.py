@@ -7,7 +7,7 @@ from enum import Enum
 
 from new import effects
 from new.effects import *
-from new.enumerations import CardType, SelectEvent
+from new.enumerations import CardType, SelectEvent, CardPiles
 
 if TYPE_CHECKING:
     from actors import AbstractActor
@@ -595,46 +595,50 @@ class Entrench(AbstractCard, ABC):
 
 class Evolve(AbstractCard, ABC):
     def __init__(self):
+        self.draw = 1
         super().__init__(energy_cost=1, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(EvolveEffect, self.draw)
 
     def upgrade_logic(self):
-        pass
+        self.draw = 2
 
 
 class FeelNoPain(AbstractCard, ABC):
     def __init__(self):
+        self.block = 3
         super().__init__(energy_cost=1, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(FeelNoPainEffect, self.block)
 
     def upgrade_logic(self):
-        pass
+        self.block = 4
 
 
 class Firebreathing(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 6
         super().__init__(energy_cost=1, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(FireBreathingEffect, self.damage)
 
     def upgrade_logic(self):
-        pass
+        self.damage = 10
 
 
 class FlameBarrier(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 4
         super().__init__(energy_cost=2, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(FlameBarrierEffect, self.damage)
 
     def upgrade_logic(self):
-        pass
+        self.damage = 6
 
 
 class GhostlyArmor(AbstractCard, ABC):

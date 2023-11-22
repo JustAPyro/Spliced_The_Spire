@@ -60,6 +60,9 @@ class AbstractEffect:
     def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         pass
 
+    def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damaging_enemy: AbstractEnemy):
+        pass
+
     def modify_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, quantity):
         """
         Effects overriding this will modify the number of cards drawn
@@ -156,8 +159,11 @@ class FireBreathingEffect(AbstractEffect):
             for enemy in environment['enemies']:
                 enemy.health = enemy.health - self.stacks
 
-class FlameBarrier(AbstractEffect):
-    pass # Yikes here we go
+class FlameBarrierEffect(AbstractEffect):
+
+    def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damaging_enemy):
+        damaging_enemy.take_damage(self.stacks)
+
 
 # ===================================
 # === Effect Management and Mixin ===
