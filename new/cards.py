@@ -643,24 +643,27 @@ class FlameBarrier(AbstractCard, ABC):
 
 class GhostlyArmor(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(energy_cost=1, card_type=CardType.SKILL)
+        self.block = 10
+        super().__init__(energy_cost=1, card_type=CardType.SKILL, ethereal=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(Block, self.block)
 
     def upgrade_logic(self):
-        pass
+        self.block = 13
 
 
 class Hemokinesis(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 15
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.deal_damage(self.damage)
+        caller.health = caller.health - 2
 
     def upgrade_logic(self):
-        pass
+        self.damage = 20
 
 
 class InfernalBlade(AbstractCard, ABC):
