@@ -156,11 +156,13 @@ class AbstractEnemy(ABC, EffectMixin):
 
 
 class DummyEnemy(AbstractEnemy, ABC):
-    def __init__(self, health=10, ascension=0):
+    def __init__(self, environment, health=10, ascension=0):
         super().__init__(name='Dummy',
                          max_health=health,
                          ascension=ascension,
-                         act=1)
+                         act=1,
+                         environment=environment)
+        self.environment = environment
 
     def pattern(self):
         pass

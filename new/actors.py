@@ -224,8 +224,8 @@ class AbstractActor(EffectMixin):
 
 
 class DummyActor(AbstractActor):
-    def __init__(self, clas, cards, health, hand, energy):
-        super().__init__(clas, cards=cards)
+    def __init__(self, clas, cards, health, hand, energy, environment):
+        super().__init__(clas, cards=cards, environment=environment)
         self.health = health
         self.max_health = health
 
@@ -233,6 +233,7 @@ class DummyActor(AbstractActor):
         self.max_energy = energy
 
         self.hand_pile = hand
+        self.environment = environment
 
         self.logging = False
 
