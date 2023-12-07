@@ -54,6 +54,12 @@ class AbstractEffect:
         """
         pass
 
+    def on_receive_damage_from_card(self: AbstractEffect, owner, environment, card):
+        pass
+
+    def on_card_play(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
+        pass
+
     def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
         pass
 
@@ -163,6 +169,25 @@ class FlameBarrierEffect(AbstractEffect):
 
     def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damaging_enemy):
         damaging_enemy.take_damage(self.stacks)
+
+
+class MetallicizeEffect(AbstractEffect):
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.increase_effect(Block, self.stacks)
+
+
+class RageEffect(AbstractEffect):
+    def on_card_play(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
+        owner.increase_effect(Block, self.stacks)
+
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.set_effect(RageEffect, 0)
+
+
+class RuptureEffect(AbstractEffect):
+    def on_receive_damage_from_card(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
+        owner.increase_effect(Strength, self.stacks)
+
 
 
 # ===================================

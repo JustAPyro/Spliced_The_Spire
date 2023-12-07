@@ -22,8 +22,14 @@ class AbstractCard(ABC):
     use, and upgrade_logic methods.
     """
 
-    def __init__(self, energy_cost: int, card_type: CardType, upgraded: bool = False, name: str = None,
-                 exhaust: bool = False, ethereal: bool = False):
+    def __init__(self,
+                 energy_cost: int,
+                 card_type: CardType,
+                 upgraded: bool = False,
+                 name: str = None,
+                 exhaust: bool = False,
+                 ethereal: bool = False,
+                 allow_multiple_upgrades: bool = False):
         # Name of the card
         if name is None:
             class_name = type(self).__name__
@@ -52,6 +58,8 @@ class AbstractCard(ABC):
         self.ethereal: bool = ethereal
         self.poof: bool = False
 
+        self.allow_multiple_upgrades = allow_multiple_upgrades
+
         # Setup for power type cards
         if self.card_type is CardType.POWER:
             self.poof = True
@@ -70,10 +78,11 @@ class AbstractCard(ABC):
         pass
 
     def upgrade(self):
-        if self.upgraded:
+        if self.upgraded and not self.allow_multiple_upgrades:
             return
 
-        self.name = self.name + "+"
+        if not self.upgraded:
+            self.name = self.name + "+"
         self.upgraded = True
         self.upgrade_logic()
 
@@ -100,6 +109,20 @@ class AbstractCard(ABC):
 class Wound(AbstractCard, ABC):
     def __init__(self):
         super().__init__(name='Wound', energy_cost=0, card_type=CardType.STATUS)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        pass
+
+    def upgrade_logic(self):
+        pass
+
+    def is_playable(self, caller):
+        return False
+
+
+class Dazed(AbstractCard, ABC):
+    def __init__(self):
+        super().__init__(name='Dazed', energy_cost=0, card_type=CardType.STATUS, ethereal=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         pass
@@ -481,7 +504,7 @@ class Bloodletting(AbstractCard, ABC):
         super().__init__(energy_cost=0, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        caller.health = caller.health - 3
+        caller.receive_damage_from_card(3, self)
         caller.energy = caller.energy + self.energy_gain
 
     def upgrade_logic(self):
@@ -664,7 +687,7 @@ class Hemokinesis(AbstractCard, ABC):
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         caller.deal_damage(self.damage)
-        caller.health = caller.health - 2
+        caller.receive_damage_from_card(2, self)
 
     def upgrade_logic(self):
         self.damage = 20
@@ -700,101 +723,118 @@ class Inflame(AbstractCard, ABC):
 
 class Intimidate(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(energy_cost=0, card_type=CardType.SKILL)
+        self.weak = 1
+        super().__init__(energy_cost=0, card_type=CardType.SKILL, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        for enemy in environment['enemies']:
+            enemy: AbstractEnemy
+            enemy.increase_effect(Weak, self.weak)
 
     def upgrade_logic(self):
-        pass
+        self.weak = 2
 
 
 class Metallicize(AbstractCard, ABC):
     def __init__(self):
+        self.metal = 3
         super().__init__(energy_cost=1, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(MetallicizeEffect, self.metal)
 
     def upgrade_logic(self):
-        pass
+        self.metal = 4
 
 
 class PowerThrough(AbstractCard, ABC):
     def __init__(self):
+        self.block_qty = 15
         super().__init__(energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.add_card_to_hand(Wound)
+        caller.add_card_to_hand(Wound)
+        caller.increase_effect(Block, self.block_qty)
 
     def upgrade_logic(self):
-        pass
+        self.block_qty = 20
 
 
 class Pummel(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(energy_cost=1, card_type=CardType.ATTACK)
+        self.times = 4
+        super().__init__(energy_cost=1, card_type=CardType.ATTACK, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        for i in range(self.times):
+            caller.deal_damage(target, 4)
 
     def upgrade_logic(self):
-        pass
+        self.times = 5
 
 
 class Rage(AbstractCard, ABC):
     def __init__(self):
+        self.stack_qty = 3
         super().__init__(energy_cost=0, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(RageEffect, self.stack_qty)
 
     def upgrade_logic(self):
-        pass
+        self.stack_qty = 5
 
 
 class Rampage(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 8
+        self.upgrade_amount = 5
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.deal_damage(target, self.damage)
+        self.damage += self.upgrade_amount
 
     def upgrade_logic(self):
-        pass
+        self.upgrade_amount = 8
 
 
 class RecklessCharge(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 7
         super().__init__(energy_cost=0, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.deal_damage(target, self.damage)
+        caller.add_card_to_draw(Dazed, shuffle=True)
 
     def upgrade_logic(self):
-        pass
+        self.damage = 10
 
 
 class Rupture(AbstractCard, ABC):
     def __init__(self):
+        self.strength = 1
         super().__init__(energy_cost=1, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(RuptureEffect, self.strength)
 
     def upgrade_logic(self):
-        pass
+        self.strength = 2
 
 
 class SearingBlow(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(energy_cost=2, card_type=CardType.ATTACK)
+        self.upgraded_qty = 0
+        super().__init__(energy_cost=2, card_type=CardType.ATTACK, allow_multiple_upgrades=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.deal_damage(target, 12 + (4 * self.upgraded_qty))
 
     def upgrade_logic(self):
-        pass
+        self.upgraded_qty += 1
 
 
 class SecondWind(AbstractCard, ABC):

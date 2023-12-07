@@ -53,13 +53,18 @@ class AbstractActor(EffectMixin):
         self.hand = hand
         return self
 
+    def receive_damage_from_card(self, damage: int, card: AbstractCard):
+        self.health = self.health - damage
+        self.process_effects('receive_damage_from_card', self.environment, card)
+
     def use_card(self, target: AbstractEnemy, card: AbstractCard, all_enemies: list[AbstractEnemy], is_free=False,
                  will_discard=True):
         if card not in self.hand_pile:
             raise RuntimeError("Tried to play card not in hand")
+
         card.use(self, target, self.environment)
-        # If card.exhaust:
-        # Do exhaust logic
+        self.process_effects('on_card_use', self.environment, card)
+
 
         # Exhaust Card logic
         if card in self.hand_pile and card.exhaust:
