@@ -132,6 +132,13 @@ class AbstractActor(EffectMixin):
 
     def end_turn(self):
         self.process_effects('on_end_turn', self.environment)
+
+        for card in (*self.hand_pile, *self.discard_pile, *self.draw_pile, *self._exhaust_pile):
+            # If the card's energy has been modified temporarily
+            if card.ex_energy_cost != -1:
+                card.energy_cost = card.ex_energy_cost
+                card.ex_energy_cost = -1
+
         for card in self.hand_pile:
             if card.ethereal:
                 self.exhaust_card(card)
