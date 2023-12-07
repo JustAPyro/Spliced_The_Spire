@@ -170,9 +170,10 @@ class AbstractActor(EffectMixin):
         if modify_card_draw is None:
             modify_card_draw = 0
         quantity = modify_card_draw
-        if len(self.draw_pile) == 0 and len(self.discard_pile) == 0:
-            return False
         for i in range(quantity):
+            # If you can't draw cards
+            if len(self.draw_pile) <= 0 and len(self.discard_pile) <= 0:
+                return False
             # If we have cards in discard but not in draw, shuffle discard into draw
             if len(self.draw_pile) <= 0 < len(self.discard_pile):
                 self.draw_pile.extend(self.discard_pile)
