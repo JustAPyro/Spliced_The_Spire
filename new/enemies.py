@@ -78,7 +78,6 @@ class Intent:
 class AbstractEnemy(ABC, EffectMixin):
     def __init__(self, name, max_health, environment, ascension=0, act=1):
         self.name = name
-
         # Here we assign max health. We use the provided value but
         # if a dict is provided we calculate a random appropriate max health
         # based on ascension.
