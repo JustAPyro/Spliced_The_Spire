@@ -14,9 +14,6 @@ if TYPE_CHECKING:
     from enemies import AbstractEnemy
 
 
-
-
-
 class AbstractCard(ABC):
     """
     Abstract card class is the blueprint for all cards. The goal for this class
@@ -42,6 +39,7 @@ class AbstractCard(ABC):
 
         # normal energy cost of card ("cost" int)
         self.energy_cost: int = energy_cost
+        self.ex_energy_cost: int = -1
 
         # If the card is upgraded or not
         self.upgraded: bool = upgraded
@@ -59,6 +57,12 @@ class AbstractCard(ABC):
             self.poof = True
             if self.exhaust or self.ethereal:
                 raise RuntimeError('WAT? (Power card with exhaust/ethereal found)')
+
+    # --- Card Cost API ---
+    def modify_cost_this_turn(self, cost: int):
+        self.ex_energy_cost = self.energy_cost
+        self.energy_cost = cost
+
 
     @abstractmethod
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -344,7 +348,7 @@ class PommelStrike(AbstractCard, ABC):
 class ShrugItOff(AbstractCard, ABC):
     def __init__(self):
         self.block = 8
-        super().__init__(energy_cost=1, card_type=CardType.ATTACK)
+        super().__init__(energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         caller.increase_effect(Block, self.block)
@@ -668,24 +672,30 @@ class Hemokinesis(AbstractCard, ABC):
 
 class InfernalBlade(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(energy_cost=1, card_type=CardType.SKILL)
+        super().__init__(energy_cost=1, card_type=CardType.SKILL, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        card_cls = random.choice([subclass for subclass in AbstractCard.__subclasses__()
+                                  if subclass().card_type == CardType.ATTACK
+                                  and subclass not in (Feed, Reaper)])
+        card = card_cls()
+        card.modify_cost_this_turn(0)
+        caller.add_card_to_hand(card)
 
     def upgrade_logic(self):
-        pass
+        self.energy_cost = 0
 
 
 class Inflame(AbstractCard, ABC):
     def __init__(self):
+        self.str = 2
         super().__init__(energy_cost=1, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(Strength, self.str)
 
     def upgrade_logic(self):
-        pass
+        self.str = 3
 
 
 class Intimidate(AbstractCard, ABC):
