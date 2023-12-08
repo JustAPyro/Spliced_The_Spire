@@ -1,14 +1,6 @@
-class foo:
-    def __init__(self, x):
-        self.x = x
+from new.cards import *
+a = [1, 2, 3]
+b = [4, 5, 6]
 
-    def __str__(self):
-        return self.x
-
-a = foo(1)
-b = foo(2)
-c = foo(2)
-
-l1 = [a, b, c]
-l2 = [b, c]
-set([l1, l2])
+for x in (*a, b):
+    print(x)
