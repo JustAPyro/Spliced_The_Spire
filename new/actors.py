@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import itertools
 import random
 from abc import abstractmethod
-
+from functools import reduce
+from operator import iconcat
 from new.enemies import AbstractEnemy
 from new.enumerations import SelectEvent, CardPiles, CardType
 from new.cards import AbstractCard
@@ -66,7 +69,6 @@ class AbstractActor(EffectMixin):
         card.use(self, target, self.environment)
         self.process_effects('on_card_play', self.environment, card)
 
-
         # Exhaust Card logic
         if card in self.hand_pile and card.exhaust:
             self.exhaust_card(card)
@@ -97,14 +99,48 @@ class AbstractActor(EffectMixin):
     def add_card_to_hand(self, card):
         self.card_piles[CardPiles.HAND].append(card)
 
-    def get_cards(self, from_piles: list[CardPiles], card_types: list[CardType]):
-        # TODO: Might be broken? Investigate Duel Wield
-        valid_from_piles = set(itertools.chain([self.card_piles.get(pile) for pile in from_piles]))
-        valid_card_types = set([card for card in self.get_all_cards() if card.card_type in card_types])
-        return valid_from_piles & valid_card_types
+    def get_cards(self,
+                  from_piles: CardPiles | list[CardPiles] = None,  # DRAW, HAND, DISCARD, EXHAUST | Default: All
+                  with_types: CardType | list[CardType] = None,  # ATTACK, SKILL, POWER, STATUS, CURSE | Default: All
+                  exclude_cards: AbstractCard | list[AbstractCard] = None):
+        """
+        Get a set of cards based on search criteria
+
+        :param from_piles: Which card piles you want included in the search.
+            (Options: DRAW, HAND, DISCARD, EXHAUST | Default: ALL)
+        :param with_types: Which type of cards you want included in the search.
+            (Options: ATTACK, SKILL, POWER, STATUS, CURSE | Default: ALL)
+        :param exclude_cards: Specific cards that you want *excluded* from the search. (Default: NONE)
+        """
+
+        # 1. Default to using all options if none are specified
+        # 2. If a singular option was provided auto-insert it into a list
+        # 3. Fetch all the cards based on the options provided
+        from_piles = CardPiles.all() if from_piles is None else from_piles
+        from_piles = [from_piles] if type(from_piles) == CardPiles else from_piles
+        valid_by_pile_cards = []
+        for pile in from_piles:
+            valid_by_pile_cards += self.card_piles.get(pile)
+
+        # 1. Default to using all options if none are specified
+        # 2. If a singular option was provided auto-insert it into a list
+        # 3. Fetch all the cards based on the options provided
+        with_types = CardType.all() if with_types is None else with_types
+        with_types = [with_types] if type(with_types) == CardType else with_types
+        valid_by_type_cards = [card for card in self.get_all_cards() if card.card_type in with_types]
+
+        # 1. For exclude cards if none default to empty list
+        # 2. Listify data
+        exclude_cards = [] if exclude_cards is None else exclude_cards
+        exclude_cards = [exclude_cards] if issubclass(type(exclude_cards), AbstractCard) else exclude_cards
+
+        return (set(valid_by_type_cards) & set(valid_by_pile_cards)) - set(exclude_cards)
 
     def get_all_cards(self):
-        return set[itertools.chain(self.card_piles.values())]
+        cards = []
+        for pile in self.card_piles.values():
+            cards += pile
+        return cards
 
     def get_hand_without(self, card):
         pile = list(self.hand_pile)
