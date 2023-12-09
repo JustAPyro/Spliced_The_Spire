@@ -958,6 +958,7 @@ class Whirlwind(AbstractCard, ABC):
         self.damage = 8
 
 
+#TODO: Effect is bugged?
 class Barricade(AbstractCard, ABC):
     def __init__(self):
         super().__init__(energy_cost=3, card_type=CardType.POWER)
@@ -969,26 +970,30 @@ class Barricade(AbstractCard, ABC):
         self.energy_cost = 2
 
 
+#TODO: Effect
 class Berserk(AbstractCard, ABC):
     def __init__(self):
+        self.vulnerable = 2
         super().__init__(energy_cost=0, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(BerserkEffect, 1)
+        caller.increase_effect(Vulnerable, self.vulnerable)
 
     def upgrade_logic(self):
-        pass
+        self.vulnerable = 1
 
 
 class Bludgeon(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 32
         super().__init__(energy_cost=3, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.deal_damage(target, self.damage)
 
     def upgrade_logic(self):
-        pass
+        self.damage = 42
 
 
 class Brutality(AbstractCard, ABC):
