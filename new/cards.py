@@ -937,8 +937,8 @@ class Uppercut(AbstractCard, ABC):
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         caller.deal_damage(target, 13)
-        target.increase_effect(Weak, self.effect_amount)
-        target.increase_effect(Vulnerable, self.effect_amount)
+        for effect in (Weak, Vulnerable):
+            target.increase_effect(effect, self.effect_amount)
 
     def upgrade_logic(self):
         self.effect_amount = 2
