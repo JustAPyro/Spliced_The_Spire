@@ -14,6 +14,10 @@ class CardPiles(Enum):
     DISCARD = 3
     EXHAUST = 4
 
+    @classmethod
+    def all(cls):
+        return CardPiles.DRAW, CardPiles.HAND, CardPiles.DISCARD, CardPiles.EXHAUST
+
 
 class CardType(Enum):
     ATTACK = 1
@@ -21,3 +25,7 @@ class CardType(Enum):
     POWER = 3
     STATUS = 4
     CURSE = 5
+
+    @staticmethod
+    def all():
+        return CardType.ATTACK, CardType.SKILL, CardType.POWER, CardType.STATUS, CardType.CURSE

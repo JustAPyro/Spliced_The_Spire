@@ -1,14 +1,10 @@
 import random
 from abc import ABC, abstractmethod
 from copy import deepcopy
-
-from typing import TYPE_CHECKING
-from enum import Enum
-
+from itertools import product
 from new import effects
 from new.effects import *
 from new.enumerations import CardType, SelectEvent, CardPiles
-
 if TYPE_CHECKING:
     from actors import AbstractActor
     from enemies import AbstractEnemy, IntentType
@@ -66,10 +62,13 @@ class AbstractCard(ABC):
             if self.exhaust or self.ethereal:
                 raise RuntimeError('WAT? (Power card with exhaust/ethereal found)')
 
-    # --- Card Cost API ---
+    # --- Card Sandbox Method API's ---
     def modify_cost_this_turn(self, cost: int):
         self.ex_energy_cost = self.energy_cost
         self.energy_cost = cost
+
+    def enemies(self):
+        return
 
     @abstractmethod
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -847,17 +846,13 @@ class SecondWind(AbstractCard, ABC):
         super().__init__(energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        counter = 0
-        to_exhaust = []
-        for card in caller.hand_pile:
-            if card == self:
-                continue
-            if card.card_type != CardType.ATTACK:
-                to_exhaust.append(card)
-                counter += 1
-        for to_exhaust_card in to_exhaust:
-            caller.exhaust_card(to_exhaust_card)
-        caller.increase_effect(Block, self.block_per_card * counter)
+        # After
+        for card in caller.get_cards(
+                from_piles=CardPiles.HAND,
+                with_types=CardType.ATTACK,
+                exclude_cards=self):
+            caller.exhaust_card(card)
+            caller.increase_effect(Block, self.block_per_card)
 
     def upgrade_logic(self):
         self.block_per_card = 7
@@ -897,14 +892,10 @@ class SeverSoul(AbstractCard, ABC):
         super().__init__(energy_cost=2, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        to_exhaust = []
-        for card in caller.hand_pile:
-            if card == self:
-                continue
-            if card.card_type != CardType.ATTACK:
-                to_exhaust.append(card)
-        for to_exhaust_card in to_exhaust:
-            caller.exhaust_card(to_exhaust_card)
+        for card in caller.get_cards(
+            piles=CardPiles.HAND,
+            exclude_cards=[self]):
+            caller.exhaust_card(card)
 
         caller.deal_damage(target, self.damage)
 
@@ -918,9 +909,8 @@ class Shockwave(AbstractCard, ABC):
         super().__init__(energy_cost=2, card_type=CardType.SKILL, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        for enemy in environment['enemies']:
-            enemy.increase_effect(Weak, self.effect_amount)
-            enemy.increase_effect(Vulnerable, self.effect_amount)
+        for enemy, effect in product(environment['enemies'], (Weak, Vulnerable)):
+            enemy.increase_effect(effect, self.effect_amount)
 
     def upgrade_logic(self):
         self.effect_amount = 5
@@ -973,10 +963,10 @@ class Barricade(AbstractCard, ABC):
         super().__init__(energy_cost=3, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(BarricadeEffect, 1)
 
     def upgrade_logic(self):
-        pass
+        self.energy_cost = 2
 
 
 class Berserk(AbstractCard, ABC):
