@@ -81,12 +81,13 @@ class AbstractEffect:
 # =======================
 
 class Block(AbstractEffect):
-    def modify_damage_taken(self: AbstractEffect, owner, environment, damage: int) -> int:
+    def modify_damage_taken(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damage: int) -> int:
         if self.stacks >= damage:
             blocked = damage
         else:
             blocked = self.stacks
 
+        environment['actor'].decrease_effect(Block, blocked)
         return blocked * -1
 
     def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
