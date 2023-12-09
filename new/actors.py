@@ -61,9 +61,10 @@ class AbstractActor(EffectMixin):
                  will_discard=True):
         if card not in self.hand_pile:
             raise RuntimeError("Tried to play card not in hand")
-
+        if card.energy_cost == 'x':
+            card.energy_cost = self.energy
         card.use(self, target, self.environment)
-        self.process_effects('on_card_use', self.environment, card)
+        self.process_effects('on_card_play', self.environment, card)
 
 
         # Exhaust Card logic
@@ -120,7 +121,7 @@ class AbstractActor(EffectMixin):
             if card is None:
                 continue
             # TODO: We need some environment dict thingie
-            if self.energy >= card.cost(self) and card.is_playable(self):
+            if card.energy_cost == 'x' or (self.energy >= card.cost(self) and card.is_playable(self)):
                 playable.append(card)
         return playable
 
@@ -165,6 +166,8 @@ class AbstractActor(EffectMixin):
         """Exhausts the selected card. If the card is not in the players hand, throws an error."""
         if card not in self.hand_pile:
             raise RuntimeError("Tried to exhaust card not in hand?")
+
+        card.on_exhaust(self)
 
         self.hand_pile.remove(card)
         self._exhaust_pile.append(card)
@@ -231,7 +234,8 @@ class AbstractActor(EffectMixin):
             print(f'Effects after turn: {self.get_effects_dict()}')
             print(f'Draw Pile: {self.draw_pile}'
                   f'\nDiscard Pile: {self.discard_pile}'
-                  f'\nExhaust Pile: {self._exhaust_pile}')
+                  f'\nExhaust Pile: {self._exhaust_pile}'
+                  f'\nEnergy: {self.energy}')
 
         return self.turn_log[-1]
 
