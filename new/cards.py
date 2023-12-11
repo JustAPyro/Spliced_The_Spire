@@ -7,11 +7,11 @@ from itertools import product
 
 from new import effects
 from new.effects import *
-from new.enumerations import CardType, SelectEvent, CardPiles
+from new.enumerations import CardType, SelectEvent, CardPiles, CardRarity, IntentType
 
 if TYPE_CHECKING:
     from actors import AbstractActor
-    from enemies import AbstractEnemy, IntentType
+    from enemies import AbstractEnemy
 
 # Card Cost Variables
 X = True
@@ -29,6 +29,7 @@ class AbstractCard(ABC):
     def __init__(self,
                  card_type: CardType = CardType.UNKNOWN,
                  energy_cost: int | bool = NO_COST,
+                 rarity: CardRarity = CardRarity.UNDEFINED,
                  upgraded: bool = False,
                  name: str = None,
                  exhaust: bool = False,
@@ -48,7 +49,10 @@ class AbstractCard(ABC):
             The amount of energy the card uses, with two exceptions:
             True is a stand-in for x cost cards, which will be set to all energy available when played.
             False is a stand-in for cards that have no cost, mostly curse or status cards.
-            '
+
+        :param rarity:
+            The rarity of the card.
+
         :param upgraded:
             If the card has been upgraded or not. Not that Searing Blow can be upgraded multiple times.
 
@@ -96,8 +100,9 @@ class AbstractCard(ABC):
         # If the card is upgraded or not
         self.upgraded: bool = upgraded
 
-        # Type of card
+        # Type and rarity of card
         self.card_type: CardType = card_type
+        self.rarity: CardRarity = rarity
 
         # Card behavior
         self.exhaust: bool = exhaust
@@ -224,22 +229,14 @@ class AbstractCard(ABC):
         return self.name
 
 
+################
+# STATUS CARDS #
+################
+# https://slay-the-spire.fandom.com/wiki/Status
+# Burn, Dazed, Wound, Slimed, Void,
+
 class Burn(AbstractCard, ABC):
     pass
-
-
-class Wound(AbstractCard, ABC):
-    def __init__(self):
-        super().__init__(name='Wound', energy_cost=0, card_type=CardType.STATUS)
-
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
-
-    def upgrade_logic(self):
-        pass
-
-    def is_playable(self, caller):
-        return False
 
 
 class Dazed(AbstractCard, ABC):
@@ -256,7 +253,33 @@ class Dazed(AbstractCard, ABC):
         return False
 
 
-# Silent cards
+class Wound(AbstractCard, ABC):
+    def __init__(self):
+        super().__init__(name='Wound', energy_cost=0, card_type=CardType.STATUS)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        pass
+
+    def upgrade_logic(self):
+        pass
+
+    def is_playable(self, caller):
+        return False
+
+
+class Slimed(AbstractCard, ABC):
+    pass
+
+
+class Void(AbstractCard, ABC):
+    pass
+
+
+################
+# SILENT CARDS #
+################
+
+
 class GreenStrike(AbstractCard, ABC):
     def __init__(self):
         self.damage = 6
@@ -297,7 +320,11 @@ class Neutralize(AbstractCard, ABC):
         self.weak = 2
 
 
-# Ironclad cards
+##################
+# IRONCLAD CARDS #
+##################
+
+
 class RedStrike(AbstractCard, ABC):
     def __init__(self):
         self.damage = 6
