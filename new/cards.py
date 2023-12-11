@@ -256,6 +256,48 @@ class Dazed(AbstractCard, ABC):
         return False
 
 
+# Silent cards
+class GreenStrike(AbstractCard, ABC):
+    def __init__(self):
+        self.damage = 6
+        super().__init__(name='Strike', energy_cost=1, card_type=CardType.ATTACK)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        caller.deal_damage(target, self.damage)
+
+    def upgrade_logic(self):
+        self.damage = 9
+
+
+class GreenDefend(AbstractCard, ABC):
+
+    def __init__(self):
+        self.block = 5
+        super().__init__(name='Defend', energy_cost=1, card_type=CardType.SKILL)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        caller.increase_effect(Block, self.block)
+
+    def upgrade_logic(self):
+        self.block = 8
+
+
+class Neutralize(AbstractCard, ABC):
+    def __init__(self):
+        self.damage = 3
+        self.weak = 1
+        super().__init__(energy_cost=0, card_type=CardType.ATTACK)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        caller.deal_damage(target, self.damage)
+        target.increase_effect(Weak, self.weak)
+
+    def upgrade_logic(self):
+        self.damage = 4
+        self.weak = 2
+
+
+# Ironclad cards
 class RedStrike(AbstractCard, ABC):
     def __init__(self):
         self.damage = 6
