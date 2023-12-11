@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import random
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from itertools import product
+
 from new import effects
 from new.effects import *
 from new.enumerations import CardType, SelectEvent, CardPiles
@@ -9,6 +12,9 @@ from new.enumerations import CardType, SelectEvent, CardPiles
 if TYPE_CHECKING:
     from actors import AbstractActor
     from enemies import AbstractEnemy, IntentType
+
+X = True
+NO_COST = False
 
 
 class AbstractCard(ABC):
@@ -20,8 +26,8 @@ class AbstractCard(ABC):
     """
 
     def __init__(self,
-                 energy_cost: int,
-                 card_type: CardType,
+                 card_type: CardType = CardType.UNKNOWN,
+                 energy_cost: int | bool = NO_COST,
                  upgraded: bool = False,
                  name: str = None,
                  exhaust: bool = False,
@@ -65,7 +71,7 @@ class AbstractCard(ABC):
             if self.exhaust or self.ethereal:
                 raise RuntimeError('WAT? (Power card with exhaust/ethereal found)')
 
-    # --- Card Sandbox Method API's ---
+    # --- Card Sandbox Method API ---
     def modify_cost_this_turn(self, cost: int):
         self.ex_energy_cost = self.energy_cost
         self.energy_cost = cost
@@ -116,6 +122,7 @@ class AbstractCard(ABC):
 
 class Burn(AbstractCard, ABC):
     pass
+
 
 class Wound(AbstractCard, ABC):
     def __init__(self):
@@ -312,7 +319,7 @@ class Headbutt(AbstractCard, ABC):
         caller.deal_damage(target, self.damage)
 
         if caller.discard_pile:
-            card = caller.select_card(caller.discard_pile)
+            card = caller.select_card(caller.discard_pile, SelectEvent.PLACE_ON_DRAWPILE)
             caller.draw_pile.append(card)
             caller.discard_pile.remove(card)
 
@@ -404,10 +411,6 @@ class SwordBoomerang(AbstractCard, ABC):
     def upgrade_logic(self):
         self.damage_times = 4
 
-
-##########################
-######################TODO
-##########################
 
 class Thunderclap(AbstractCard, ABC):
     def __init__(self):
@@ -608,7 +611,7 @@ class DuelWield(AbstractCard, ABC):
             event_type=SelectEvent.COPY,
             options=caller.get_cards(
                 from_piles=[CardPiles.HAND],
-                card_types=[CardType.ATTACK, CardType.POWER]))
+                with_types=[CardType.ATTACK, CardType.POWER]))
 
         # Add one to hand
         caller.add_card_to_hand(deepcopy(card))
@@ -656,7 +659,7 @@ class FeelNoPain(AbstractCard, ABC):
         self.block = 4
 
 
-class Firebreathing(AbstractCard, ABC):
+class FireBreathing(AbstractCard, ABC):
     def __init__(self):
         self.damage = 6
         super().__init__(energy_cost=1, card_type=CardType.POWER)
@@ -698,7 +701,7 @@ class Hemokinesis(AbstractCard, ABC):
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        caller.deal_damage(self.damage)
+        caller.deal_damage(target, self.damage)
         caller.receive_damage_from_card(2, self)
 
     def upgrade_logic(self):
@@ -902,7 +905,7 @@ class SeverSoul(AbstractCard, ABC):
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         for card in caller.get_cards(
-                piles=CardPiles.HAND,
+                from_piles=CardPiles.HAND,
                 exclude_cards=[self]):
             caller.exhaust_card(card)
 
@@ -956,7 +959,7 @@ class Uppercut(AbstractCard, ABC):
 class Whirlwind(AbstractCard, ABC):
     def __init__(self):
         self.damage = 5
-        super().__init__(energy_cost='x', card_type=CardType.ATTACK)
+        super().__init__(energy_cost=X, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         for enemy in environment['enemies']:
@@ -1016,6 +1019,7 @@ class Brutality(AbstractCard, ABC):
     def upgrade_logic(self):
         self.innate = True
 
+
 # TODO: Effect
 class Corruption(AbstractCard, ABC):
     def __init__(self):
@@ -1026,6 +1030,7 @@ class Corruption(AbstractCard, ABC):
 
     def upgrade_logic(self):
         self.energy_cost = 2
+
 
 # TODO: Effect
 class DemonForm(AbstractCard, ABC):
@@ -1127,7 +1132,7 @@ class Immolate(AbstractCard, ABC):
         self.damage = 28
 
 
-#TODO: Test
+# TODO: Test
 class Impervious(AbstractCard, ABC):
     def __init__(self):
         self.quantity = 30
@@ -1151,6 +1156,7 @@ class Juggernaut(AbstractCard, ABC):
     def upgrade_logic(self):
         self.stacks = 7
 
+
 # TODO: Test
 class LimitBreak(AbstractCard, ABC):
     def __init__(self):
@@ -1166,6 +1172,7 @@ class LimitBreak(AbstractCard, ABC):
 # TODO: Test
 class Offering(AbstractCard, ABC):
     """Lose 6 HP. Gain 2 energy. Draw 3(5) cards. Exhaust."""
+
     def __init__(self):
         self.cards = 3
         super().__init__(energy_cost=0, card_type=CardType.SKILL, exhaust=True)
@@ -1178,10 +1185,12 @@ class Offering(AbstractCard, ABC):
     def upgrade_logic(self):
         self.cards = 5
 
+
 # TODO: TEST
 # This was designed using deal_damage, which may need to be refactored if it doesn't return damage dealt
 class Reaper(AbstractCard, ABC):
     """	Deal 4(5) damage to ALL enemies. Heal HP equal to unblocked damage. Exhaust."""
+
     def __init__(self):
         self.damage = 4
         super().__init__(energy_cost=2, card_type=CardType.ATTACK)

@@ -21,6 +21,7 @@ class CardPiles(Enum):
 
 
 class CardType(Enum):
+    UNKNOWN = 0
     ATTACK = 1
     SKILL = 2
     POWER = 3
