@@ -5,7 +5,8 @@ class SelectEvent(Enum):
     DRAW = 1
     EXHAUST = 2
     PLACE_ON_DRAWPILE = 3
-    COPY = 4
+    COPY = 4,
+    RECOVER_FROM_EXHAUST = 5
 
 
 class CardPiles(Enum):
@@ -14,10 +15,19 @@ class CardPiles(Enum):
     DISCARD = 3
     EXHAUST = 4
 
+    @classmethod
+    def all(cls):
+        return CardPiles.DRAW, CardPiles.HAND, CardPiles.DISCARD, CardPiles.EXHAUST
+
 
 class CardType(Enum):
+    UNKNOWN = 0
     ATTACK = 1
     SKILL = 2
     POWER = 3
     STATUS = 4
     CURSE = 5
+
+    @staticmethod
+    def all():
+        return CardType.ATTACK, CardType.SKILL, CardType.POWER, CardType.STATUS, CardType.CURSE

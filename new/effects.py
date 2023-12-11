@@ -81,16 +81,18 @@ class AbstractEffect:
 # =======================
 
 class Block(AbstractEffect):
-    def modify_damage_taken(self: AbstractEffect, owner, environment, damage: int) -> int:
+    def modify_damage_taken(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damage: int) -> int:
         if self.stacks >= damage:
             blocked = damage
         else:
             blocked = self.stacks
 
+        environment['actor'].decrease_effect(Block, blocked)
         return blocked * -1
 
     def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        owner.set_effect(Block, 0)
+        if not owner.has_effect(BarricadeEffect):
+            owner.set_effect(Block, 0)
 
 
 class Vulnerable(AbstractEffect):
@@ -187,6 +189,30 @@ class RageEffect(AbstractEffect):
 class RuptureEffect(AbstractEffect):
     def on_receive_damage_from_card(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
         owner.increase_effect(Strength, self.stacks)
+
+
+class BarricadeEffect(AbstractEffect):
+    pass
+
+class BerserkEffect(AbstractEffect):
+    pass
+
+class BrutalityEffect(AbstractEffect):
+    pass
+
+class CorruptionEffect(AbstractEffect):
+    pass
+
+
+class DemonFormEffect(AbstractEffect):
+    pass
+
+
+class DoubleTapEffect(AbstractEffect):
+    pass
+
+class JuggernautEffect(AbstractEffect):
+    pass
 
 
 
