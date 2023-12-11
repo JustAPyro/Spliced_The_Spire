@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from actors import AbstractActor
     from enemies import AbstractEnemy, IntentType
 
+# Card Cost Variables
 X = True
 NO_COST = False
 
@@ -33,8 +34,44 @@ class AbstractCard(ABC):
                  exhaust: bool = False,
                  ethereal: bool = False,
                  innate: bool = False,
+                 unplayable: bool = False,
                  allow_multiple_upgrades: bool = False):
-        # Name of the card
+        """
+        Primarily designed tobe called in subclassed cards.
+
+        Parameters
+        ----------
+        :param card_type:
+            The type of the card created. Options: ATTACK, SKILL, POWER, STATUS, CURSE
+
+        :param energy_cost:
+            The amount of energy the card uses, with two exceptions:
+            True is a stand-in for x cost cards, which will be set to all energy available when played.
+            False is a stand-in for cards that have no cost, mostly curse or status cards.
+            '
+        :param upgraded:
+            If the card has been upgraded or not. Not that Searing Blow can be upgraded multiple times.
+
+        :param name:
+            The name of the card.
+
+        :param exhaust:
+            If the card should be exhausted when played. (Sent to exhaust pile and not shuffled back in deck)
+
+        :param ethereal:
+            If the card is ethereal (card will exhaust if it's in your hand at end of turn).
+
+        :param innate:
+            If the card is innate (card will always be drawn turn 1)
+
+        :param unplayable:
+            Sets the card to unplayable. Note that this will OVERRIDE the is_playable method.
+
+        :param allow_multiple_upgrades:
+            If the card can be upgraded multiple times (Example: Searing blow)
+
+        """
+        # If name is not provided then it will be parsed from subclass name
         if name is None:
             class_name = type(self).__name__
             final_name = ''
@@ -49,7 +86,11 @@ class AbstractCard(ABC):
 
         # normal energy cost of card ("cost" int)
         self.energy_cost: int = energy_cost
+
+        # old cost of the card if the cost is ever changed temporarily (For example, card costs 0 this turn)
         self.ex_energy_cost: int = -1
+
+        # If the card is innate or not
         self.innate: bool = innate
 
         # If the card is upgraded or not
@@ -61,8 +102,10 @@ class AbstractCard(ABC):
         # Card behavior
         self.exhaust: bool = exhaust
         self.ethereal: bool = ethereal
+        self.unplayable: bool = unplayable
         self.poof: bool = False
 
+        # Allows the card to be upgraded multiple times (Searing blow)
         self.allow_multiple_upgrades = allow_multiple_upgrades
 
         # Setup for power type cards
@@ -71,52 +114,113 @@ class AbstractCard(ABC):
             if self.exhaust or self.ethereal:
                 raise RuntimeError('WAT? (Power card with exhaust/ethereal found)')
 
-    # --- Card Sandbox Method API ---
-    def modify_cost_this_turn(self, cost: int):
-        self.ex_energy_cost = self.energy_cost
-        self.energy_cost = cost
-
-    def enemies(self):
-        return
-
     @abstractmethod
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        """Overriding this method provides the default behavior of a card."""
+        """
+        * You are REQUIRED to implement this method in subclasses. *
+        Overriding this method provides the default behavior of a card.
+
+        Parameters
+        ----------
+        :param caller:
+            The player using the card.
+
+        :param target:
+            The target of the card, if applicable.
+
+        :param environment:
+            The environment the card was played in, including all enemies in the room.
+        """
         pass
-
-    def upgrade(self):
-        if self.upgraded and not self.allow_multiple_upgrades:
-            return
-
-        if not self.upgraded:
-            self.name = self.name + "+"
-        self.upgraded = True
-        self.upgrade_logic()
 
     @abstractmethod
     def upgrade_logic(self):
-        """Overriding this method provides the behavior of the card on upgrade."""
+        """
+        * You are REQUIRED to implement this method in subclasses. *
+        Overriding this method defines the behavior change when a card is upgraded.
+        """
         pass
 
-    def is_playable(self, caller):
+    def is_playable(self, caller: 'AbstractActor'):
+        """
+        * You may OPTIONALLY implement this method. *
+        Overriding this method defines when a subclassed card may be playable.
+
+        parameters
+        ----------
+        caller: AbstractActor
+            The player using the card.
+        """
         return True
 
     # Only for cards that have an effect when they're exhausted by other cards
-    def on_exhaust(self, caller):
-        pass
+    def on_exhaust(self, caller: 'AbstractActor'):
+        """
+        * You may OPTIONALLY implement this method. *
+        Overriding this method defines an effect that will be triggered on the card's exhaustion.
+        This is -ONLY- for cards that have an effect when they're exhausted by other cards.
+
+        Parameters
+        ----------
+        :param caller: AbstractActor
+                The player using the card.
+        """
 
     def on_fatal(self, caller):
+        """
+        * You may OPTIONALLY implement this method. *
+        Overriding this method defines behavior that occurs if the card successfully kills an enemy.
+
+        Parameters
+        ----------
+        :param caller: AbstractActor
+                The player using the card.
+        """
         pass
 
-    def cost(self, actor):
-        return self.energy_cost
+    # --- Card Sandbox Method API ---
+    # These are methods that can be called during the implementations of cards using self.method_name()
+    # They are mostly utility methods that allow implementations to be more readable and concise.
 
-    # Override the str() method so printing it returns the name
+    def modify_cost_this_turn(self, cost: int):
+        """
+        Modifies the cost of the card only for this turn.
+
+        Parameters
+        ----------
+        :param cost:
+            The cost the card will be set to for the remainder of the turn.
+        """
+        self.ex_energy_cost = self.energy_cost
+        self.energy_cost = cost
+
+    # --- Card methods ---
+    # These are methods you may wish to call on a card itself.
+
+    def upgrade(self):
+        """
+        This method does everything required to fully upgrade the card.
+        It handles marking the card upgraded, modifying the name, and executing the upgrade logic.
+        """
+
+        # If it's already upgraded and doesn't allow upgrades do nothing
+        if self.upgraded and not self.allow_multiple_upgrades:
+            return
+
+        # Append the + to the name
+        if not self.upgraded:
+            self.name = self.name + "+"
+
+        # Set the card to upgrade and execute the upgrade logic
+        self.upgraded = True
+        self.upgrade_logic()
+
     def __str__(self):
+        """Override the str() method so printing it returns the name"""
         return self.name
 
-    # Override the repr() method so arrays print neatly
     def __repr__(self):
+        """Override the repr() method so arrays of cards print neatly"""
         return self.name
 
 
