@@ -167,7 +167,11 @@ class AbstractActor(EffectMixin):
             if card is None:
                 continue
             # TODO: We need some environment dict thingie
-            if card.energy_cost == 'x' or (self.energy >= card.cost(self) and card.is_playable(self)):
+            # TODO This logic doesn't seem right
+            if (card.energy_cost == 'x'
+                    or (self.energy >= card.energy_cost
+                        and card.is_playable(self)
+                        and not card.unplayable)):
                 playable.append(card)
         return playable
 
