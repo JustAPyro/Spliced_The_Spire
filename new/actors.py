@@ -67,6 +67,10 @@ class AbstractActor(EffectMixin):
         if card.energy_cost == 'x':
             card.energy_cost = self.energy
         card.use(self, target, self.environment)
+
+        # If enemy was killed call the on_fatal effect
+        card.on_fatal(self)
+
         self.process_effects('on_card_play', self.environment, card)
 
         # Exhaust Card logic
@@ -89,6 +93,9 @@ class AbstractActor(EffectMixin):
                 'message': f'{self.name} used {card.name} on {target.name}'
             })
 
+    def heal(self, increase: int):
+        self.health += increase
+
     def add_card_to_draw(self, card, shuffle=False):
         if shuffle:
             insert_at = random.randint(0, len(self.draw_pile))
@@ -98,6 +105,9 @@ class AbstractActor(EffectMixin):
 
     def add_card_to_hand(self, card):
         self.card_piles[CardPiles.HAND].append(card)
+
+    def add_card_to_exhaust(self, card):
+        self.card_piles[CardPiles.DISCARD].append(card)
 
     def get_cards(self,
                   from_piles: CardPiles | list[CardPiles] = None,  # DRAW, HAND, DISCARD, EXHAUST | Default: All
@@ -198,6 +208,14 @@ class AbstractActor(EffectMixin):
         })
         self.process_effects('on_start_turn', self.environment)
 
+    def recover_card(self, card):
+        if card not in self._exhaust_pile:
+            raise RuntimeError('???')
+
+        self._exhaust_pile.remove(card)
+        self.hand_pile.append(card)
+
+
     def exhaust_card(self, card: AbstractCard):
         """Exhausts the selected card. If the card is not in the players hand, throws an error."""
         if card not in self.hand_pile:
@@ -214,6 +232,14 @@ class AbstractActor(EffectMixin):
         if modify_card_draw is None:
             modify_card_draw = 0
         quantity = modify_card_draw
+
+        # If it's turn 1 force innate cards to be drawn
+        if len(self.turn_log) == 0:
+            for card in [card for card in self.draw_pile if card.innate is True]:
+                self.draw_pile.remove(card)
+                self.hand_pile.append(card)
+                quantity = quantity - 1
+
         for i in range(quantity):
             # If you can't draw cards
             if len(self.draw_pile) <= 0 and len(self.discard_pile) <= 0:

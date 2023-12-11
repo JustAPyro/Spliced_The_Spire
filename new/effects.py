@@ -200,6 +200,20 @@ class BerserkEffect(AbstractEffect):
 class BrutalityEffect(AbstractEffect):
     pass
 
+class CorruptionEffect(AbstractEffect):
+    pass
+
+
+class DemonFormEffect(AbstractEffect):
+    pass
+
+
+class DoubleTapEffect(AbstractEffect):
+    pass
+
+class JuggernautEffect(AbstractEffect):
+    pass
+
 
 
 # ===================================
