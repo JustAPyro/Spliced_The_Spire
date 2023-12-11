@@ -1,9 +1,9 @@
+from __future__ import annotations
+
 import random
 from abc import ABC, abstractmethod
 from copy import deepcopy
-
-from typing import TYPE_CHECKING
-from enum import Enum
+from itertools import product
 
 from new import effects
 from new.effects import *
@@ -12,6 +12,10 @@ from new.enumerations import CardType, SelectEvent, CardPiles
 if TYPE_CHECKING:
     from actors import AbstractActor
     from enemies import AbstractEnemy, IntentType
+
+# Card Cost Variables
+X = True
+NO_COST = False
 
 
 class AbstractCard(ABC):
@@ -23,14 +27,51 @@ class AbstractCard(ABC):
     """
 
     def __init__(self,
-                 energy_cost: int,
-                 card_type: CardType,
+                 card_type: CardType = CardType.UNKNOWN,
+                 energy_cost: int | bool = NO_COST,
                  upgraded: bool = False,
                  name: str = None,
                  exhaust: bool = False,
                  ethereal: bool = False,
+                 innate: bool = False,
+                 unplayable: bool = False,
                  allow_multiple_upgrades: bool = False):
-        # Name of the card
+        """
+        Primarily designed tobe called in subclassed cards.
+
+        Parameters
+        ----------
+        :param card_type:
+            The type of the card created. Options: ATTACK, SKILL, POWER, STATUS, CURSE
+
+        :param energy_cost:
+            The amount of energy the card uses, with two exceptions:
+            True is a stand-in for x cost cards, which will be set to all energy available when played.
+            False is a stand-in for cards that have no cost, mostly curse or status cards.
+            '
+        :param upgraded:
+            If the card has been upgraded or not. Not that Searing Blow can be upgraded multiple times.
+
+        :param name:
+            The name of the card.
+
+        :param exhaust:
+            If the card should be exhausted when played. (Sent to exhaust pile and not shuffled back in deck)
+
+        :param ethereal:
+            If the card is ethereal (card will exhaust if it's in your hand at end of turn).
+
+        :param innate:
+            If the card is innate (card will always be drawn turn 1)
+
+        :param unplayable:
+            Sets the card to unplayable. Note that this will OVERRIDE the is_playable method.
+
+        :param allow_multiple_upgrades:
+            If the card can be upgraded multiple times (Example: Searing blow)
+
+        """
+        # If name is not provided then it will be parsed from subclass name
         if name is None:
             class_name = type(self).__name__
             final_name = ''
@@ -45,7 +86,12 @@ class AbstractCard(ABC):
 
         # normal energy cost of card ("cost" int)
         self.energy_cost: int = energy_cost
+
+        # old cost of the card if the cost is ever changed temporarily (For example, card costs 0 this turn)
         self.ex_energy_cost: int = -1
+
+        # If the card is innate or not
+        self.innate: bool = innate
 
         # If the card is upgraded or not
         self.upgraded: bool = upgraded
@@ -56,8 +102,10 @@ class AbstractCard(ABC):
         # Card behavior
         self.exhaust: bool = exhaust
         self.ethereal: bool = ethereal
+        self.unplayable: bool = unplayable
         self.poof: bool = False
 
+        # Allows the card to be upgraded multiple times (Searing blow)
         self.allow_multiple_upgrades = allow_multiple_upgrades
 
         # Setup for power type cards
@@ -66,47 +114,118 @@ class AbstractCard(ABC):
             if self.exhaust or self.ethereal:
                 raise RuntimeError('WAT? (Power card with exhaust/ethereal found)')
 
-    # --- Card Cost API ---
-    def modify_cost_this_turn(self, cost: int):
-        self.ex_energy_cost = self.energy_cost
-        self.energy_cost = cost
-
     @abstractmethod
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        """Overriding this method provides the default behavior of a card."""
+        """
+        * You are REQUIRED to implement this method in subclasses. *
+        Overriding this method provides the default behavior of a card.
+
+        Parameters
+        ----------
+        :param caller:
+            The player using the card.
+
+        :param target:
+            The target of the card, if applicable.
+
+        :param environment:
+            The environment the card was played in, including all enemies in the room.
+        """
         pass
-
-    def upgrade(self):
-        if self.upgraded and not self.allow_multiple_upgrades:
-            return
-
-        if not self.upgraded:
-            self.name = self.name + "+"
-        self.upgraded = True
-        self.upgrade_logic()
 
     @abstractmethod
     def upgrade_logic(self):
-        """Overriding this method provides the behavior of the card on upgrade."""
+        """
+        * You are REQUIRED to implement this method in subclasses. *
+        Overriding this method defines the behavior change when a card is upgraded.
+        """
         pass
 
-    def is_playable(self, caller):
+    def is_playable(self, caller: 'AbstractActor'):
+        """
+        * You may OPTIONALLY implement this method. *
+        Overriding this method defines when a subclassed card may be playable.
+
+        parameters
+        ----------
+        caller: AbstractActor
+            The player using the card.
+        """
         return True
 
     # Only for cards that have an effect when they're exhausted by other cards
-    def on_exhaust(self, caller):
+    def on_exhaust(self, caller: 'AbstractActor'):
+        """
+        * You may OPTIONALLY implement this method. *
+        Overriding this method defines an effect that will be triggered on the card's exhaustion.
+        This is -ONLY- for cards that have an effect when they're exhausted by other cards.
+
+        Parameters
+        ----------
+        :param caller: AbstractActor
+                The player using the card.
+        """
+
+    def on_fatal(self, caller):
+        """
+        * You may OPTIONALLY implement this method. *
+        Overriding this method defines behavior that occurs if the card successfully kills an enemy.
+
+        Parameters
+        ----------
+        :param caller: AbstractActor
+                The player using the card.
+        """
         pass
 
-    def cost(self, actor):
-        return self.energy_cost
+    # --- Card Sandbox Method API ---
+    # These are methods that can be called during the implementations of cards using self.method_name()
+    # They are mostly utility methods that allow implementations to be more readable and concise.
 
-    # Override the str() method so printing it returns the name
+    def modify_cost_this_turn(self, cost: int):
+        """
+        Modifies the cost of the card only for this turn.
+
+        Parameters
+        ----------
+        :param cost:
+            The cost the card will be set to for the remainder of the turn.
+        """
+        self.ex_energy_cost = self.energy_cost
+        self.energy_cost = cost
+
+    # --- Card methods ---
+    # These are methods you may wish to call on a card itself.
+
+    def upgrade(self):
+        """
+        This method does everything required to fully upgrade the card.
+        It handles marking the card upgraded, modifying the name, and executing the upgrade logic.
+        """
+
+        # If it's already upgraded and doesn't allow upgrades do nothing
+        if self.upgraded and not self.allow_multiple_upgrades:
+            return
+
+        # Append the + to the name
+        if not self.upgraded:
+            self.name = self.name + "+"
+
+        # Set the card to upgrade and execute the upgrade logic
+        self.upgraded = True
+        self.upgrade_logic()
+
     def __str__(self):
+        """Override the str() method so printing it returns the name"""
         return self.name
 
-    # Override the repr() method so arrays print neatly
     def __repr__(self):
+        """Override the repr() method so arrays of cards print neatly"""
         return self.name
+
+
+class Burn(AbstractCard, ABC):
+    pass
 
 
 class Wound(AbstractCard, ABC):
@@ -346,7 +465,7 @@ class Headbutt(AbstractCard, ABC):
         caller.deal_damage(target, self.damage)
 
         if caller.discard_pile:
-            card = caller.select_card(caller.discard_pile)
+            card = caller.select_card(caller.discard_pile, SelectEvent.PLACE_ON_DRAWPILE)
             caller.draw_pile.append(card)
             caller.discard_pile.remove(card)
 
@@ -438,10 +557,6 @@ class SwordBoomerang(AbstractCard, ABC):
     def upgrade_logic(self):
         self.damage_times = 4
 
-
-##########################
-######################TODO
-##########################
 
 class Thunderclap(AbstractCard, ABC):
     def __init__(self):
@@ -642,7 +757,7 @@ class DuelWield(AbstractCard, ABC):
             event_type=SelectEvent.COPY,
             options=caller.get_cards(
                 from_piles=[CardPiles.HAND],
-                card_types=[CardType.ATTACK, CardType.POWER]))
+                with_types=[CardType.ATTACK, CardType.POWER]))
 
         # Add one to hand
         caller.add_card_to_hand(deepcopy(card))
@@ -690,7 +805,7 @@ class FeelNoPain(AbstractCard, ABC):
         self.block = 4
 
 
-class Firebreathing(AbstractCard, ABC):
+class FireBreathing(AbstractCard, ABC):
     def __init__(self):
         self.damage = 6
         super().__init__(energy_cost=1, card_type=CardType.POWER)
@@ -732,7 +847,7 @@ class Hemokinesis(AbstractCard, ABC):
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        caller.deal_damage(self.damage)
+        caller.deal_damage(target, self.damage)
         caller.receive_damage_from_card(2, self)
 
     def upgrade_logic(self):
@@ -889,17 +1004,13 @@ class SecondWind(AbstractCard, ABC):
         super().__init__(energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        counter = 0
-        to_exhaust = []
-        for card in caller.hand_pile:
-            if card == self:
-                continue
-            if card.card_type != CardType.ATTACK:
-                to_exhaust.append(card)
-                counter += 1
-        for to_exhaust_card in to_exhaust:
-            caller.exhaust_card(to_exhaust_card)
-        caller.increase_effect(Block, self.block_per_card * counter)
+        # After
+        for card in caller.get_cards(
+                from_piles=CardPiles.HAND,
+                with_types=CardType.ATTACK,
+                exclude_cards=self):
+            caller.exhaust_card(card)
+            caller.increase_effect(Block, self.block_per_card)
 
     def upgrade_logic(self):
         self.block_per_card = 7
@@ -939,14 +1050,10 @@ class SeverSoul(AbstractCard, ABC):
         super().__init__(energy_cost=2, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        to_exhaust = []
-        for card in caller.hand_pile:
-            if card == self:
-                continue
-            if card.card_type != CardType.ATTACK:
-                to_exhaust.append(card)
-        for to_exhaust_card in to_exhaust:
-            caller.exhaust_card(to_exhaust_card)
+        for card in caller.get_cards(
+                from_piles=CardPiles.HAND,
+                exclude_cards=[self]):
+            caller.exhaust_card(card)
 
         caller.deal_damage(target, self.damage)
 
@@ -960,9 +1067,8 @@ class Shockwave(AbstractCard, ABC):
         super().__init__(energy_cost=2, card_type=CardType.SKILL, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        for enemy in environment['enemies']:
-            enemy.increase_effect(Weak, self.effect_amount)
-            enemy.increase_effect(Vulnerable, self.effect_amount)
+        for enemy, effect in product(environment['enemies'], (Weak, Vulnerable)):
+            enemy.increase_effect(effect, self.effect_amount)
 
     def upgrade_logic(self):
         self.effect_amount = 5
@@ -989,8 +1095,8 @@ class Uppercut(AbstractCard, ABC):
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         caller.deal_damage(target, 13)
-        target.increase_effect(Weak, self.effect_amount)
-        target.increase_effect(Vulnerable, self.effect_amount)
+        for effect in (Weak, Vulnerable):
+            target.increase_effect(effect, self.effect_amount)
 
     def upgrade_logic(self):
         self.effect_amount = 2
@@ -999,7 +1105,7 @@ class Uppercut(AbstractCard, ABC):
 class Whirlwind(AbstractCard, ABC):
     def __init__(self):
         self.damage = 5
-        super().__init__(energy_cost='x', card_type=CardType.ATTACK)
+        super().__init__(energy_cost=X, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         for enemy in environment['enemies']:
@@ -1010,177 +1116,236 @@ class Whirlwind(AbstractCard, ABC):
         self.damage = 8
 
 
+# TODO: Effect is bugged?
 class Barricade(AbstractCard, ABC):
     def __init__(self):
         super().__init__(energy_cost=3, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(BarricadeEffect, 1)
 
     def upgrade_logic(self):
-        pass
+        self.energy_cost = 2
 
 
+# TODO: Effect
 class Berserk(AbstractCard, ABC):
     def __init__(self):
+        self.vulnerable = 2
         super().__init__(energy_cost=0, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(BerserkEffect, 1)
+        caller.increase_effect(Vulnerable, self.vulnerable)
 
     def upgrade_logic(self):
-        pass
+        self.vulnerable = 1
 
 
 class Bludgeon(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 32
         super().__init__(energy_cost=3, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.deal_damage(target, self.damage)
 
     def upgrade_logic(self):
-        pass
+        self.damage = 42
 
 
+# TODO: Effect
 class Brutality(AbstractCard, ABC):
     def __init__(self):
         super().__init__(energy_cost=0, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(BrutalityEffect, 1)
 
     def upgrade_logic(self):
-        pass
+        self.innate = True
 
 
+# TODO: Effect
 class Corruption(AbstractCard, ABC):
     def __init__(self):
         super().__init__(energy_cost=3, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(CorruptionEffect, 1)
 
     def upgrade_logic(self):
-        pass
+        self.energy_cost = 2
 
 
+# TODO: Effect
 class DemonForm(AbstractCard, ABC):
     def __init__(self):
+        self.demon_form_stacks = 2
         super().__init__(energy_cost=3, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(DemonFormEffect, self.demon_form_stacks)
 
     def upgrade_logic(self):
-        pass
+        self.demon_form_stacks = 3
 
 
+# TODO: Effect
 class DoubleTap(AbstractCard, ABC):
     def __init__(self):
+        self.double_tap_stacks = 1
         super().__init__(energy_cost=1, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(DoubleTapEffect, self.double_tap_stacks)
 
     def upgrade_logic(self):
-        pass
+        self.double_tap_stacks = 2
 
 
+# TODO: Test
 class Exhume(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(energy_cost=1, card_type=CardType.SKILL)
+        super().__init__(energy_cost=1, card_type=CardType.SKILL, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        card = caller.select_card(
+            caller.get_cards(
+                from_piles=CardPiles.EXHAUST,
+                exclude_cards=self),
+            event_type=SelectEvent.RECOVER_FROM_EXHAUST)
+        caller.recover_card(card)
 
     def upgrade_logic(self):
-        pass
+        self.energy_cost = 0
 
 
+# TODO: Test
 class Feed(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 10
+        self.gain = 3
         super().__init__(energy_cost=1, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.deal_damage(target, self.damage)
 
     def upgrade_logic(self):
-        pass
+        self.damage = 12
+        self.gain = 4
+
+    def on_fatal(self, caller):
+        caller.max_health += self.gain
 
 
+# TODO: Test
 class FiendFire(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 7
         super().__init__(energy_cost=2, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        # I don't know for sure, but my impression is that
+        # all the cards are exhausted and THEN all the damage is dealt
+        # so that's how I'm implementing it here
+        qty = 0
+        for card in caller.get_cards(
+                from_piles=CardPiles.HAND,
+                exclude_cards=self):
+            caller.exhaust_card(card)
+            qty += 1
+
+        for _ in range(qty):
+            caller.deal_damage(target, self.damage)
 
     def upgrade_logic(self):
-        pass
+        self.damage = 10
 
 
+# TODO: Implement Burn
 class Immolate(AbstractCard, ABC):
     def __init__(self):
+        self.damage = 21
         super().__init__(energy_cost=2, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        for enemy in environment['enemies']:
+            caller.deal_damage(enemy, self.damage)
+            caller.add_card_to_exhaust(Burn())
 
     def upgrade_logic(self):
-        pass
+        self.damage = 28
 
 
+# TODO: Test
 class Impervious(AbstractCard, ABC):
     def __init__(self):
+        self.quantity = 30
         super().__init__(energy_cost=2, card_type=CardType.SKILL)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(Block, self.quantity)
 
     def upgrade_logic(self):
-        pass
+        self.quantity = 40
 
 
 class Juggernaut(AbstractCard, ABC):
     def __init__(self):
+        self.stacks = 5
         super().__init__(energy_cost=2, card_type=CardType.POWER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(JuggernautEffect, self.stacks)
 
     def upgrade_logic(self):
-        pass
+        self.stacks = 7
 
 
+# TODO: Test
 class LimitBreak(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(energy_cost=1, card_type=CardType.SKILL)
+        super().__init__(energy_cost=1, card_type=CardType.SKILL, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.increase_effect(Strength, caller.get_effect_stacks(Strength))
 
     def upgrade_logic(self):
-        pass
+        self.exhaust = False
 
 
+# TODO: Test
 class Offering(AbstractCard, ABC):
+    """Lose 6 HP. Gain 2 energy. Draw 3(5) cards. Exhaust."""
+
     def __init__(self):
-        super().__init__(energy_cost=0, card_type=CardType.SKILL)
+        self.cards = 3
+        super().__init__(energy_cost=0, card_type=CardType.SKILL, exhaust=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        caller.receive_damage_from_card(6, self)
+        caller.gain_energy(2)
+        caller.draw_card(self.cards)
 
     def upgrade_logic(self):
-        pass
+        self.cards = 5
 
 
+# TODO: TEST
+# This was designed using deal_damage, which may need to be refactored if it doesn't return damage dealt
 class Reaper(AbstractCard, ABC):
+    """	Deal 4(5) damage to ALL enemies. Heal HP equal to unblocked damage. Exhaust."""
+
     def __init__(self):
+        self.damage = 4
         super().__init__(energy_cost=2, card_type=CardType.ATTACK)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
-        pass
+        damage = 0
+        for enemy in environment['enemies']:
+            damage += caller.deal_damage(enemy, self.damage)
+        caller.heal(damage)
 
     def upgrade_logic(self):
-        pass
+        self.damage = 5
