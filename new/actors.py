@@ -345,4 +345,6 @@ class LeftToRightAI(AbstractActor):
             choices = self.get_playable_cards()
 
     def select_card(self, options: list[AbstractCard], event_type: SelectEvent) -> AbstractCard:
+        if event_type is SelectEvent.COPY:
+            return options[-1]
         return options[0]

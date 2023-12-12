@@ -1143,7 +1143,6 @@ class Whirlwind(AbstractCard, ABC):
         self.damage = 8
 
 
-# TODO: Effect is bugged?
 class Barricade(AbstractCard, ABC):
     def __init__(self):
         super().__init__(energy_cost=3, card_type=CardType.POWER)

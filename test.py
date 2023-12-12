@@ -1,6 +1,15 @@
-from itertools import product
+thing = False
 
-x = [5]
-x = [x] if type(x) == int else x
 
-print(x)
+def generator():
+    while True:
+        if thing:
+            yield 'donuts'
+        else:
+            yield 'fried ice cream'
+
+
+gen = generator()
+
+for _ in range(10):
+    print(next(gen))

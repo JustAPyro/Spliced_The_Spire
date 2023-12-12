@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 
+import lutil
 from new.effects import EffectMixin, Ritual
 from random import randint
 from typing import TYPE_CHECKING, Optional
 
-from lutil import ascension_based_int
+from lutil import asc_int
 from new.enumerations import IntentType
 
 if TYPE_CHECKING:
@@ -50,20 +53,56 @@ class Intent:
 
 
 class AbstractEnemy(ABC, EffectMixin):
-    def __init__(self, name, max_health, environment, ascension=0, act=1):
-        self.name = name
-        # Here we assign max health. We use the provided value but
-        # if a dict is provided we calculate a random appropriate max health
-        # based on ascension.
-        self.max_health = (max_health if type(max_health) is not dict
-                           else ascension_based_int(ascension, max_health))
-        # Since this was just created current health should be full
-        self.health = self.max_health
+    """
+    This class is an abstract class designed to streamline the implementation
+    of enemies and elites.
+    https://slay-the-spire.fandom.com/wiki/Monsters
+    """
 
-        # This stores the move pattern of the enemy,
-        # It will populate with a generator the first time
-        # that take_turn is called on this enemy
-        self.ability = self.pattern()
+    def __init__(self,
+                 name: Optional[str] = None,
+                 max_health: dict[tuple[int], Optional[int]] | int | None = None,
+                 set_health: Optional[int] = None,
+                 ascension=0,
+                 environment=None,
+                 act=1):
+        """
+        Create an enemy.
+
+        Parameters
+        ----------
+        :param name:
+            The name of the enemy.
+            Note that if this is not provided, the name of the enemy will be parsed from
+            the class name.
+
+        :param max_health:
+            The creature's max_health. This can be provided in the following format.
+            {(lower, upper): None}
+
+        :param set_health:
+            If specified will set the health of the creature to this amount.
+
+        Exceptions
+        ----------
+        :raises RuntimeError:
+            This will be thrown if max_health is not provided and the subclass does not
+            implement its own static class "max_health" variable.
+        """
+        # Use the provided name if there is, otherwise parse it from class name
+        self.name = name if name else lutil.parse_class_name(type(self).__name__)
+
+        # Guard against people not providing a max_health anywhere
+        if not max_health and not hasattr(self, 'max_health'):
+            raise RuntimeError(f'Tried to call subclass AbstractEnemy without providing static max_health variable. '
+                               f'Please verify that {type(self).__name__}.max_health is a defined value. '
+                               f'You may also choose to provide it in the {type(self).__name__}.__init__ constructor.')
+
+        # Assigns a max health based on the ascension and the class.max_health property
+        self.max_health = asc_int(ascension, getattr(self, 'max_health'))
+
+        # Since this was just created current health should be full
+        self.health = set_health if set_health else self.max_health
 
         # Information about the environment that is relevant to the battle
         self.ascension = ascension
@@ -74,6 +113,12 @@ class AbstractEnemy(ABC, EffectMixin):
             self.environment = environment
             self.environment['enemies'].append(self)
 
+        # This stores the move pattern of the enemy,
+        # It will populate with a generator the first time
+        # that take_turn is called on this enemy
+        self.ability_method_generator = self.pattern()
+
+        # Initialize the EffectMixin
         super().__init__()
 
     def is_dead(self):
@@ -88,33 +133,9 @@ class AbstractEnemy(ABC, EffectMixin):
         log.append(f'used Dark Strike on {target.name} to deal {damage} damage.')
         target.take_damage(damage, self)
 
-    def before_ability(self):
-        pass
-
-    def after_ability(self):
-        pass
-
     @property
     def intent(self):
         return None
-
-    @staticmethod
-    def ability(func):
-        def wrapper(*args, **kwargs):
-            self = args[0]
-            self.before_ability()
-            func(*args, **kwargs)
-            self.after_ability()
-
-        return wrapper
-
-    @staticmethod
-    def ability_pattern(func):
-        def wrapper(*args, **kwargs):
-            self = args[0]
-            func(*args, **kwargs)
-
-        return wrapper
 
     @abstractmethod
     def pattern(self):
@@ -123,7 +144,7 @@ class AbstractEnemy(ABC, EffectMixin):
     def take_turn(self, actor):
         log = []
         self.process_effects('on_start_turn', self.environment)
-        next(self.ability)(actor, None, log)
+        next(self.ability_method_generator)(actor, None, log)
         self.process_effects('on_end_turn', self.environment)
         return log[0]
 
@@ -141,31 +162,31 @@ class DummyEnemy(AbstractEnemy, ABC):
         pass
 
 
+
+
+
 class Cultist(AbstractEnemy):
-    max_health_range = {
-        0: (48, 54),  # A1- Health is 48-54
-        7: (50, 56)  # A7+ Health is 50-56
+    max_health = {
+        0: (48, 54),  # Health is 48-54 on A0+
+        7: (50, 56)  # Health is 50-56 on A7+
     }
+    # The amount of ritual gained by ascension
     ritual_gain = {
-        +0: 3,  # A0-A1 gain 3 ritual
-        +2: 4,  # A2-A16 gain 4 ritual
-        17: 5,  # A17+ gain 5 ritual
+        +0: 3,
+        +2: 4,
+        17: 5
     }
 
     def __init__(self, environment=None, ascension=0):
-        super().__init__(name='Cultist',
-                         max_health=Cultist.max_health_range,
-                         environment=environment,
+        super().__init__(environment=environment,
                          ascension=ascension,
                          act=1)
 
-    @AbstractEnemy.ability
     def incantation(self, target, quantity: Optional[int] = None, log=[]):
         log.append('used incantation')
         self.increase_effect(Ritual, quantity if quantity is not None
-        else ascension_based_int(self.ascension, Cultist.ritual_gain))
+        else asc_int(self.ascension, Cultist.ritual_gain))
 
-    @AbstractEnemy.ability
     def dark_strike(self, target, damage: Optional[int] = None, log=[]):
         self.deal_damage(6, target, log)
 
@@ -180,6 +201,10 @@ class RedLouse(AbstractEnemy):
     max_health_range = {
         0: (10, 15),
         7: (11, 16)
+    }
+    new_max_health = {
+        (48, 54): None,
+        (50, 56): 7
     }
     curl_up_power = {
         +0: (3, 7),
@@ -202,22 +227,19 @@ class RedLouse(AbstractEnemy):
                          act=1)
 
         # Calculate a random curl up power based on value map
-        self.set_effect(CURLUP, ascension_based_int(ascension, RedLouse.curl_up_power))
+        self.set_effect(CURLUP, asc_int(ascension, RedLouse.curl_up_power))
 
         # TODO: Confirm this? "Between 5  and 7" Inclusive or exclusive?
         self.damage = randint(5, 7)
 
-    @AbstractEnemy.ability
     def bite(self, target=None, damage: Optional[int] = None):
         target.take_damage(damage if damage is not None else
-                           self.damage + ascension_based_int(self.ascension, RedLouse.bite_value))
+                           self.damage + asc_int(self.ascension, RedLouse.bite_value))
 
-    @AbstractEnemy.ability
     def grow(self, quantity: Optional[int] = None):
         self.apply_strength(quantity if quantity is not None else
-                            ascension_based_int(self.ascension, RedLouse.grow_value))
+                            asc_int(self.ascension, RedLouse.grow_value))
 
-    @AbstractEnemy.ability_pattern
     def pattern(self):
         yield self.bite
 
@@ -234,34 +256,30 @@ class Jaw_Worm(AbstractEnemy):
                          ascension=ascension,
                          act=act)
 
-    @AbstractEnemy.ability
     def Chomp(self, target):
         # Chomp: Deal 11 damage, or 12 on ascension 2+
         target.take_damage(
-            ascension_based_int(self.ascension, {
+            asc_int(self.ascension, {
                 0: 11,
                 2: 12
             }))
 
-    @AbstractEnemy.ability
     def Thrash(self, target):
         # Thrash: Deal 7 damage, gain 5 block.
         self.apply_block(5)
         target.take_damage(7)
 
-    @AbstractEnemy.ability
     def Bellow(self):
-        self.apply_strength(ascension_based_int(self.ascension, {
+        self.apply_strength(asc_int(self.ascension, {
             +0: 3,
             +2: 4,
             17: 5
         }))
-        self.apply_block(ascension_based_int(self.ascension, {
+        self.apply_block(asc_int(self.ascension, {
             +0: 6,
             17: 9
         }))
 
-    @AbstractEnemy.ability_pattern
     def pattern(self):
         # Simple pattern: casts incantation, then spams dark stroke.
         yield self.incantation

@@ -1,5 +1,5 @@
 from random import randint
-from typing import Dict, Tuple, Union
+from typing import Dict, Tuple, Union, Optional
 
 
 class C:
@@ -9,7 +9,20 @@ class C:
     END = '\033[0m'
 
 
-def ascension_based_int(ascension: int, value_dict: Dict[int, Union[Tuple[int, int], int]]) -> int:
+def parse_class_name(class_name: str) -> str:
+    """
+    This will parse a python CamelCase class name and return the resulting strings.
+    Example: 'PerfectedStrike' -> 'Perfected Strike'
+    """
+    final_name = ''
+    for char in class_name:
+        if char.isupper():
+            final_name += ' '
+        final_name += char
+    return final_name[1:]
+
+
+def asc_int(ascension: int, value_dict: Dict[int, Union[Tuple[int, int], int]]) -> int:
     """
     Use this to get a value based on ascension
     This will either return a random value between (lower, upper) bounds if a tuple is provided
@@ -26,6 +39,7 @@ def ascension_based_int(ascension: int, value_dict: Dict[int, Union[Tuple[int, i
         {$ascension: value} for set static numbers
     :return: An integer value based on provided ascension and value dict
     """
+
     # Start by creating a list of sorted keys
     ascension_bounds = list(value_dict.keys())
     ascension_bounds.sort()
