@@ -5,8 +5,9 @@ class SelectEvent(Enum):
     DRAW = 1
     EXHAUST = 2
     PLACE_ON_DRAWPILE = 3
-    COPY = 4,
+    COPY = 4
     RECOVER_FROM_EXHAUST = 5
+    DISCARD = 6
 
 
 class CardPiles(Enum):
