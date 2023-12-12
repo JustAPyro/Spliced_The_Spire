@@ -80,6 +80,13 @@ class AbstractEffect:
 # === Implementations ===
 # =======================
 
+class Poison(AbstractEffect):
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.take_damage(self.stacks)
+        if self.stacks > 0:
+            owner.decrease_effect(Poison, 1)
+
+
 class Block(AbstractEffect):
     def modify_damage_taken(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damage: int) -> int:
         if self.stacks >= damage:
