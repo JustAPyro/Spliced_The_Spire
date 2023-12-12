@@ -312,6 +312,49 @@ class Survivor(AbstractCard, ABC):
         self.block = 11
 
 
+class Acrobatics(AbstractCard, ABC):
+
+    def __init__(self):
+        self.cardDraw = 3
+        super().__init__(name='Acrobatics', energy_cost=1, card_type=CardType.SKILL)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        caller.draw_card(quantity=self.cardDraw)
+        chosenDiscard = caller.select_card(caller.get_hand(), event_type=SelectEvent.DISCARD)
+        caller.discard_card(chosenDiscard)
+
+    def upgrade_logic(self):
+        self.cardDraw = 4
+
+
+class Backflip(AbstractCard, ABC):
+    def __init__(self):
+        self.block = 5
+        self.draw = 2
+        super().__init__(name='Backflip', energy_cost=1, card_type=CardType.SKILL)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        caller.increase_effect(Block, self.block)
+        caller.draw_card(quantity=self.draw)
+
+    def upgrade_logic(self):
+        self.block = 8
+
+
+class Bane(AbstractCard, ABC):
+    def __init__(self):
+        self.damage = 7
+        super().__init__(name='Bane', energy_cost=1, card_type=CardType.ATTACK)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        target.take_damage(self.damage)
+        if target.has_effect(Poison):
+            target.take_damage(self.damage)
+
+    def upgrade_logic(self):
+        self.damage = 10
+
+
 # Ironclad cards
 class RedStrike(AbstractCard, ABC):
     def __init__(self):
