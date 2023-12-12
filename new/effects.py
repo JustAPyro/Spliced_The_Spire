@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING
 from new.enumerations import CardType
 
 if TYPE_CHECKING:
-    from actors import AbstractActor
-    from enemies import AbstractEnemy
+    from new.abstractions import AbstractActor, AbstractEnemy
 
 
 # ===================

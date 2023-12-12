@@ -1,21 +1,39 @@
 class Parent:
-    staticvar = 3
+    def __init__(self):
+        pass
+
+    class Message():
+        def __init__(self):
+            self.message = NotImplemented
+
+        def set_message(self, message):
+            self.message = message
+
+        def has_message(self):
+            return self.message is not NotImplemented
+
+    @staticmethod
+    def do_twice(func):
+        def wrapper_do_twice(*args, **kwargs):
+            self = args[0]
+            message = Parent.Message()
+            func(self, message.set_message)
+            if not message.has_message():
+                raise Exception(' Didnt init!')
+
+        return wrapper_do_twice
+
 
 class Child(Parent):
-    10-15
-    11-16, 7+
+    def __init__(self):
+        super().__init__()
 
-    11-17
-    12-18 7+
-    pass
+    @Parent.do_twice
+    def prin(self, var):
+        var('hi')
+        print('hello!')
+        print(var)
 
-    3-7
-    4-8, 7
-    9-12, 17
 
-    3-7
-    4-8 7
-    9-12, 17
-
-print(Parent.staticvar)
-print(Child.staticvar)
+c = Child()
+c.prin()

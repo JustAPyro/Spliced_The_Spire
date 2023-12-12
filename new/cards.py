@@ -10,8 +10,7 @@ from new.effects import *
 from new.enumerations import CardType, SelectEvent, CardPiles, CardRarity, IntentType
 
 if TYPE_CHECKING:
-    from actors import AbstractActor
-    from enemies import AbstractEnemy
+    from new.abstractions import AbstractActor, AbstractEnemy
 
 # Card Cost Variables
 X = True
@@ -153,7 +152,7 @@ class AbstractCard(ABC):
 
         parameters
         ----------
-        caller: AbstractActor
+        caller: new.abstractions.AbstractActor
             The player using the card.
         """
         return True
