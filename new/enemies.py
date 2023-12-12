@@ -2,18 +2,24 @@ from __future__ import annotations
 
 import random
 from abc import ABC, abstractmethod
-
-import lutil
-from new.effects import EffectMixin, Ritual, Block, Strength
 from random import randint
 from typing import TYPE_CHECKING, Optional
 
+import lutil
 from lutil import asc_int
+from new.abstractions import DamageMixin
+from new.actors import AbstractActor
+from new.effects import EffectMixin, Ritual, Block, Strength, Weak, CurlUp
 from new.enumerations import IntentType
 
 if TYPE_CHECKING:
     pass
 
+
+# Short term goal for this file
+# - TODO: Polish and complete AbstractEnemy
+# - - TODO: Fix the bad messaging code in take/deal damage of AbstractEnemy
+# - TODO: Cultist, Jaw Worm, Red Louse & Green Louse, Acid Slime (m), Spike Slime(m), Acid Slime(s), Spike Slime(s)
 
 class Intent:
     """
@@ -53,7 +59,7 @@ class Intent:
         self.damage = damage
 
 
-class AbstractEnemy(ABC, EffectMixin):
+class AbstractEnemy(ABC, EffectMixin, DamageMixin):
     """
     This class is an abstract class designed to streamline the implementation
     of enemies and elites.
@@ -62,7 +68,7 @@ class AbstractEnemy(ABC, EffectMixin):
 
     def __init__(self,
                  name: Optional[str] = None,
-                 max_health: dict[tuple[int], Optional[int]] | int | None = None,
+                 max_health: dict[int, tuple[int, int]] | int | None = None,
                  set_health: Optional[int] = None,
                  ascension=0,
                  environment=None,
@@ -78,8 +84,10 @@ class AbstractEnemy(ABC, EffectMixin):
             the class name.
 
         :param max_health:
-            The creature's max_health. This can be provided in the following format.
-            {(lower, upper): None}
+            The creature's max_health. This can be provided in three formats. You can either declare it
+            as a static class level variable, by adding a max_health map to the class (outside __init__/self), or
+            you can pass it into the init function either as a map, or just as an int if you want to set it to a
+            specific value.
 
         :param set_health:
             If specified will set the health of the creature to this amount.
@@ -125,6 +133,9 @@ class AbstractEnemy(ABC, EffectMixin):
         # Initialize the EffectMixin
         super().__init__()
 
+    def get_actor(self) -> AbstractActor:
+        return self.environment['player']
+
     def is_dead(self):
         return self.health <= 0
 
@@ -155,7 +166,7 @@ class AbstractEnemy(ABC, EffectMixin):
                 continue
 
             for i in range(successive_limit[ability]):
-                if (len(self.log) < itype(self.log[-i]) == ability):
+                if (len(self.log) < type(self.log[-i]) == ability):
                     valid_abilities.append(type(self.log[-i]))
 
         # Then use chances to pick between them
@@ -188,6 +199,7 @@ class DummyEnemy(AbstractEnemy, ABC):
         pass
 
 
+# Checked 12/12/23
 class Cultist(AbstractEnemy):
     max_health = {
         0: (48, 54),  # Health is 48-54 on A0+
@@ -205,12 +217,17 @@ class Cultist(AbstractEnemy):
                          ascension=ascension,
                          act=1)
 
-    def incantation(self, target, quantity: Optional[int] = None, log=[]):
+    def incantation(self, target, quantity: Optional[int] = None, log=None):
+        if log is None:
+            log = []
         log.append('used incantation')
-        self.increase_effect(Ritual, quantity if quantity is not None
-        else asc_int(self.ascension, Cultist.ritual_gain))
 
-    def dark_strike(self, target, damage: Optional[int] = None, log=[]):
+        increase = quantity if quantity is not None else asc_int(self.ascension, Cultist.ritual_gain)
+        self.increase_effect(Ritual, increase)
+
+    def dark_strike(self, target, damage: Optional[int] = None, log=None):
+        if log is None:
+            log = []
         self.deal_damage(6, target, log)
 
     def pattern(self):
@@ -220,53 +237,7 @@ class Cultist(AbstractEnemy):
             yield self.dark_strike
 
 
-class RedLouse(AbstractEnemy):
-    max_health_range = {
-        0: (10, 15),
-        7: (11, 16)
-    }
-    new_max_health = {
-        (48, 54): None,
-        (50, 56): 7
-    }
-    curl_up_power = {
-        +0: (3, 7),
-        +7: (4, 8),
-        17: (9, 12)
-    }
-    bite_value = {
-        0: 0,  # Deals D + 0 damage on A0
-        2: 1,  # Deals D + 1 damage on A2+
-    }
-    grow_value = {
-        +0: 3,
-        17: 4,
-    }
-
-    def __init__(self, ascension=0):
-        super().__init__(name='Louse',
-                         max_health=RedLouse.max_health_range,
-                         ascension=ascension,
-                         act=1)
-
-        # Calculate a random curl up power based on value map
-        self.set_effect(CURLUP, asc_int(ascension, RedLouse.curl_up_power))
-
-        # TODO: Confirm this? "Between 5  and 7" Inclusive or exclusive?
-        self.damage = randint(5, 7)
-
-    def bite(self, target=None, damage: Optional[int] = None):
-        target.take_damage(damage if damage is not None else
-                           self.damage + asc_int(self.ascension, RedLouse.bite_value))
-
-    def grow(self, quantity: Optional[int] = None):
-        self.apply_strength(quantity if quantity is not None else
-                            asc_int(self.ascension, RedLouse.grow_value))
-
-    def pattern(self):
-        yield self.bite
-
-
+# Checked 12/12/23
 class Jaw_Worm(AbstractEnemy):
     max_health = {
         0: (40, 44),  # A1- Health is 48-54
@@ -316,6 +287,132 @@ class Jaw_Worm(AbstractEnemy):
                     self.chomp: 2
                 }
             )
+
+
+class GreenLouse(AbstractEnemy, ABC):
+    """
+    # 12/12/23 - Checked (LH)
+    Green Louse: https://slay-the-spire.fandom.com/wiki/Louses#Green_Louse.
+    The green Louse has two abilities: Bite and Spit Web.
+    """
+    max_health = {
+        0: (11, 17),
+        7: (12, 18)
+    }
+
+    # Curl up effect from start
+    curl_up_stack_map = {
+        +0: (3, 7),
+        +7: (4, 8),
+        17: (9, 12),
+    }
+
+    def __init__(self, ascension=0, act=1,
+                 base_damage: int = random.randint(5, 7),
+                 curl_up_stacks: Optional[int] = None):
+        """
+        Create a Green louse. Note that base damage may be provided as a static value, but
+        if it is not, then it will be randomly selected between 5 and 7 on enemy creation,
+        which is how it happens in slay the spire.
+
+        Parameters
+        ----------
+        :param ascension:
+            The ascension the enemy is fighting on.
+
+        :param act:
+            What act the enemy is in (Which can affect behavior)
+
+        :param base_damage:
+            Green Louse select a value 'D' on creation, and then deal damage consistently
+            throughout the fight based on that. The base_damage variable allows you to set
+            the value of d manually, if you choose to. If you choose not to it will be
+            generated randomly per slay the spire rules.
+
+        :param curl_up_stacks:
+            Green Louse starts with multiple stacks of Curl Up. Generally, this is
+            determined randomly based on ascension, following the mapping in
+            GreenLouse.curl_up_stack_map. If you would like to create a Green Louse
+            starting with a specific number of curl up, you may provide it here.
+        """
+        # Apply the curl up stacks, calculating an appropriate one if none was provided
+        self.increase_effect(CurlUp, curl_up_stacks if curl_up_stacks
+                             else asc_int(ascension, GreenLouse.curl_up_stack_map))
+
+        self.base_damage = base_damage
+        super().__init__(ascension=ascension, act=act)
+
+    def bite(self):
+        """Deals damage based on the base_damage of the louse and the ascension."""
+        self.damage(asc_int(self.ascension, {
+            self.base_damage: 0,
+            self.base_damage + 1: 2
+        }))
+
+    def spit_web(self):
+        """Applies two weak."""
+        self.get_actor().increase_effect(Weak, 2)
+
+    def pattern(self):
+        """
+        Has a 25% chance of using Spit Web and a 75% chance of using Bite.
+        Cannot use the same move three times in a row.
+
+        On Ascension Icon Ascension 17, it cannot use Spit Web twice in a row
+        and cannot use Bite three times in a row.
+        """
+        while True:
+            yield self.rule_pattern(
+                chances={
+                    self.spit_web: 25,
+                    self.bite: 75},
+                successive_limit={
+                    self.spit_web: 2 if self.ascension >= 17 else 3,
+                    self.bite: 3})
+
+
+class RedLouse(AbstractEnemy):
+    health_range = {
+        0: (10, 15),
+        7: (11, 16)
+    }
+    curl_up_power = {
+        +0: (3, 7),
+        +7: (4, 8),
+        17: (9, 12)
+    }
+    bite_value = {
+        0: 0,  # Deals D + 0 damage on A0
+        2: 1,  # Deals D + 1 damage on A2+
+    }
+    grow_value = {
+        +0: 3,
+        17: 4,
+    }
+
+    def __init__(self, ascension=0):
+        super().__init__(
+            max_health=RedLouse.max_health_range,
+            ascension=ascension,
+            act=1)
+
+        # Calculate a random curl up power based on value map
+        self.set_effect(CURLUP, asc_int(ascension, RedLouse.curl_up_power))
+
+        # TODO: Confirm this? "Between 5  and 7" Inclusive or exclusive?
+        self.damage = randint(5, 7)
+
+    def bite(self, target=None, damage: Optional[int] = None):
+        target.take_damage(damage if damage is not None else
+                           self.damage + asc_int(self.ascension, RedLouse.bite_value))
+
+    def grow(self, quantity: Optional[int] = None):
+        self.apply_strength(quantity if quantity is not None else
+                            asc_int(self.ascension, RedLouse.grow_value))
+
+    def pattern(self):
+        yield self.bite
+
 
 x = Jaw_Worm()
 gen = x.pattern()

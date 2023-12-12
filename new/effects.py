@@ -66,7 +66,8 @@ class AbstractEffect:
     def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         pass
 
-    def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damaging_enemy: AbstractEnemy):
+    def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment,
+                       damaging_enemy: AbstractEnemy):
         pass
 
     def modify_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, quantity):
@@ -81,7 +82,8 @@ class AbstractEffect:
 # =======================
 
 class Block(AbstractEffect):
-    def modify_damage_taken(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damage: int) -> int:
+    def modify_damage_taken(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment,
+                            damage: int) -> int:
         if self.stacks >= damage:
             blocked = damage
         else:
@@ -167,6 +169,7 @@ class FireBreathingEffect(AbstractEffect):
             for enemy in environment['enemies']:
                 enemy.health = enemy.health - self.stacks
 
+
 class FlameBarrierEffect(AbstractEffect):
 
     def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damaging_enemy):
@@ -186,6 +189,10 @@ class RageEffect(AbstractEffect):
         owner.set_effect(RageEffect, 0)
 
 
+class CurlUp(AbstractEffect):
+    pass
+
+
 class RuptureEffect(AbstractEffect):
     def on_receive_damage_from_card(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
         owner.increase_effect(Strength, self.stacks)
@@ -194,11 +201,14 @@ class RuptureEffect(AbstractEffect):
 class BarricadeEffect(AbstractEffect):
     pass
 
+
 class BerserkEffect(AbstractEffect):
     pass
 
+
 class BrutalityEffect(AbstractEffect):
     pass
+
 
 class CorruptionEffect(AbstractEffect):
     pass
@@ -211,9 +221,9 @@ class DemonFormEffect(AbstractEffect):
 class DoubleTapEffect(AbstractEffect):
     pass
 
+
 class JuggernautEffect(AbstractEffect):
     pass
-
 
 
 # ===================================
