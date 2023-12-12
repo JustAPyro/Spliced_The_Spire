@@ -291,7 +291,7 @@ class Jaw_Worm(AbstractEnemy):
 
 class GreenLouse(AbstractEnemy, ABC):
     """
-    # 12/12/23 - Checked (LH)
+    Checked 12/12/23 (LH)
     Green Louse: https://slay-the-spire.fandom.com/wiki/Louses#Green_Louse.
     The green Louse has two abilities: Bite and Spit Web.
     """
@@ -300,7 +300,7 @@ class GreenLouse(AbstractEnemy, ABC):
         7: (12, 18)
     }
 
-    # Curl up effect from start
+    # Curl up effect applied at start
     curl_up_stack_map = {
         +0: (3, 7),
         +7: (4, 8),
@@ -336,8 +336,8 @@ class GreenLouse(AbstractEnemy, ABC):
             starting with a specific number of curl up, you may provide it here.
         """
         # Apply the curl up stacks, calculating an appropriate one if none was provided
-        self.increase_effect(CurlUp, curl_up_stacks if curl_up_stacks
-                             else asc_int(ascension, GreenLouse.curl_up_stack_map))
+        self.increase_effect(CurlUp,
+                             curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))
 
         self.base_damage = base_damage
         super().__init__(ascension=ascension, act=act)
@@ -372,46 +372,86 @@ class GreenLouse(AbstractEnemy, ABC):
 
 
 class RedLouse(AbstractEnemy):
+    """
+    Checked 12/12/23 (LH)
+    Red Louse: https://slay-the-spire.fandom.com/wiki/Louses#Red_Louse.
+    The red Louse has two abilities: Bite and Grow.
+    """
     health_range = {
         0: (10, 15),
         7: (11, 16)
     }
+
+    # Curl Up effect applied at start
     curl_up_power = {
         +0: (3, 7),
         +7: (4, 8),
         17: (9, 12)
     }
-    bite_value = {
-        0: 0,  # Deals D + 0 damage on A0
-        2: 1,  # Deals D + 1 damage on A2+
-    }
-    grow_value = {
-        +0: 3,
-        17: 4,
-    }
 
-    def __init__(self, ascension=0):
-        super().__init__(
-            max_health=RedLouse.max_health_range,
-            ascension=ascension,
-            act=1)
+    # TODO: Is 5, 7 right? Is this inclusive or exclusive?
+    def __init__(self, ascension=0, act=1,
+                 base_damage: int = random.randint(5, 7),
+                 curl_up_stacks: Optional[int] = None):
+        """
+        Create a Red Louse. Note that base damage may be provided as a static value, but
+        if it is not, then it will be randomly selected between 5 and 7 on enemy creation,
+        which is how it happens in slay the spire.
 
-        # Calculate a random curl up power based on value map
-        self.set_effect(CURLUP, asc_int(ascension, RedLouse.curl_up_power))
+        Parameters
+        ----------
+        :param ascension:
+            The ascension the enemy is fighting on.
 
-        # TODO: Confirm this? "Between 5  and 7" Inclusive or exclusive?
-        self.damage = randint(5, 7)
+        :param act:
+            What act the enemy is in (Which can affect behavior)
 
-    def bite(self, target=None, damage: Optional[int] = None):
-        target.take_damage(damage if damage is not None else
-                           self.damage + asc_int(self.ascension, RedLouse.bite_value))
+        :param base_damage:
+            Red Louse select a value 'D' on creation, and then deal damage consistently
+            throughout the fight based on that. The base_damage variable allows you to set
+            the value of d manually, if you choose to. If you choose not to it will be
+            generated randomly per slay the spire rules.
 
-    def grow(self, quantity: Optional[int] = None):
-        self.apply_strength(quantity if quantity is not None else
-                            asc_int(self.ascension, RedLouse.grow_value))
+        :param curl_up_stacks:
+            Red Louse starts with multiple stacks of Curl Up. Generally, this is
+            determined randomly based on ascension, following the mapping in
+            RedLouse.curl_up_stack_map. If you would like to create a Red Louse
+            starting with a specific number of curl up, you may provide it here.
+        """
+        # Apply the curl up stacks, calculating an appropriate one if none was provided
+        self.increase_effect(CurlUp,
+                             curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))
+
+        self.base_damage = base_damage
+        super().__init__(ascension=ascension, act=act)
+
+    def bite(self):
+        """Deals damage based on the base_damage of the louse and the ascension."""
+        self.damage(asc_int(self.ascension, {
+            self.base_damage: 0,
+            self.base_damage + 1: 2
+        }))
+
+    def grow(self):
+        """Gains 3 Strength. (4 on asc. 17+)"""
+        self.increase_effect(Strength, 4 if self.ascension >= 17 else 3)
 
     def pattern(self):
-        yield self.bite
+        """
+        Has a 25% chance of using Spit Web and a 75% chance of using Bite.
+        Cannot use the same move three times in a row.
+
+        On Ascension Icon Ascension 17, it cannot use Spit Web twice in a row
+        and cannot use Bite three times in a row.
+        """
+        while True:
+            yield self.rule_pattern(
+                chances={
+                    self.grow: 25,
+                    self.bite: 75},
+                successive_limit={
+                    self.grow: 2 if self.ascension >= 17 else 3,
+                    self.bite: 3})
 
 
 x = Jaw_Worm()
