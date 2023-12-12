@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import random
 from abc import ABC, abstractmethod
 
 import lutil
-from new.effects import EffectMixin, Ritual
+from new.effects import EffectMixin, Ritual, Block, Strength
 from random import randint
 from typing import TYPE_CHECKING, Optional
 
@@ -118,6 +119,9 @@ class AbstractEnemy(ABC, EffectMixin):
         # that take_turn is called on this enemy
         self.ability_method_generator = self.pattern()
 
+        # Track the history and stuffs
+        self.log = []
+
         # Initialize the EffectMixin
         super().__init__()
 
@@ -141,10 +145,32 @@ class AbstractEnemy(ABC, EffectMixin):
     def pattern(self):
         raise NotImplementedError
 
+    def rule_pattern(self, chances, successive_limit):
+        # Get a list of the possible abilites bassed on successiveness?
+
+        valid_abilities = []
+        for ability in successive_limit:
+            if successive_limit[ability] > len(self.log):
+                valid_abilities.append(ability)
+                continue
+
+            for i in range(successive_limit[ability]):
+                if (len(self.log) < itype(self.log[-i]) == ability):
+                    valid_abilities.append(type(self.log[-i]))
+
+        # Then use chances to pick between them
+        weights = []
+        for ability in valid_abilities:
+            weights.append(chances[ability])
+
+        return random.choices(valid_abilities, weights)
+
     def take_turn(self, actor):
         log = []
         self.process_effects('on_start_turn', self.environment)
-        next(self.ability_method_generator)(actor, None, log)
+        next_method = next(self.ability_method_generator)
+        self.log.append(next_method.__name__)
+        next_method(actor, None, log)
         self.process_effects('on_end_turn', self.environment)
         return log[0]
 
@@ -160,9 +186,6 @@ class DummyEnemy(AbstractEnemy, ABC):
 
     def pattern(self):
         pass
-
-
-
 
 
 class Cultist(AbstractEnemy):
@@ -245,18 +268,16 @@ class RedLouse(AbstractEnemy):
 
 
 class Jaw_Worm(AbstractEnemy):
-    max_health_range = {
+    max_health = {
         0: (40, 44),  # A1- Health is 48-54
         7: (42, 46)  # A7+ Health is 50-56
     }
 
     def __init__(self, ascension=0, act=1):
-        super().__init__(name='Jaw Worm',
-                         max_health=Jaw_Worm.max_health_range,
-                         ascension=ascension,
+        super().__init__(ascension=ascension,
                          act=act)
 
-    def Chomp(self, target):
+    def chomp(self, target):
         # Chomp: Deal 11 damage, or 12 on ascension 2+
         target.take_damage(
             asc_int(self.ascension, {
@@ -264,24 +285,40 @@ class Jaw_Worm(AbstractEnemy):
                 2: 12
             }))
 
-    def Thrash(self, target):
+    def thrash(self, target):
         # Thrash: Deal 7 damage, gain 5 block.
-        self.apply_block(5)
+        self.increase_effect(Block, 5)
         target.take_damage(7)
 
-    def Bellow(self):
-        self.apply_strength(asc_int(self.ascension, {
-            +0: 3,
-            +2: 4,
-            17: 5
-        }))
-        self.apply_block(asc_int(self.ascension, {
-            +0: 6,
-            17: 9
-        }))
+    def bellow(self):
+        # Bellow: Gain strength and block
+        self.increase_effect(Strength,
+                             asc_int(self.ascension, {
+                                 +0: 3,
+                                 +2: 4,
+                                 17: 5}))
+        self.increase_effect(Block,
+                             asc_int(self.ascension, {
+                                 +0: 6,
+                                 17: 9}))
 
     def pattern(self):
-        # Simple pattern: casts incantation, then spams dark stroke.
-        yield self.incantation
+        yield self.chomp
         while True:
-            yield self.dark_strike
+            yield self.rule_pattern(
+                chances={
+                    self.bellow: 45,
+                    self.thrash: 30,
+                    self.chomp: 25},
+                successive_limit={
+                    self.bellow: 2,
+                    self.thrash: 3,
+                    self.chomp: 2
+                }
+            )
+
+x = Jaw_Worm()
+gen = x.pattern()
+last = None
+for i in range(1000):
+    print(next(gen))
