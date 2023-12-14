@@ -107,20 +107,19 @@ class Cultist(AbstractEnemy):
                          act=act)
 
     def incantation(self):
-        """Gains stacks of Ritual effect depending on ascension."""
+        self.intent = IntentType.BUFF,
+        self.message = 'Cultist used incantation'
         self.increase_effect(Ritual, asc_int(self.ascension, {
             +0: 3,
             +2: 4,
             17: 5
         }))
 
-    @AbstractEnemy.ability
-    def dark_strike(self,
-                    set_message: callable,
-                    set_intent: callable):
+    def dark_strike(self):
         """Deal 6 damage."""
+        self.intent = IntentType.AGGRESSIVE
+        self.message = 'Cultist used Dark Strike'
         self.damage(6)
-        set_intent(IntentType.AGGRESSIVE)
 
     def pattern(self):
         """Simple pattern: casts incantation, then spams dark stroke."""

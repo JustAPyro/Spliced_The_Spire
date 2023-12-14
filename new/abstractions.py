@@ -9,7 +9,7 @@ import lutil
 from lutil import C, asc_int
 from new.cards import AbstractCard
 from new.effects import EffectMixin
-from new.enumerations import CardPiles, CardType, SelectEvent
+from new.enumerations import CardPiles, CardType, SelectEvent, IntentType
 
 
 class DamageMixin:
@@ -381,6 +381,10 @@ class AbstractEnemy(ABC, EffectMixin, DamageMixin):
         # Track the history and stuffs
         self.log = []
 
+        # Turn specific stuff for enemies to be set in abilities
+        self.intent: Optional[IntentType] = None
+        self.message: Optional[str] = None
+
         # Initialize the EffectMixin
         super().__init__()
 
@@ -399,10 +403,6 @@ class AbstractEnemy(ABC, EffectMixin, DamageMixin):
         log.append(f'used Dark Strike on {target.name} to deal {damage} damage.')
         target.take_damage(damage, self)
 
-    @property
-    def intent(self):
-        return None
-
     @abstractmethod
     def pattern(self):
         raise NotImplementedError
@@ -417,7 +417,7 @@ class AbstractEnemy(ABC, EffectMixin, DamageMixin):
                 continue
 
             for i in range(successive_limit[ability]):
-                if (len(self.log) < type(self.log[-i]) == ability):
+                if len(self.log) < type(self.log[-i]) == ability:
                     valid_abilities.append(type(self.log[-i]))
 
         # Then use chances to pick between them
@@ -427,55 +427,20 @@ class AbstractEnemy(ABC, EffectMixin, DamageMixin):
 
         return random.choices(valid_abilities, weights)
 
-    class Collector:
-        def __init__(self):
-            self.message = NotImplemented
-            self.intent = NotImplemented
-
-        def set_message(self, message: str):
-            self.message = message
-
-        def has_message(self):
-            return self.message is not NotImplemented
-
-        def set_intent(self, intent):
-            self.intent = intent
-
-        def has_intent(self):
-            return self.intent is not NotImplemented
-
-    @classmethod
-    def ability(cls, func):
-        """
-        This is a decorator function. Decorators are kind of convoluted, but what
-        actually happens here is that a Collector is created and passes injects two methods
-        into the ability method (set_message and set_intent). If these are not used by the
-        ability message it will throw an exception.
-        """
-
-        def ability_with_collector(*args, **kwargs):
-            self = args[0]
-            collector = AbstractEnemy.Collector()
-
-            func(self, collector.set_message, collector.set_intent)
-
-            # TODO: Clean up these guards
-            if not collector.has_message() or not collector.has_intent():
-                raise RuntimeError(f'{cls.__name__}.{func.__name__} implementation does not use the provided collector method set_message. '
-                                   f'Please add a {func.__name__}(\'message\') to the implementation.')
-            if not collector.has_intent():
-                raise RuntimeError(
-                    f'{cls.__name__}.{func.__name__} implementation does not use the provided collector method set_message. '
-                    f'Please add a {func.__name__}(\'message\') to the implementation.')
-
-
-        return ability_with_collector
-
     def take_turn(self, actor):
-        log = []
         self.process_effects('on_start_turn', self.environment)
+
+        self.intent = None
+        self.message = None
+
+        # Get and call the next ability method the enemy will use
         next_method = next(self.ability_method_generator)
-        self.log.append(next_method.__name__)
         next_method()
+
+        if self.intent is None or self.message is None:
+            raise RuntimeError(f'Yo, set the intent/message in the {next_method.__name__} method.')
+
+        # Append the message
+        self.log.append(self.message)
         self.process_effects('on_end_turn', self.environment)
-        return log
+        return self.log

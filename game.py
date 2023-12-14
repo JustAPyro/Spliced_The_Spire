@@ -31,8 +31,8 @@ class Simulation:
                 print(f'{enemy.name}\'s turn. \n{enemy.name} has {enemy.health} health'
                       f' and the following effects: {enemy.get_effects_dict()}')
 
-                turn = enemy.take_turn(self.actor)
-                print(f'{enemy.name} {turn}')
+                log = enemy.take_turn(self.actor)
+                print(f'{log[-1]}')
 
         if self.actor.health <= 0:
             print("Actor LOST")
