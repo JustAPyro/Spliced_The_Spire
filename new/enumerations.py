@@ -32,3 +32,21 @@ class CardType(Enum):
     @staticmethod
     def all():
         return CardType.ATTACK, CardType.SKILL, CardType.POWER, CardType.STATUS, CardType.CURSE
+
+
+class CardRarity(Enum):
+    UNKNOWN = 0
+    STARTER = 1
+    COMMON = 2
+    UNCOMMON = 3
+    RARE = 4
+    SPECIAL = 5
+
+
+class CardColor(Enum):
+    UNKNOWN = 0
+    COLORLESS = 1
+    RED = 2
+    GREEN = 3
+    BLUE = 4
+    PURPLE = 5
