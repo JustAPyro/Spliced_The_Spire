@@ -1,6 +1,9 @@
 from enum import Enum
 
 
+class EventHooks(Enum):
+    MODIFY_DAMAGE_TAKEN = 1
+
 class SelectEvent(Enum):
     DRAW = 1
     EXHAUST = 2

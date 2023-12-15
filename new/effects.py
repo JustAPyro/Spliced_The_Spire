@@ -6,74 +6,7 @@ from typing import TYPE_CHECKING
 from new.enumerations import CardType
 
 if TYPE_CHECKING:
-    from new.abstractions import AbstractActor, AbstractEnemy
-
-
-# ===================
-# === Abstraction ===
-# ===================
-
-class AbstractEffect:
-    """
-    This abstraction allows the easy creation of Effects.
-    An effect in this context is a Slay The Spire Buff,
-    Debuff, or block.
-    """
-
-    def __init__(self):
-        self.stacks = 0  # Number of stacks of this effect
-
-    # === API/SANDBOX METHODS ===
-
-    def modify_damage_taken(self, owner, environment, damage: int) -> int:
-        """
-        Effects overriding this can modify the damage taken by an actor or enemy.
-        The return value of this method will be added to the damage, you can lower the damage
-        received by returning a negative value.
-        """
-        pass
-
-    def modify_damage_dealt(self, owner, environment, damage: int) -> int:
-        """
-        Effects overriding this can modify the damage dealt by an actor or enemy.
-        The return value of this method will be added to the damage, you can lower the damage
-        dealt by returning a negative value.
-        """
-        pass
-
-    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        """
-        Effects overriding this can cause things to happen on the end of turn.
-        """
-        pass
-
-    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        """
-        Effects overriding this can cause things to happen on the end of turn.
-        """
-        pass
-
-    def on_receive_damage_from_card(self: AbstractEffect, owner, environment, card):
-        pass
-
-    def on_card_play(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
-        pass
-
-    def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
-        pass
-
-    def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        pass
-
-    def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment,
-                       damaging_enemy: AbstractEnemy):
-        pass
-
-    def modify_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, quantity):
-        """
-        Effects overriding this will modify the number of cards drawn
-        """
-        return 0
+    from new.abstractions import AbstractActor, AbstractEnemy, AbstractEffect
 
 
 # =======================

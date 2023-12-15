@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 from abc import abstractmethod, ABC
 from copy import copy
+from enum import Enum
 from typing import Optional
 
 import lutil
@@ -20,6 +21,39 @@ from new.enumerations import CardPiles, CardType, SelectEvent, IntentType
 #
 #     def damage(self: AbstractEnemy, damage):
 #         self.get_actor().take_damage(damage, self)
+
+class EventHooks:
+    implementations = {}
+
+    def __init__(self):
+        # If a method is overridden add the self to
+        if type(self).modify_damage_taken == EventHooks.modify_damage_taken:
+            implementations[EventHooks.modify_damage_taken].append(self)
+
+    def modify_damage_taken(self: 'AbstractActor',
+                            owner: 'AbstractActor',
+                            environment: dict,
+                            damage: int) -> int:
+        """
+        Effects overriding this can modify the damage taken by an actor or enemy.
+        The return value of this method will be added to the damage, you can lower the damage
+        received by returning a negative value.
+
+        Parameters
+        ----------
+        :param self:
+            The actor receiving the damage
+        :param owner:
+            I think this is also the actor receiving the damage. When I implemented this I erroneously believed
+            that self would be an Effect or EventHook.
+        :param environment:
+            TODO
+        :param damage:
+            The amount of damage received.
+        :returns:
+            The amount to add to the damage (or reduce, if returning a negative value.)
+        """
+        return NotImplemented
 
 
 class AbstractActor(EffectMixin):
@@ -451,3 +485,58 @@ class AbstractEnemy(ABC, EffectMixin):
         self.print_log.append(self.message)
         self.process_effects('on_end_turn', self.environment)
         return self.print_log
+
+
+class AbstractEffect(EventHooks):
+    """
+    This abstraction allows the easy creation of Effects.
+    An effect in this context is a Slay The Spire Buff,
+    Debuff, or block.
+    """
+
+    def __init__(self):
+        self.stacks = 0  # Number of stacks of this effect
+
+    # === API/SANDBOX METHODS ===
+
+    def modify_damage_dealt(self, owner, environment, damage: int) -> int:
+        """
+        Effects overriding this can modify the damage dealt by an actor or enemy.
+        The return value of this method will be added to the damage, you can lower the damage
+        dealt by returning a negative value.
+        """
+        pass
+
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        """
+        Effects overriding this can cause things to happen on the end of turn.
+        """
+        pass
+
+    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        """
+        Effects overriding this can cause things to happen on the end of turn.
+        """
+        pass
+
+    def on_receive_damage_from_card(self: AbstractEffect, owner, environment, card):
+        pass
+
+    def on_card_play(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
+        pass
+
+    def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
+        pass
+
+    def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        pass
+
+    def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment,
+                       damaging_enemy: AbstractEnemy):
+        pass
+
+    def modify_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, quantity):
+        """
+        Effects overriding this will modify the number of cards drawn
+        """
+        return 0
