@@ -107,7 +107,11 @@ class AbstractActor(EffectMixin):
         self.card_piles[CardPiles.HAND].append(card)
 
     def add_card_to_exhaust(self, card):
+        self.card_piles[CardPiles.EXHAUST].append(card)
+
+    def discard_card(self, card):
         self.card_piles[CardPiles.DISCARD].append(card)
+        self.card_piles[CardPiles.HAND].remove(card)
 
     def get_cards(self,
                   from_piles: CardPiles | list[CardPiles] = None,  # DRAW, HAND, DISCARD, EXHAUST | Default: All
@@ -218,7 +222,6 @@ class AbstractActor(EffectMixin):
 
         self._exhaust_pile.remove(card)
         self.hand_pile.append(card)
-
 
     def exhaust_card(self, card: AbstractCard):
         """Exhausts the selected card. If the card is not in the players hand, throws an error."""
