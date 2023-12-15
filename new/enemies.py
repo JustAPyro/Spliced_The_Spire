@@ -129,31 +129,38 @@ class Cultist(AbstractEnemy):
 
 
 # Checked 12/12/23
-class Jaw_Worm(AbstractEnemy):
+class JawWorm(AbstractEnemy):
     max_health = {
         0: (40, 44),  # A1- Health is 48-54
         7: (42, 46)  # A7+ Health is 50-56
     }
 
-    def __init__(self, ascension=0, act=1):
-        super().__init__(ascension=ascension,
+    def __init__(self, environment: dict = None, ascension=0, act=1):
+        super().__init__(environment=environment,
+                         ascension=ascension,
                          act=act)
 
-    def chomp(self, target):
+    def chomp(self):
         # Chomp: Deal 11 damage, or 12 on ascension 2+
-        target.take_damage(
+        self.intent = IntentType.AGGRESSIVE
+        self.message = 'Jaw Worm used Chomp'
+        self.damage(
             asc_int(self.ascension, {
                 0: 11,
                 2: 12
             }))
 
-    def thrash(self, target):
+    def thrash(self):
         # Thrash: Deal 7 damage, gain 5 block.
+        self.intent = IntentType.AGGRESSIVE_DEFENSE
+        self.message = 'Jaw Worm used Thrash'
         self.increase_effect(Block, 5)
-        target.take_damage(7)
+        self.damage(7)
 
     def bellow(self):
         # Bellow: Gain strength and block
+        self.intent = IntentType.DEFENSIVE_BUFF
+        self.message = 'Jaw Worm used Bellow'
         self.increase_effect(Strength,
                              asc_int(self.ascension, {
                                  +0: 3,
@@ -172,7 +179,7 @@ class Jaw_Worm(AbstractEnemy):
                     self.bellow: 45,
                     self.thrash: 30,
                     self.chomp: 25},
-                successive_limit={
+                successive_limit_dict={
                     self.bellow: 2,
                     self.thrash: 3,
                     self.chomp: 2
@@ -257,7 +264,7 @@ class GreenLouse(AbstractEnemy, ABC):
                 chances={
                     self.spit_web: 25,
                     self.bite: 75},
-                successive_limit={
+                successive_limit_dict={
                     self.spit_web: 2 if self.ascension >= 17 else 3,
                     self.bite: 3})
 
@@ -340,6 +347,6 @@ class RedLouse(AbstractEnemy):
                 chances={
                     self.grow: 25,
                     self.bite: 75},
-                successive_limit={
+                successive_limit_dict={
                     self.grow: 2 if self.ascension >= 17 else 3,
                     self.bite: 3})

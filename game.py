@@ -1,5 +1,5 @@
 from new.cards import *
-from new.enemies import Cultist
+from new.enemies import Cultist, JawWorm
 from new.actors import LeftToRightAI
 from new.abstractions import AbstractActor, AbstractEnemy
 from new.classes import Ironclad
@@ -58,14 +58,8 @@ class Simulation:
         return healths
 
 
-c2 = Cultist()
-c2.name = 'Cultist #2'
-
-c3 = Cultist()
-c3.name = 'Cultist #3'
-
 sim = Simulation(actor=LeftToRightAI,
-                 enemies=[Cultist, Cultist],
+                 enemies=[JawWorm],
                  hero=Ironclad,
                  relics=[Ironclad.start_relic],
                  deck=[RedDefend(), RedDefend(), RedStrike(), RedDefend(), Barricade()

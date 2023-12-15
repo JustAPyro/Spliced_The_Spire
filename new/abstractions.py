@@ -379,7 +379,8 @@ class AbstractEnemy(ABC, EffectMixin, DamageMixin):
         self.ability_method_generator = self.pattern()
 
         # Track the history and stuffs
-        self.log = []
+        self.print_log = []
+        self.ability_log = []
 
         # Turn specific stuff for enemies to be set in abilities
         self.intent: Optional[IntentType] = None
@@ -407,25 +408,31 @@ class AbstractEnemy(ABC, EffectMixin, DamageMixin):
     def pattern(self):
         raise NotImplementedError
 
-    def rule_pattern(self, chances, successive_limit):
-        # Get a list of the possible abilites bassed on successiveness?
+    def rule_pattern(self, chances, successive_limit_dict):
+        # Get a list of the possible abilities based on successiveness?
 
         valid_abilities = []
-        for ability in successive_limit:
-            if successive_limit[ability] > len(self.log):
-                valid_abilities.append(ability)
-                continue
+        turns_taken = len(self.ability_log)
 
-            for i in range(successive_limit[ability]):
-                if len(self.log) < type(self.log[-i]) == ability:
-                    valid_abilities.append(type(self.log[-i]))
+        for ability in successive_limit_dict:
+            ability_limit = successive_limit_dict[ability]
+            # For every ability, if turns taken so far is less than the limit, automatically valid.
+            if turns_taken < ability_limit:
+                valid_abilities.append(ability)
+            else:
+                for i in range(ability_limit):
+                    if self.ability_log[-i] == ability:
+                        continue
+                    valid_abilities.append(ability)
+                    break
 
         # Then use chances to pick between them
         weights = []
         for ability in valid_abilities:
             weights.append(chances[ability])
 
-        return random.choices(valid_abilities, weights)
+        x = random.choices(valid_abilities, weights)
+        return x[0]  # Random.choices returns a list???
 
     def take_turn(self, actor):
         self.process_effects('on_start_turn', self.environment)
@@ -436,11 +443,12 @@ class AbstractEnemy(ABC, EffectMixin, DamageMixin):
         # Get and call the next ability method the enemy will use
         next_method = next(self.ability_method_generator)
         next_method()
+        self.ability_log.append(next_method)
 
         if self.intent is None or self.message is None:
             raise RuntimeError(f'Yo, set the intent/message in the {next_method.__name__} method.')
 
         # Append the message
-        self.log.append(self.message)
+        self.print_log.append(self.message)
         self.process_effects('on_end_turn', self.environment)
-        return self.log
+        return self.print_log
