@@ -119,7 +119,7 @@ class Cultist(AbstractEnemy):
         """Deal 6 damage."""
         self.intent = IntentType.AGGRESSIVE
         self.message = 'Cultist used Dark Strike'
-        self.damage(6)
+        self.deal_damage(6)
 
     def pattern(self):
         """Simple pattern: casts incantation, then spams dark stroke."""
@@ -144,7 +144,7 @@ class JawWorm(AbstractEnemy):
         # Chomp: Deal 11 damage, or 12 on ascension 2+
         self.intent = IntentType.AGGRESSIVE
         self.message = 'Jaw Worm used Chomp'
-        self.damage(
+        self.deal_damage(
             asc_int(self.ascension, {
                 0: 11,
                 2: 12
@@ -155,7 +155,7 @@ class JawWorm(AbstractEnemy):
         self.intent = IntentType.AGGRESSIVE_DEFENSE
         self.message = 'Jaw Worm used Thrash'
         self.increase_effect(Block, 5)
-        self.damage(7)
+        self.deal_damage(7)
 
     def bellow(self):
         # Bellow: Gain strength and block
@@ -242,7 +242,7 @@ class GreenLouse(AbstractEnemy, ABC):
 
     def bite(self):
         """Deals damage based on the base_damage of the louse and the ascension."""
-        self.damage(asc_int(self.ascension, {
+        self.deal_damage(asc_int(self.ascension, {
             self.base_damage: 0,
             self.base_damage + 1: 2
         }))
@@ -325,7 +325,7 @@ class RedLouse(AbstractEnemy):
 
     def bite(self):
         """Deals damage based on the base_damage of the louse and the ascension."""
-        self.damage(asc_int(self.ascension, {
+        self.deal_damage(asc_int(self.ascension, {
             self.base_damage: 0,
             self.base_damage + 1: 2
         }))

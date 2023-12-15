@@ -12,14 +12,14 @@ from new.effects import EffectMixin
 from new.enumerations import CardPiles, CardType, SelectEvent, IntentType
 
 
-class DamageMixin:
-    """
-    Adding this to a subclass will provide it with the ability to take, deal
-    and manage damage.
-    """
-
-    def damage(self: AbstractEnemy, damage):
-        self.get_actor().take_damage(damage, self)
+# class DamageMixin:
+#     """
+#     Adding this to a subclass will provide it with the ability to take, deal
+#     and manage damage.
+#     """
+#
+#     def damage(self: AbstractEnemy, damage):
+#         self.get_actor().take_damage(damage, self)
 
 
 class AbstractActor(EffectMixin):
@@ -310,7 +310,7 @@ class AbstractActor(EffectMixin):
         return self.turn_log[-1]
 
 
-class AbstractEnemy(ABC, EffectMixin, DamageMixin):
+class AbstractEnemy(ABC, EffectMixin):
     """
     This class is an abstract class designed to streamline the implementation
     of enemies and elites.
@@ -399,10 +399,9 @@ class AbstractEnemy(ABC, EffectMixin, DamageMixin):
         damage = self.process_effects('modify_damage_taken', self.environment, damage)
         self.health -= damage
 
-    def deal_damage(self, damage: int, target, log):
+    def deal_damage(self, damage: int):
         damage = self.process_effects('modify_damage_dealt', self.environment, damage)
-        log.append(f'used Dark Strike on {target.name} to deal {damage} damage.')
-        target.take_damage(damage, self)
+        self.get_actor().take_damage(damage, self)
 
     @abstractmethod
     def pattern(self):
@@ -434,7 +433,7 @@ class AbstractEnemy(ABC, EffectMixin, DamageMixin):
         x = random.choices(valid_abilities, weights)
         return x[0]  # Random.choices returns a list???
 
-    def take_turn(self, actor):
+    def take_turn(self):
         self.process_effects('on_start_turn', self.environment)
 
         self.intent = None

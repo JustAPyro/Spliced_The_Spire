@@ -31,7 +31,7 @@ class Simulation:
                 print(f'{enemy.name}\'s turn. \n{enemy.name} has {enemy.health} health'
                       f' and the following effects: {enemy.get_effects_dict()}')
 
-                log = enemy.take_turn(self.actor)
+                log = enemy.take_turn()
                 print(f'{log[-1]}')
 
         if self.actor.health <= 0:
