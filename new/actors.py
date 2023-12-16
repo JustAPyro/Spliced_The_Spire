@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from abc import ABC
 
-from new.abstractions import AbstractActor
+from new.abstractions import AbstractActor, AbstractCard
 from new.enumerations import SelectEvent
-from new.cards import AbstractCard
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

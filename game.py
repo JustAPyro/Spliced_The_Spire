@@ -62,7 +62,7 @@ sim = Simulation(actor=LeftToRightAI,
                  enemies=[JawWorm],
                  hero=Ironclad,
                  relics=[Ironclad.start_relic],
-                 deck=[RedDefend(), RedDefend(), RedStrike(), RedDefend(), Barricade()
+                 deck=[RedDefend(), RedDefend(), RedStrike(), RedDefend()
                        ],
                  ascension=0)
 sim.run()

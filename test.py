@@ -1,39 +1,31 @@
 class Parent:
+    classes_with_method = []
+
     def __init__(self):
+        print(type(self).method)
+        print(Parent.method)
+        if type(self).method != Parent.method:
+            Parent.classes_with_method.append(self)
+
+
+    def method(self):
         pass
 
-    class Message():
-        def __init__(self):
-            self.message = NotImplemented
+    def method2(self):
+        pass
 
-        def set_message(self, message):
-            self.message = message
+class ChildWithMethod(Parent):
+    def method(self):
+        print("Do stuff")
 
-        def has_message(self):
-            return self.message is not NotImplemented
+class ChildWithoutMethod(Parent):
+    pass
 
-    @staticmethod
-    def do_twice(func):
-        def wrapper_do_twice(*args, **kwargs):
-            self = args[0]
-            message = Parent.Message()
-            func(self, message.set_message)
-            if not message.has_message():
-                raise Exception(' Didnt init!')
+a = ChildWithoutMethod()
+c = ChildWithoutMethod()
+b = ChildWithMethod()
+x = ChildWithMethod()
 
-        return wrapper_do_twice
+for x in Parent.classes_with_method:
+    x.method()
 
-
-class Child(Parent):
-    def __init__(self):
-        super().__init__()
-
-    @Parent.do_twice
-    def prin(self, var):
-        var('hi')
-        print('hello!')
-        print(var)
-
-
-c = Child()
-c.prin()
