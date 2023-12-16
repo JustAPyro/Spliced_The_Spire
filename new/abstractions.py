@@ -45,6 +45,7 @@ class EffectMixin:
         # This is the primary dictionary of effects on an entity
         self.effects: dict[type[AbstractEffect], AbstractEffect] = {}
         self.ritual_flag: bool = False
+        self.implemented_hooks = {}
 
     def get_effects_dict(self) -> dict[str, int]:
         """
@@ -119,8 +120,6 @@ class AbstractActor(EffectMixin):
         # This log contains what the actor did each turn
         self.logging: bool = True
         self.turn_log = []
-
-        self.implemented_hooks = {}
 
         # Save the environment to class and add self to it
         self.environment = environment
@@ -486,7 +485,6 @@ class AbstractEnemy(ABC, EffectMixin):
         # Turn specific stuff for enemies to be set in abilities
         self.intent: Optional[IntentType] = None
         self.message: Optional[str] = None
-        self.implemented_hooks = {}
 
         # Initialize the EffectMixin
         super().__init__()
@@ -584,7 +582,6 @@ class AbstractEnemy(ABC, EffectMixin):
 
 
 class EventHookMixin:
-
     def __init__(self, owner):
         implemented_hooks = getattr(owner, 'implemented_hooks')
 
