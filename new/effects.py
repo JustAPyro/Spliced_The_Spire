@@ -6,6 +6,7 @@ from new.enumerations import CardType
 
 from new.abstractions import AbstractActor, AbstractEnemy, AbstractEffect
 
+
 class Block(AbstractEffect):
     def modify_damage_taken(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment,
                             damage: int) -> int:
@@ -14,7 +15,7 @@ class Block(AbstractEffect):
         else:
             blocked = self.stacks
 
-        environment['actor'].decrease_effect(Block, blocked)
+        owner.decrease_effect(Block, blocked)
         return blocked * -1
 
     def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
@@ -150,8 +151,6 @@ class DoubleTapEffect(AbstractEffect):
 class JuggernautEffect(AbstractEffect):
     pass
 
-
 # ===================================
 # === Effect Management and Mixin ===
 # ===================================
-

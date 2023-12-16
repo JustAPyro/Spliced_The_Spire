@@ -13,7 +13,9 @@ class Simulation:
 
         # Instantiate the enemies from the provided classes
         for enemy_class in enemies:
-            enemy_class(self.environment)
+            enemy = enemy_class(self.environment)
+            enemy.set_actor(self.actor)
+
         self.enemies = self.environment['enemies']
 
     def run(self):
@@ -21,6 +23,7 @@ class Simulation:
         print(f'Fighting {self.get_names()} with {self.get_healths()} health')
         print(f'Starting draw order: {self.actor.draw_pile}')
         while self.actor.health > 0:
+
             self.actor.turn_impl(verbose=True)
 
             if self.enemies_dead():
