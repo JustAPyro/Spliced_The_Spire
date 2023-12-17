@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from abc import ABC
 
-from new.abstractions import AbstractActor, AbstractCard
-from new.enumerations import SelectEvent
+from spliced_the_spire.new.abstractions import AbstractActor, AbstractCard
+from spliced_the_spire.new.enumerations import SelectEvent
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

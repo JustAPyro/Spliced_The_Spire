@@ -4,10 +4,10 @@ import random
 from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
-from lutil import asc_int
-from new.abstractions import AbstractEnemy
-from new.effects import Ritual, Block, Strength, Weak, CurlUp
-from new.enumerations import IntentType
+from spliced_the_spire.lutil import asc_int
+from spliced_the_spire.new.abstractions import AbstractEnemy
+from spliced_the_spire.new.effects import Ritual, Block, Strength, Weak, CurlUp
+from spliced_the_spire.new.enumerations import IntentType
 
 if TYPE_CHECKING:
     pass

@@ -5,9 +5,9 @@ from abc import abstractmethod, ABC
 from copy import copy
 from typing import Optional
 
-import lutil
-from lutil import C, asc_int
-from new.enumerations import CardPiles, CardType, SelectEvent, IntentType, CardRarity, CardColor
+from spliced_the_spire import lutil
+from spliced_the_spire.lutil import C, asc_int
+from spliced_the_spire.new.enumerations import CardPiles, CardType, SelectEvent, IntentType, CardRarity, CardColor
 
 # Card Cost Variables
 X = True

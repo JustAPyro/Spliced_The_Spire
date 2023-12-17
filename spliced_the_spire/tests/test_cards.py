@@ -1,9 +1,9 @@
 import unittest
 
-from new.actors import DummyActor
-from new.cards import *
-from new.classes import Ironclad
-from new.enemies import DummyEnemy
+from spliced_the_spire.new.actors import DummyActor
+from spliced_the_spire.new.cards import *
+from spliced_the_spire.new.classes import Ironclad
+from spliced_the_spire.new.enemies import DummyEnemy
 
 
 class TestCards(unittest.TestCase):

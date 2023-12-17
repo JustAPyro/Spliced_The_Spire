@@ -1,10 +1,9 @@
 # importing the module
 import json
 
-from new.abstractions import AbstractEnemy
-import csv
+from spliced_the_spire.new.abstractions import AbstractEnemy
 
-from tests.BugTracker import BugTracker, BugType, BugArea
+from spliced_the_spire.tests.BugTracker import BugTracker, BugType, BugArea
 
 implemented_enemies = [sc.__name__ for sc in AbstractEnemy.__subclasses__()]
 

@@ -1,5 +1,5 @@
-from new.cards import *
-from new.relics import Burning_Blood
+from spliced_the_spire.new.cards import *
+from spliced_the_spire.new.relics import Burning_Blood
 
 class STSClass():
     pass

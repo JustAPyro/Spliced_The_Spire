@@ -5,13 +5,11 @@ from abc import ABC
 from copy import deepcopy
 from itertools import product
 
-from new import effects
-from new.effects import *
-from new.enumerations import CardType, SelectEvent, CardPiles, IntentType, CardColor, CardRarity
+from spliced_the_spire.new import effects
+from spliced_the_spire.new.effects import *
+from spliced_the_spire.new.enumerations import CardType, SelectEvent, CardPiles, IntentType, CardColor, CardRarity
 
-from new.abstractions import AbstractActor, AbstractEnemy, AbstractCard
-
-
+from spliced_the_spire.new.abstractions import AbstractActor, AbstractEnemy, AbstractCard
 
 
 ################
