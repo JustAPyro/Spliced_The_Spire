@@ -58,11 +58,11 @@ class Intent:
 
 class DummyEnemy(AbstractEnemy, ABC):
     def __init__(self, environment, health=10, ascension=0):
-        super().__init__(name='Dummy',
+        super().__init__(environment=environment,
+                         name='Dummy',
                          max_health=health,
                          ascension=ascension,
-                         act=1,
-                         environment=environment)
+                         act=1)
         self.environment = environment
 
     def pattern(self):
@@ -202,10 +202,10 @@ class GreenLouse(AbstractEnemy, ABC):
     curl_up_stack_map = {
         +0: (3, 7),
         +7: (4, 8),
-        17: (9, 12),
+        17: (9, 12)
     }
 
-    def __init__(self, ascension=0, act=1,
+    def __init__(self, environment: dict, ascension=0, act=1,
                  base_damage: int = random.randint(5, 7),
                  curl_up_stacks: Optional[int] = None):
         """
@@ -233,12 +233,12 @@ class GreenLouse(AbstractEnemy, ABC):
             GreenLouse.curl_up_stack_map. If you would like to create a Green Louse
             starting with a specific number of curl up, you may provide it here.
         """
+        super().__init__(environment=environment, ascension=ascension, act=act)
         # Apply the curl up stacks, calculating an appropriate one if none was provided
         self.increase_effect(CurlUp,
                              curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))
 
         self.base_damage = base_damage
-        super().__init__(ascension=ascension, act=act)
 
     def bite(self):
         """Deals damage based on the base_damage of the louse and the ascension."""
@@ -275,7 +275,7 @@ class RedLouse(AbstractEnemy):
     Red Louse: https://slay-the-spire.fandom.com/wiki/Louses#Red_Louse.
     The red Louse has two abilities: Bite and Grow.
     """
-    health_range = {
+    max_health = {
         0: (10, 15),
         7: (11, 16)
     }
@@ -288,7 +288,7 @@ class RedLouse(AbstractEnemy):
     }
 
     # TODO: Is 5, 7 right? Is this inclusive or exclusive?
-    def __init__(self, ascension=0, act=1,
+    def __init__(self, environment, ascension=0, act=1,
                  base_damage: int = random.randint(5, 7),
                  curl_up_stacks: Optional[int] = None):
         """
@@ -316,12 +316,13 @@ class RedLouse(AbstractEnemy):
             RedLouse.curl_up_stack_map. If you would like to create a Red Louse
             starting with a specific number of curl up, you may provide it here.
         """
+        super().__init__(environment, ascension=ascension, act=act)
         # Apply the curl up stacks, calculating an appropriate one if none was provided
         self.increase_effect(CurlUp,
                              curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))
 
         self.base_damage = base_damage
-        super().__init__(ascension=ascension, act=act)
+
 
     def bite(self):
         """Deals damage based on the base_damage of the louse and the ascension."""
@@ -350,3 +351,7 @@ class RedLouse(AbstractEnemy):
                 successive_limit_dict={
                     self.grow: 2 if self.ascension >= 17 else 3,
                     self.bite: 3})
+
+
+env = {}
+enemies = {cls(env).sts_name: cls for cls in AbstractEnemy.__subclasses__()}

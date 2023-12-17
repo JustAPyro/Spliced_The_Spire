@@ -33,7 +33,7 @@ class EffectMixin:
 
     def __init__(self):
         # This is the primary dictionary of effects on an entity
-        self.effects: dict[type[AbstractEffect], AbstractEffect] = {}
+        self.effects: dict[type[AbstractEffect], AbstractEffect] = dict()
         self.ritual_flag: bool = False
         self.implemented_hooks = {}
 
@@ -404,12 +404,12 @@ class AbstractEnemy(ABC, EffectMixin):
     https://slay-the-spire.fandom.com/wiki/Monsters
     """
 
-    def __init__(self,
+    def __init__(self, environment: dict,
                  name: Optional[str] = None,
+                 sts_name: Optional[str] = None,
                  max_health: dict[int, tuple[int, int]] | int | None = None,
                  set_health: Optional[int] = None,
                  ascension=0,
-                 environment=None,
                  act=1):
         """
         Create an enemy.
@@ -438,6 +438,7 @@ class AbstractEnemy(ABC, EffectMixin):
         """
         # Use the provided name if there is, otherwise parse it from class name
         self.name = name if name else lutil.parse_class_name(type(self).__name__)
+        self.sts_name = self.name
 
         # Guard against people not providing a max_health anywhere
         if not max_health and not hasattr(self, 'max_health'):
@@ -446,7 +447,10 @@ class AbstractEnemy(ABC, EffectMixin):
                                f'You may also choose to provide it in the {type(self).__name__}.__init__ constructor.')
 
         # Assigns a max health based on the ascension and the class.max_health property
-        self.max_health = asc_int(ascension, getattr(self, 'max_health'))
+        if type(max_health) is int:
+            self.max_health = max_health
+        elif hasattr(self, 'max_health'):
+            self.max_health = asc_int(ascension, getattr(self, 'max_health'))
 
         # Since this was just created current health should be full
         self.health = set_health if set_health else self.max_health
@@ -458,9 +462,8 @@ class AbstractEnemy(ABC, EffectMixin):
         self.actor = NotImplemented
 
         # Add self to the environment
-        if environment:
-            self.environment = environment
-            self.environment['enemies'].append(self)
+        self.environment = environment
+        self.environment.setdefault('enemies', []).append(self)
 
         # This stores the move pattern of the enemy,
         # It will populate with a generator the first time
