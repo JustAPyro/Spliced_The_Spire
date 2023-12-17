@@ -7,7 +7,7 @@ from typing import Optional
 
 import lutil
 from lutil import C, asc_int
-from new.enumerations import CardPiles, CardType, SelectEvent, IntentType, CardRarity
+from new.enumerations import CardPiles, CardType, SelectEvent, IntentType, CardRarity, CardColor
 
 # Card Cost Variables
 X = True
@@ -681,7 +681,8 @@ class AbstractCard(ABC):
     def __init__(self,
                  card_type: CardType = CardType.UNKNOWN,
                  energy_cost: int | bool = NO_COST,
-                 rarity: CardRarity = CardRarity.UNDEFINED,
+                 card_rarity: CardRarity = CardRarity.UNKNOWN,
+                 card_color: CardColor = CardColor.UNKNOWN,
                  upgraded: bool = False,
                  name: str = None,
                  exhaust: bool = False,
@@ -754,7 +755,8 @@ class AbstractCard(ABC):
 
         # Type and rarity of card
         self.card_type: CardType = card_type
-        self.rarity: CardRarity = rarity
+        self.rarity: CardRarity = card_rarity
+        self.color: CardColor = card_color
 
         # Card behavior
         self.exhaust: bool = exhaust

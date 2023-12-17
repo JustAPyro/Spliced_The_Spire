@@ -7,8 +7,7 @@ from itertools import product
 
 from new import effects
 from new.effects import *
-from new.enumerations import CardType, SelectEvent, CardPiles, IntentType
-
+from new.enumerations import CardType, SelectEvent, CardPiles, IntentType, CardColor, CardRarity
 
 from new.abstractions import AbstractActor, AbstractEnemy, AbstractCard
 
