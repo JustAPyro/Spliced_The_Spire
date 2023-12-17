@@ -490,15 +490,6 @@ class AbstractEnemy(ABC, EffectMixin):
         return self.health <= 0
 
     def take_damage(self, damage: int):
-        # VERY OLD
-        # damage = self.process_effects('modify_damage_taken', self, self.environment, damage)
-
-        # OLD
-        # for obj_with_hook in EventHookMixin.implements_method['modify_damage_taken']:
-        #    # TODO: I'm not sure these should use strings lol?
-        #    damage += getattr(obj_with_hook, 'modify_damage_taken')(self, self.environment, damage)
-        #    obj_with_hook.modify_damage_taken(self, ...)
-
         damage_mod = call_all(method=EventHookMixin.modify_damage_taken,
                               owner=self,
                               parameters=(self, self.environment, damage),
