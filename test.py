@@ -1,21 +1,31 @@
 class Parent:
-    staticvar = 3
+    classes_with_method = []
 
-class Child(Parent):
-    10-15
-    11-16, 7+
+    def __init__(self):
+        print(type(self).method)
+        print(Parent.method)
+        if type(self).method != Parent.method:
+            Parent.classes_with_method.append(self)
 
-    11-17
-    12-18 7+
+
+    def method(self):
+        pass
+
+    def method2(self):
+        pass
+
+class ChildWithMethod(Parent):
+    def method(self):
+        print("Do stuff")
+
+class ChildWithoutMethod(Parent):
     pass
 
-    3-7
-    4-8, 7
-    9-12, 17
+a = ChildWithoutMethod()
+c = ChildWithoutMethod()
+b = ChildWithMethod()
+x = ChildWithMethod()
 
-    3-7
-    4-8 7
-    9-12, 17
+for x in Parent.classes_with_method:
+    x.method()
 
-print(Parent.staticvar)
-print(Child.staticvar)

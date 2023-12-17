@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     pass
 
 
-class DummyActor(AbstractActor):
+class DummyActor(AbstractActor, ABC):
     def __init__(self, clas, cards, health, hand, energy, environment):
         super().__init__(clas, cards=cards, environment=environment)
         self.health = health

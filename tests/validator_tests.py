@@ -1,7 +1,7 @@
 # importing the module
 import json
 
-from new.enemies import AbstractEnemy
+from new.abstractions import AbstractEnemy
 import csv
 
 from tests.BugTracker import BugTracker, BugType, BugArea

@@ -1,18 +1,11 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
 
 from new.enumerations import CardType
 
-if TYPE_CHECKING:
-    from new.abstractions import AbstractActor, AbstractEffect
-    from enemies import AbstractEnemy
+from new.abstractions import AbstractActor, AbstractEnemy, AbstractEffect
 
-
-# =======================
-# === Implementations ===
-# =======================
 
 class Poison(AbstractEffect):
     def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
@@ -29,7 +22,7 @@ class Block(AbstractEffect):
         else:
             blocked = self.stacks
 
-        environment['actor'].decrease_effect(Block, blocked)
+        owner.decrease_effect(Block, blocked)
         return blocked * -1
 
     def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
@@ -48,7 +41,7 @@ class Vulnerable(AbstractEffect):
 
 class Strength(AbstractEffect):
     def modify_damage_dealt(self, owner, environment, damage: int) -> int:
-        return self.stacks
+        return 0 if not self.stacks else self.stacks
 
 
 class Ritual(AbstractEffect):
@@ -164,6 +157,4 @@ class DoubleTapEffect(AbstractEffect):
 
 class JuggernautEffect(AbstractEffect):
     pass
-
-
 

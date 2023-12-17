@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import random
-from abc import ABC, abstractmethod
-from random import randint
+from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
-import lutil
 from lutil import asc_int
-from new.abstractions import DamageMixin, AbstractActor
-from new.effects import EffectMixin, Ritual, Block, Strength, Weak, CurlUp
+from new.abstractions import AbstractEnemy
+from new.effects import Ritual, Block, Strength, Weak, CurlUp
+from new.enumerations import IntentType
 
 if TYPE_CHECKING:
     pass
@@ -57,133 +56,6 @@ class Intent:
         self.damage = damage
 
 
-class AbstractEnemy(ABC, EffectMixin, DamageMixin):
-    """
-    This class is an abstract class designed to streamline the implementation
-    of enemies and elites.
-    https://slay-the-spire.fandom.com/wiki/Monsters
-    """
-
-    def __init__(self,
-                 name: Optional[str] = None,
-                 max_health: dict[int, tuple[int, int]] | int | None = None,
-                 set_health: Optional[int] = None,
-                 ascension=0,
-                 environment=None,
-                 act=1):
-        """
-        Create an enemy.
-
-        Parameters
-        ----------
-        :param name:
-            The name of the enemy.
-            Note that if this is not provided, the name of the enemy will be parsed from
-            the class name.
-
-        :param max_health:
-            The creature's max_health. This can be provided in three formats. You can either declare it
-            as a static class level variable, by adding a max_health map to the class (outside __init__/self), or
-            you can pass it into the init function either as a map, or just as an int if you want to set it to a
-            specific value.
-
-        :param set_health:
-            If specified will set the health of the creature to this amount.
-
-        Exceptions
-        ----------
-        :raises RuntimeError:
-            This will be thrown if max_health is not provided and the subclass does not
-            implement its own static class "max_health" variable.
-        """
-        # Use the provided name if there is, otherwise parse it from class name
-        self.name = name if name else lutil.parse_class_name(type(self).__name__)
-
-        # Guard against people not providing a max_health anywhere
-        if not max_health and not hasattr(self, 'max_health'):
-            raise RuntimeError(f'Tried to call subclass AbstractEnemy without providing static max_health variable. '
-                               f'Please verify that {type(self).__name__}.max_health is a defined value. '
-                               f'You may also choose to provide it in the {type(self).__name__}.__init__ constructor.')
-
-        # Assigns a max health based on the ascension and the class.max_health property
-        self.max_health = asc_int(ascension, getattr(self, 'max_health'))
-
-        # Since this was just created current health should be full
-        self.health = set_health if set_health else self.max_health
-
-        # Information about the environment that is relevant to the battle
-        self.ascension = ascension
-        self.act = act
-
-        # Add self to the environment
-        if environment:
-            self.environment = environment
-            self.environment['enemies'].append(self)
-
-        # This stores the move pattern of the enemy,
-        # It will populate with a generator the first time
-        # that take_turn is called on this enemy
-        self.ability_method_generator = self.pattern()
-
-        # Track the history and stuffs
-        self.log = []
-
-        # Initialize the EffectMixin
-        super().__init__()
-
-    def get_actor(self) -> AbstractActor:
-        return self.environment['player']
-
-    def is_dead(self):
-        return self.health <= 0
-
-    def take_damage(self, damage: int):
-        damage = self.process_effects('modify_damage_taken', self.environment, damage)
-        self.health -= damage
-
-    def deal_damage(self, damage: int, target, log):
-        damage = self.process_effects('modify_damage_dealt', self.environment, damage)
-        log.append(f'used Dark Strike on {target.name} to deal {damage} damage.')
-        target.take_damage(damage, self)
-
-    @property
-    def intent(self):
-        return None
-
-    @abstractmethod
-    def pattern(self):
-        raise NotImplementedError
-
-    def rule_pattern(self, chances, successive_limit):
-        # Get a list of the possible abilites bassed on successiveness?
-
-        valid_abilities = []
-        for ability in successive_limit:
-            if successive_limit[ability] > len(self.log):
-                valid_abilities.append(ability)
-                continue
-
-            for i in range(successive_limit[ability]):
-                if (len(self.log) < type(self.log[-i]) == ability):
-                    valid_abilities.append(type(self.log[-i]))
-
-        # Then use chances to pick between them
-        weights = []
-        for ability in valid_abilities:
-            weights.append(chances[ability])
-
-        return random.choices(valid_abilities, weights)
-
-    def take_turn(self, actor):
-        log = []
-        self.process_effects('on_start_turn', self.environment)
-        next_method = next(self.ability_method_generator)
-        self.log.append(next_method.__name__)
-        next_method(actor, None, log)
-        self.process_effects('on_end_turn', self.environment)
-        return log[0]
-
-
 class DummyEnemy(AbstractEnemy, ABC):
     def __init__(self, environment, health=10, ascension=0):
         super().__init__(name='Dummy',
@@ -199,10 +71,15 @@ class DummyEnemy(AbstractEnemy, ABC):
 
 # Checked 12/12/23
 class Cultist(AbstractEnemy):
+    """
+    Cultist: https://slay-the-spire.fandom.com/wiki/Cultist
+    The Cultist has two abilities: Incantation and Dark Strike
+    """
     max_health = {
         0: (48, 54),  # Health is 48-54 on A0+
         7: (50, 56)  # Health is 50-56 on A7+
     }
+
     # The amount of ritual gained by ascension
     ritual_gain = {
         +0: 3,
@@ -210,57 +87,80 @@ class Cultist(AbstractEnemy):
         17: 5
     }
 
-    def __init__(self, environment=None, ascension=0):
+    def __init__(self, environment: dict = None, ascension: int = 0, act: int = 1):
+        """
+        Creates a Cultist.
+
+        Parameters
+        ----------
+        :param environment:
+            The environment the enemy is acting in.
+
+        :param ascension:
+            The ascension the enemy is fighting on.
+
+        :param act:
+            What act the enemy is in (Which can affect behavior)
+        """
         super().__init__(environment=environment,
                          ascension=ascension,
-                         act=1)
+                         act=act)
 
-    def incantation(self, target, quantity: Optional[int] = None, log=None):
-        if log is None:
-            log = []
-        log.append('used incantation')
+    def incantation(self):
+        self.intent = IntentType.BUFF,
+        self.message = 'Cultist used incantation'
+        self.increase_effect(Ritual, asc_int(self.ascension, {
+            +0: 3,
+            +2: 4,
+            17: 5
+        }))
 
-        increase = quantity if quantity is not None else asc_int(self.ascension, Cultist.ritual_gain)
-        self.increase_effect(Ritual, increase)
-
-    def dark_strike(self, target, damage: Optional[int] = None, log=None):
-        if log is None:
-            log = []
-        self.deal_damage(6, target, log)
+    def dark_strike(self):
+        """Deal 6 damage."""
+        self.intent = IntentType.AGGRESSIVE
+        self.message = 'Cultist used Dark Strike'
+        self.deal_damage(6)
 
     def pattern(self):
-        # Simple pattern: casts incantation, then spams dark stroke.
+        """Simple pattern: casts incantation, then spams dark stroke."""
         yield self.incantation
         while True:
             yield self.dark_strike
 
 
 # Checked 12/12/23
-class Jaw_Worm(AbstractEnemy):
+class JawWorm(AbstractEnemy):
     max_health = {
         0: (40, 44),  # A1- Health is 48-54
         7: (42, 46)  # A7+ Health is 50-56
     }
 
-    def __init__(self, ascension=0, act=1):
-        super().__init__(ascension=ascension,
+    def __init__(self, environment: dict = None, ascension=0, act=1):
+        super().__init__(environment=environment,
+                         ascension=ascension,
                          act=act)
 
-    def chomp(self, target):
+    def chomp(self):
         # Chomp: Deal 11 damage, or 12 on ascension 2+
-        target.take_damage(
+        self.intent = IntentType.AGGRESSIVE
+        self.message = 'Jaw Worm used Chomp'
+        self.deal_damage(
             asc_int(self.ascension, {
                 0: 11,
                 2: 12
             }))
 
-    def thrash(self, target):
+    def thrash(self):
         # Thrash: Deal 7 damage, gain 5 block.
+        self.intent = IntentType.AGGRESSIVE_DEFENSE
+        self.message = 'Jaw Worm used Thrash'
         self.increase_effect(Block, 5)
-        target.take_damage(7)
+        self.deal_damage(7)
 
     def bellow(self):
         # Bellow: Gain strength and block
+        self.intent = IntentType.DEFENSIVE_BUFF
+        self.message = 'Jaw Worm used Bellow'
         self.increase_effect(Strength,
                              asc_int(self.ascension, {
                                  +0: 3,
@@ -279,7 +179,7 @@ class Jaw_Worm(AbstractEnemy):
                     self.bellow: 45,
                     self.thrash: 30,
                     self.chomp: 25},
-                successive_limit={
+                successive_limit_dict={
                     self.bellow: 2,
                     self.thrash: 3,
                     self.chomp: 2
@@ -342,7 +242,7 @@ class GreenLouse(AbstractEnemy, ABC):
 
     def bite(self):
         """Deals damage based on the base_damage of the louse and the ascension."""
-        self.damage(asc_int(self.ascension, {
+        self.deal_damage(asc_int(self.ascension, {
             self.base_damage: 0,
             self.base_damage + 1: 2
         }))
@@ -364,7 +264,7 @@ class GreenLouse(AbstractEnemy, ABC):
                 chances={
                     self.spit_web: 25,
                     self.bite: 75},
-                successive_limit={
+                successive_limit_dict={
                     self.spit_web: 2 if self.ascension >= 17 else 3,
                     self.bite: 3})
 
@@ -425,7 +325,7 @@ class RedLouse(AbstractEnemy):
 
     def bite(self):
         """Deals damage based on the base_damage of the louse and the ascension."""
-        self.damage(asc_int(self.ascension, {
+        self.deal_damage(asc_int(self.ascension, {
             self.base_damage: 0,
             self.base_damage + 1: 2
         }))
@@ -447,13 +347,6 @@ class RedLouse(AbstractEnemy):
                 chances={
                     self.grow: 25,
                     self.bite: 75},
-                successive_limit={
+                successive_limit_dict={
                     self.grow: 2 if self.ascension >= 17 else 3,
                     self.bite: 3})
-
-
-x = Jaw_Worm()
-gen = x.pattern()
-last = None
-for i in range(1000):
-    print(next(gen))

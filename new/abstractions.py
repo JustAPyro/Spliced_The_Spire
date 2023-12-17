@@ -3,21 +3,84 @@ from __future__ import annotations
 import random
 from abc import abstractmethod, ABC
 from copy import copy
+from typing import Optional
 
-from lutil import C
-from new.cards import NO_COST
-from new.effects import EffectMixin
-from new.enemies import AbstractEnemy
-from new.enumerations import CardPiles, CardType, SelectEvent, CardColor, CardRarity
+import lutil
+from lutil import C, asc_int
+from new.enumerations import CardPiles, CardType, SelectEvent, IntentType, CardRarity
+
+# Card Cost Variables
+X = True
+NO_COST = False
 
 
-class DamageMixin:
+class EffectMixin:
     """
-    Adding this to a subclass will provide it with the ability to take, deal
-    and manage damage.
+    This EffectMixin class is added to both the actors and the enemies, and allows for
+    managing different effects.
+
+    Below are listed common API methods you are encouraged to use in the development
+    of cards, enemies, relics, and effects. (Note that entity in this case means a player
+    or enemy)
+
+    - entity.clear_effects() -> Remove all effects from an entity
+    - entity.add_effects(effect, qty) -> increments stacks of effect by qty
+    - entity.set_effects(effect, qty) -> sets the stacks of effect to qty
+    - entity.has_effect(effect) -> Returns true if entity has effect
+    - entity.has_effect(effect, qty) -> returns true if entity has at least qty stacks of effect
+    - entity.get_stacks(effect) -> Returns the number of stacks of effect
     """
-    def damage(self, target):
-        pass
+
+    def __init__(self):
+        # This is the primary dictionary of effects on an entity
+        self.effects: dict[type[AbstractEffect], AbstractEffect] = {}
+        self.ritual_flag: bool = False
+        self.implemented_hooks = {}
+
+    def get_effects_dict(self) -> dict[str, int]:
+        """
+        Returns a dictionary of effects in the format {"effect name": stacks}
+        This is primarily used for displaying information about all the stacks on an entity.
+        """
+        # Start with an empty dictionary
+        effects_dict = {}
+        for effect in self.effects:
+            # Add a dictionary entry using the name of the effect as key and stacks as qty
+            effects_dict[effect.__name__] = self.effects[effect].stacks
+        # Return the final dict
+        return effects_dict
+
+    def clear_effects(self):
+        """
+        Removes all effects from the owner.
+        """
+        self.effects.clear()
+
+    def has_effect(self, effect, quantity=None):
+        if quantity is None:
+            return effect in self.effects
+        else:
+            return effect.stacks >= quantity
+
+    def _check_instantiate_effect(self, effect):
+        if effect not in self.effects:
+            self.effects[effect] = effect(self)
+
+    def set_effect(self, effect, value):
+        self._check_instantiate_effect(effect)
+        self.effects.get(effect).stacks = value
+
+    def increase_effect(self, effect, value):
+        self._check_instantiate_effect(effect)
+        self.effects.get(effect).stacks += value
+
+    def decrease_effect(self, effect, value):
+        self._check_instantiate_effect(effect)
+        self.effects.get(effect).stacks -= value
+
+    def get_effect_stacks(self, effect):
+        self._check_instantiate_effect(effect)
+        return self.effects.get(effect).stacks
 
 
 class AbstractActor(EffectMixin):
@@ -61,12 +124,14 @@ class AbstractActor(EffectMixin):
 
     def receive_damage_from_card(self, damage: int, card: AbstractCard):
         self.health = self.health - damage
-        self.process_effects('receive_damage_from_card', self.environment, card)
+        call_all(method=EventHookMixin.on_receive_damage_from_card,
+                 parameters=(self, self.environment, card))
 
     def use_card(self, target: AbstractEnemy, card: AbstractCard, all_enemies: list[AbstractEnemy], is_free=False,
                  will_discard=True):
-        if card not in self.hand_pile:
+        if card not in self.get_cards(from_piles=CardPiles.HAND):
             raise RuntimeError("Tried to play card not in hand")
+        # TODO: ???? Fix 'x' cost
         if card.energy_cost == 'x':
             card.energy_cost = self.energy
         card.use(self, target, self.environment)
@@ -74,12 +139,15 @@ class AbstractActor(EffectMixin):
         # If enemy was killed call the on_fatal effect
         card.on_fatal(self)
 
-        self.process_effects('on_card_play', self.environment, card)
+        call_all(method=EventHookMixin.on_card_play,
+                 owner=self,
+                 parameters=(self, self, self.environment, card))
 
         # Exhaust Card logic
         if card in self.hand_pile and card.exhaust:
             self.exhaust_card(card)
-            self.process_effects('on_card_exhaust', self.environment)
+            call_all(method=EventHookMixin.on_card_exhaust,
+                     parameters=(self, self.environment,))
         # Poof card logic (powers)
         elif card.poof:
             self.hand_pile.remove(card)
@@ -110,11 +178,7 @@ class AbstractActor(EffectMixin):
         self.card_piles[CardPiles.HAND].append(card)
 
     def add_card_to_exhaust(self, card):
-        self.card_piles[CardPiles.EXHAUST].append(card)
-
-    def discard_card(self, card):
         self.card_piles[CardPiles.DISCARD].append(card)
-        self.card_piles[CardPiles.HAND].remove(card)
 
     def get_cards(self,
                   from_piles: CardPiles | list[CardPiles] = None,  # DRAW, HAND, DISCARD, EXHAUST | Default: All
@@ -169,7 +233,7 @@ class AbstractActor(EffectMixin):
 
     def get_playable_cards(self) -> list[AbstractCard]:
         playable = []
-        for card in self.hand_pile:
+        for card in self.get_cards(from_piles=CardPiles.HAND):
             # TODO: This is a sketchy patch
             if card is None:
                 continue
@@ -183,18 +247,32 @@ class AbstractActor(EffectMixin):
         return playable
 
     def deal_damage(self, target, damage):
-        actual_damage = self.process_effects('modify_damage_dealt', self.environment, damage)
+        damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
+                              owner=self,
+                              parameters=(self, self.environment, damage),
+                              return_param=damage)
+        actual_damage = damage + damage_mod
         target.take_damage(actual_damage)
 
     def take_damage(self, damage, damaging_enemy):
-        actual_damage = self.process_effects('modify_damage_taken', self.environment, damage)
+        damage_mod = call_all(method=EventHookMixin.modify_damage_taken,
+                              owner=self,
+                              parameters=(self, self.environment, damage),
+                              return_param=damage)
+
+        actual_damage = damage + damage_mod
+
         self.health -= actual_damage
         if actual_damage > 0:
             self.times_received_damage += 1
-            self.process_effects('on_take_damage', self.environment, damaging_enemy)
+            call_all(method=EventHookMixin.on_take_damage,
+                     owner=self,
+                     parameters=(self, self.environment, damaging_enemy))
 
     def end_turn(self):
-        self.process_effects('on_end_turn', self.environment)
+        call_all(method=EventHookMixin.on_end_turn,
+                 owner=self,
+                 parameters=(self, self.environment,))
 
         for card in (*self.hand_pile, *self.discard_pile, *self.draw_pile, *self._exhaust_pile):
             # If the card's energy has been modified temporarily
@@ -217,7 +295,9 @@ class AbstractActor(EffectMixin):
             'initial_health': copy(self.health),
             'turn_actions': []
         })
-        self.process_effects('on_start_turn', self.environment)
+        call_all(method=EventHookMixin.on_start_turn,
+                 owner=self,
+                 parameters=(self, self.environment))
 
     def recover_card(self, card):
         if card not in self._exhaust_pile:
@@ -238,10 +318,13 @@ class AbstractActor(EffectMixin):
 
     def draw_card(self, quantity: int = 1):
         """Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard."""
-        modify_card_draw = self.process_effects('modify_card_draw', self.environment, quantity)
+        modify_card_draw = call_all(method=EventHookMixin.modify_card_draw,
+                                    owner=self,
+                                    parameters=(self, self.environment, quantity),
+                                    return_param=quantity)
         if modify_card_draw is None:
             modify_card_draw = 0
-        quantity = modify_card_draw
+        quantity += modify_card_draw
 
         # If it's turn 1 force innate cards to be drawn
         if len(self.turn_log) == 0:
@@ -263,7 +346,9 @@ class AbstractActor(EffectMixin):
             card = self.draw_pile.pop()
             self.hand_pile.append(card)
             # Process effects related to card draw
-            self.process_effects('on_card_draw', self.environment, card)
+            call_all(method=EventHookMixin.on_card_draw,
+                     owner=self,
+                     parameters=(self, self.environment, card))
         return True
 
     @abstractmethod
@@ -312,6 +397,279 @@ class AbstractActor(EffectMixin):
         return self.turn_log[-1]
 
 
+class AbstractEnemy(ABC, EffectMixin):
+    """
+    This class is an abstract class designed to streamline the implementation
+    of enemies and elites.
+    https://slay-the-spire.fandom.com/wiki/Monsters
+    """
+
+    def __init__(self,
+                 name: Optional[str] = None,
+                 max_health: dict[int, tuple[int, int]] | int | None = None,
+                 set_health: Optional[int] = None,
+                 ascension=0,
+                 environment=None,
+                 act=1):
+        """
+        Create an enemy.
+
+        Parameters
+        ----------
+        :param name:
+            The name of the enemy.
+            Note that if this is not provided, the name of the enemy will be parsed from
+            the class name.
+
+        :param max_health:
+            The creature's max_health. This can be provided in three formats. You can either declare it
+            as a static class level variable, by adding a max_health map to the class (outside __init__/self), or
+            you can pass it into the init function either as a map, or just as an int if you want to set it to a
+            specific value.
+
+        :param set_health:
+            If specified will set the health of the creature to this amount.
+
+        Exceptions
+        ----------
+        :raises RuntimeError:
+            This will be thrown if max_health is not provided and the subclass does not
+            implement its own static class "max_health" variable.
+        """
+        # Use the provided name if there is, otherwise parse it from class name
+        self.name = name if name else lutil.parse_class_name(type(self).__name__)
+
+        # Guard against people not providing a max_health anywhere
+        if not max_health and not hasattr(self, 'max_health'):
+            raise RuntimeError(f'Tried to call subclass AbstractEnemy without providing static max_health variable. '
+                               f'Please verify that {type(self).__name__}.max_health is a defined value. '
+                               f'You may also choose to provide it in the {type(self).__name__}.__init__ constructor.')
+
+        # Assigns a max health based on the ascension and the class.max_health property
+        self.max_health = asc_int(ascension, getattr(self, 'max_health'))
+
+        # Since this was just created current health should be full
+        self.health = set_health if set_health else self.max_health
+
+        # Information about the environment that is relevant to the battle
+        self.ascension = ascension
+        self.act = act
+
+        self.actor = NotImplemented
+
+        # Add self to the environment
+        if environment:
+            self.environment = environment
+            self.environment['enemies'].append(self)
+
+        # This stores the move pattern of the enemy,
+        # It will populate with a generator the first time
+        # that take_turn is called on this enemy
+        self.ability_method_generator = self.pattern()
+
+        # Track the history and stuffs
+        self.print_log = []
+        self.ability_log = []
+
+        # Turn specific stuff for enemies to be set in abilities
+        self.intent: Optional[IntentType] = None
+        self.message: Optional[str] = None
+
+        # Initialize the EffectMixin
+        super().__init__()
+
+    def set_actor(self, actor):
+        self.actor = actor
+
+    def get_actor(self) -> AbstractActor:
+        if self.actor is NotImplemented:
+            raise RuntimeError(" HOOOOOBOY")
+        return self.actor
+
+    def is_dead(self):
+        return self.health <= 0
+
+    def take_damage(self, damage: int):
+        damage_mod = call_all(method=EventHookMixin.modify_damage_taken,
+                              owner=self,
+                              parameters=(self, self.environment, damage),
+                              return_param=damage)
+        actual_damage = damage + damage_mod
+        if actual_damage:  # TODO: Fix bad coding here
+            self.health -= actual_damage
+
+    def deal_damage(self, damage: int):
+        damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
+                              owner=self,
+                              parameters=(self, self.environment, damage),
+                              return_param=damage)
+        damage = damage + damage_mod
+        actor = self.get_actor()
+        actor.take_damage(damage=damage, damaging_enemy=self)
+
+    @abstractmethod
+    def pattern(self):
+        raise NotImplementedError
+
+    def rule_pattern(self, chances, successive_limit_dict):
+        # Get a list of the possible abilities based on successiveness?
+
+        valid_abilities = []
+        turns_taken = len(self.ability_log)
+
+        for ability in successive_limit_dict:
+            ability_limit = successive_limit_dict[ability]
+            # For every ability, if turns taken so far is less than the limit, automatically valid.
+            if turns_taken < ability_limit:
+                valid_abilities.append(ability)
+            else:
+                for i in range(ability_limit):
+                    if self.ability_log[-i] == ability:
+                        continue
+                    valid_abilities.append(ability)
+                    break
+
+        # Then use chances to pick between them
+        weights = []
+        for ability in valid_abilities:
+            weights.append(chances[ability])
+
+        x = random.choices(valid_abilities, weights)
+        return x[0]  # Random.choices returns a list???
+
+    def take_turn(self):
+        call_all(method=EventHookMixin.on_start_turn,
+                 owner=self,
+                 parameters=(self, self.environment,))
+
+        self.intent = None
+        self.message = None
+
+        # Get and call the next ability method the enemy will use
+        next_method = next(self.ability_method_generator)
+        next_method()
+        self.ability_log.append(next_method)
+
+        if self.intent is None or self.message is None:
+            raise RuntimeError(f'Yo, set the intent/message in the {next_method.__name__} method.')
+
+        # Append the message
+        self.print_log.append(self.message)
+        call_all(method=EventHookMixin.on_end_turn,
+                 owner=self,
+                 parameters=(self, self.environment,))
+        return self.print_log
+
+
+class EventHookMixin:
+    def __init__(self, owner):
+        implemented_hooks = getattr(owner, 'implemented_hooks')
+
+        # Should in theory be every method in EventHookMixin
+        all_subclass_implemented_methods = [method for method in dir(EventHookMixin)
+                                            if not method.startswith('__') and method != 'implements_method']
+        for method in all_subclass_implemented_methods:
+
+            # If child overrode method this should activate
+            if getattr(EventHookMixin, method) != getattr(type(self), method):
+                # Add this object to the list of things that should be called for methods
+                parent_method = getattr(EventHookMixin, method)
+                implemented_hooks.setdefault(parent_method, []).append(self)
+
+    # Damage hooks
+
+    def modify_damage_taken(self, owner, environment, damage: int) -> int:
+        """
+        Effects overriding this can modify the damage taken by an actor or enemy.
+        The return value of this method will be added to the damage, you can lower the damage
+        received by returning a negative value.
+        """
+        pass
+
+    def modify_damage_dealt(self, owner, environment, damage: int) -> int:
+        """
+        Effects overriding this can modify the damage dealt by an actor or enemy.
+        The return value of this method will be added to the damage, you can lower the damage
+        dealt by returning a negative value.
+        """
+        pass
+
+    def on_receive_damage_from_card(self: AbstractEffect, owner, environment, card):
+        pass
+
+    def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment,
+                       damaging_enemy: AbstractEnemy):
+        pass
+
+    # Turn related hooks
+
+    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        """
+        Effects overriding this can cause things to happen on the end of turn.
+        """
+        pass
+
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        """
+        Effects overriding this can cause things to happen on the end of turn.
+        """
+        pass
+
+    def on_card_play(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
+        pass
+
+    # Card draw related hooks
+
+    def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
+        pass
+
+    def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        pass
+
+    def modify_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, quantity):
+        """
+        Effects overriding this will modify the number of cards drawn
+        """
+        return 0
+
+
+class AbstractEffect(EventHookMixin):
+    """
+    This abstraction allows the easy creation of Effects.
+    An effect in this context is a Slay The Spire Buff,
+    Debuff, or block.
+    """
+
+    def __init__(self, owner):
+        super().__init__(owner)
+        self.owner = owner
+        self.stacks = 0  # Number of stacks of this effect
+
+
+# TODO: Lots of occurances of return_param damage being passed twice awkwardly and self and self.env being passed
+def call_all(method, owner, parameters, return_param: Optional[int] = None):
+    if method not in getattr(owner, 'implemented_hooks'):
+        return 0 if return_param else return_param
+
+    # Get all objects that the method requested
+    objects_with_hooks = owner.implemented_hooks[method]
+
+    # For each of those objects
+    for obj in objects_with_hooks:
+        # Get the actual method associated with the object
+        # (E.g. Strength.modify_damage_dealt instead of EventHookMixin.modify_damage_dealt)
+        method = getattr(obj, method.__name__)
+
+        # If the method is returning something keep track of that and return in
+        result = 0
+        if return_param:
+            result = method(*parameters)
+        else:
+            method(*parameters)
+
+    return result
+
+
 class AbstractCard(ABC):
     """
     Abstract card class is the blueprint for all cards. The goal for this class
@@ -322,16 +680,14 @@ class AbstractCard(ABC):
 
     def __init__(self,
                  card_type: CardType = CardType.UNKNOWN,
-                 card_color: CardColor = CardColor.UNKNOWN,
-                 card_rarity: CardRarity = CardRarity.UNKNOWN,
                  energy_cost: int | bool = NO_COST,
+                 rarity: CardRarity = CardRarity.UNDEFINED,
                  upgraded: bool = False,
                  name: str = None,
                  exhaust: bool = False,
                  ethereal: bool = False,
                  innate: bool = False,
                  unplayable: bool = False,
-                 remove_after_combat: bool = False,
                  allow_multiple_upgrades: bool = False):
         """
         Primarily designed tobe called in subclassed cards.
@@ -345,7 +701,10 @@ class AbstractCard(ABC):
             The amount of energy the card uses, with two exceptions:
             True is a stand-in for x cost cards, which will be set to all energy available when played.
             False is a stand-in for cards that have no cost, mostly curse or status cards.
-            '
+
+        :param rarity:
+            The rarity of the card.
+
         :param upgraded:
             If the card has been upgraded or not. Not that Searing Blow can be upgraded multiple times.
 
@@ -393,8 +752,9 @@ class AbstractCard(ABC):
         # If the card is upgraded or not
         self.upgraded: bool = upgraded
 
-        # Type of card
+        # Type and rarity of card
         self.card_type: CardType = card_type
+        self.rarity: CardRarity = rarity
 
         # Card behavior
         self.exhaust: bool = exhaust
@@ -519,164 +879,3 @@ class AbstractCard(ABC):
     def __repr__(self):
         """Override the repr() method so arrays of cards print neatly"""
         return self.name
-
-
-class AbstractEffect:
-    """
-    This abstraction allows the easy creation of Effects.
-    An effect in this context is a Slay The Spire Buff,
-    Debuff, or block.
-    """
-
-    def __init__(self):
-        self.stacks = 0  # Number of stacks of this effect
-
-    # === API/SANDBOX METHODS ===
-
-    def modify_damage_taken(self, owner, environment, damage: int) -> int:
-        """
-        Effects overriding this can modify the damage taken by an actor or enemy.
-        The return value of this method will be added to the damage, you can lower the damage
-        received by returning a negative value.
-        """
-        pass
-
-    def modify_damage_dealt(self, owner, environment, damage: int) -> int:
-        """
-        Effects overriding this can modify the damage dealt by an actor or enemy.
-        The return value of this method will be added to the damage, you can lower the damage
-        dealt by returning a negative value.
-        """
-        pass
-
-    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        """
-        Effects overriding this can cause things to happen on the end of turn.
-        """
-        pass
-
-    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        """
-        Effects overriding this can cause things to happen on the end of turn.
-        """
-        pass
-
-    def on_receive_damage_from_card(self: AbstractEffect, owner, environment, card):
-        pass
-
-    def on_card_play(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
-        pass
-
-    def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, card):
-        pass
-
-    def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        pass
-
-    def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment,
-                       damaging_enemy: AbstractEnemy):
-        pass
-
-    def modify_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, quantity):
-        """
-        Effects overriding this will modify the number of cards drawn
-        """
-        return 0
-
-
-# ===================================
-# === Effect Management and Mixin ===
-# ===================================
-
-class EffectMixin:
-    """
-    This EffectMixin class is added to both the actors and the enemies, and allows for
-    managing different effects.
-
-    Below are listed common API methods you are encouraged to use in the development
-    of cards, enemies, relics, and effects. (Note that entity in this case means a player
-    or enemy)
-
-    - entity.clear_effects() -> Remove all effects from an entity
-    - entity.add_effects(effect, qty) -> increments stacks of effect by qty
-    - entity.set_effects(effect, qty) -> sets the stacks of effect to qty
-    - entity.has_effect(effect) -> Returns true if entity has effect
-    - entity.has_effect(effect, qty) -> returns true if entity has at least qty stacks of effect
-    - entity.get_stacks(effect) -> Returns the number of stacks of effect
-    """
-
-    def __init__(self):
-        # This is the primary dictionary of effects on an entity
-        self.effects: dict[type[AbstractEffect], AbstractEffect] = {}
-        self.ritual_flag: bool = False
-
-    def process_effects(self: AbstractActor | AbstractEnemy, method_name: str, environment, parameter=None):
-        """
-        This method streamlines the processing of effects by allowing you to quickly
-        call a given method on all effects. It is
-        """
-        # Note: func = getattr(obj, method_name); func;
-        # is essentially the same as doing obj.method_name()
-        # This is somewhat brittle since we take method name as
-        # a string, but I think it simplifies enough to be worth it
-        # TODO: Only call on methods where it exists
-
-        for effect_name in list(self.effects):
-            func = getattr(self.effects.get(effect_name), method_name)
-            if parameter is not None:
-                # Bug here?
-                modification = func(self.effects.get(effect_name), environment, parameter)
-                if modification is not None:
-                    parameter = parameter + modification
-            else:
-                func(self, environment)
-            for effect in list(self.effects):
-                if self.effects.get(effect).stacks <= 0:
-                    self.effects.pop(effect)
-
-        return parameter
-
-    def get_effects_dict(self) -> dict[str, int]:
-        """
-        Returns a dictionary of effects in the format {"effect name": stacks}
-        This is primarily used for displaying information about all the stacks on an entity.
-        """
-        # Start with an empty dictionary
-        effects_dict = {}
-        for effect in self.effects:
-            # Add a dictionary entry using the name of the effect as key and stacks as qty
-            effects_dict[effect.__name__] = self.effects[effect].stacks
-        # Return the final dict
-        return effects_dict
-
-    def clear_effects(self):
-        """
-        Removes all effects from the owner.
-        """
-        self.effects.clear()
-
-    def has_effect(self, effect, quantity=None):
-        if quantity is None:
-            return effect in self.effects
-        else:
-            return effect.stacks >= quantity
-
-    def _check_instantiate_effect(self, effect):
-        if effect not in self.effects:
-            self.effects[effect] = effect()
-
-    def set_effect(self, effect, value):
-        self._check_instantiate_effect(effect)
-        self.effects.get(effect).stacks = value
-
-    def increase_effect(self, effect, value):
-        self._check_instantiate_effect(effect)
-        self.effects.get(effect).stacks += value
-
-    def decrease_effect(self, effect, value):
-        self._check_instantiate_effect(effect)
-        self.effects.get(effect).stacks -= value
-
-    def get_effect_stacks(self, effect):
-        self._check_instantiate_effect(effect)
-        return self.effects.get(effect).stacks

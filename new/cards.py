@@ -7,24 +7,27 @@ from itertools import product
 
 from new import effects
 from new.effects import *
-from new.enumerations import CardType, SelectEvent, CardPiles, CardColor, CardRarity
+from new.enumerations import CardType, SelectEvent, CardPiles, IntentType
 
-if TYPE_CHECKING:
-    from new.abstractions import AbstractActor, AbstractCard
-    from enemies import AbstractEnemy, IntentType
 
-# Card Cost Variables
-X = True
-NO_COST = False
+from new.abstractions import AbstractActor, AbstractEnemy, AbstractCard
 
+
+
+
+################
+# STATUS CARDS #
+################
+# https://slay-the-spire.fandom.com/wiki/Status
+# Burn, Dazed, Wound, Slimed, Void,
 
 class Burn(AbstractCard, ABC):
     pass
 
 
-class Wound(AbstractCard, ABC):
+class Dazed(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(name='Wound', energy_cost=0, card_type=CardType.STATUS)
+        super().__init__(name='Dazed', energy_cost=0, card_type=CardType.STATUS, ethereal=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         pass
@@ -36,9 +39,9 @@ class Wound(AbstractCard, ABC):
         return False
 
 
-class Dazed(AbstractCard, ABC):
+class Wound(AbstractCard, ABC):
     def __init__(self):
-        super().__init__(name='Dazed', energy_cost=0, card_type=CardType.STATUS, ethereal=True)
+        super().__init__(name='Wound', energy_cost=0, card_type=CardType.STATUS)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         pass
