@@ -7,10 +7,8 @@ from typing import TYPE_CHECKING, Optional
 
 import lutil
 from lutil import asc_int
-from new.abstractions import DamageMixin
-from new.actors import AbstractActor
+from new.abstractions import DamageMixin, AbstractActor
 from new.effects import EffectMixin, Ritual, Block, Strength, Weak, CurlUp
-from new.enumerations import IntentType
 
 if TYPE_CHECKING:
     pass

@@ -1,6 +1,7 @@
 from new.cards import *
 from new.enemies import Cultist, AbstractEnemy
-from new.actors import AbstractActor, LeftToRightAI
+from new.actors import LeftToRightAI
+from new.abstractions import AbstractActor
 from new.classes import Ironclad
 from lutil import C
 
