@@ -14,16 +14,6 @@ X = True
 NO_COST = False
 
 
-# class DamageMixin:
-#     """
-#     Adding this to a subclass will provide it with the ability to take, deal
-#     and manage damage.
-#     """
-#
-#     def damage(self: AbstractEnemy, damage):
-#         self.get_actor().take_damage(damage, self)
-
-
 class EffectMixin:
     """
     This EffectMixin class is added to both the actors and the enemies, and allows for
@@ -258,20 +248,19 @@ class AbstractActor(EffectMixin):
 
     def deal_damage(self, target, damage):
         damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
-                                 owner=self,
-                                 parameters=(self, self.environment, damage),
-                                 return_param=damage)
+                              owner=self,
+                              parameters=(self, self.environment, damage),
+                              return_param=damage)
         actual_damage = damage + damage_mod
         target.take_damage(actual_damage)
 
     def take_damage(self, damage, damaging_enemy):
         damage_mod = call_all(method=EventHookMixin.modify_damage_taken,
-                                 owner=self,
-                                 parameters=(self, self.environment, damage),
-                                 return_param=damage)
+                              owner=self,
+                              parameters=(self, self.environment, damage),
+                              return_param=damage)
 
         actual_damage = damage + damage_mod
-
 
         self.health -= actual_damage
         if actual_damage > 0:
@@ -511,18 +500,18 @@ class AbstractEnemy(ABC, EffectMixin):
         #    obj_with_hook.modify_damage_taken(self, ...)
 
         damage_mod = call_all(method=EventHookMixin.modify_damage_taken,
-                          owner=self,
-                          parameters=(self, self.environment, damage),
-                          return_param=damage)
+                              owner=self,
+                              parameters=(self, self.environment, damage),
+                              return_param=damage)
         actual_damage = damage + damage_mod
         if actual_damage:  # TODO: Fix bad coding here
             self.health -= actual_damage
 
     def deal_damage(self, damage: int):
         damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
-                          owner=self,
-                          parameters=(self, self.environment, damage),
-                          return_param=damage)
+                              owner=self,
+                              parameters=(self, self.environment, damage),
+                              return_param=damage)
         damage = damage + damage_mod
         actor = self.get_actor()
         actor.take_damage(damage=damage, damaging_enemy=self)
