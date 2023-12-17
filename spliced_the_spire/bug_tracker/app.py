@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 
 from spliced_the_spire.new.enemies import enemies
+from bug_enums import BugStatus, BugType, BugLocation
 
 data_base_name = 'pyredevelopment$spliced_the_spire'
 database_location = 'pyredevelopment.mysql.pythonanywhere-services.com'
@@ -25,16 +26,17 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 
-class Bug(db.Model):
+class SplicedBugs(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    bug_title = db.Column(db.String(100), unique=True, nullable=False)
-    bug_type = db.Column(db.Integer, nullable=False)
-    bug_location = db.Column(db.Integer, nullable=False)
-    bug_status = db.Column(db.Integer, unique=True, nullable=False)
-    bug_name = db.Column(db.String(100), nullable=False)
-    bug_description = db.Column(db.String(100))
+    title = db.Column(db.String(100), unique=True, nullable=False)
+    tagged_by = db.Column(db.String(100), unique=False, nullable=False)
+    type = db.Column(db.Integer, nullable=False)
+    location = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.Integer, unique=True, nullable=False)
+    description = db.Column(db.String(100))
     created_at = db.Column(db.DateTime(timezone=True),
                            server_default=func.now())
+    last_modified = db.Column(db.DateTime(timezone=True), server_default=func.now())
     notes = db.Column(db.String(1000))
 
 
@@ -47,15 +49,21 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 
-@app.route("/register/monster_room", methods=['GET', 'POST'])
+@app.route("/register/room/monster", methods=['GET', 'POST'])
 def router():
+    name = 'something'
+    description = f'Could not locate implementation of enemy {name}. This was reported in the following room/act: 1.2/1'
+    reporter = 'Luke'
     room_data = json.loads(request.data.decode())
-    print(room_data)
-    monsters = room_data['monsters']
-    for monster in monsters:
-        enemy_klass = enemies.get(monster['name'])
-        if not enemy_klass:
-            print(f'COULD NOT FIND CLASS FOR ENEMY NAME: {monster["name"]}')
+    bug = SplicedBugs(
+        title='Missing or misnamed monster "{name}"',
+        tagged_by=f'AUTO-TAGGER ({reporter})',
+        type=BugType.MISSING,
+        location=BugLocation.MONSTERS,
+        status=BugStatus.OPEN,
+        description=description
+    )
+    db.session.add(bug)
+    db.session.commit()
 
-    print(map)
     return "Hi!"
