@@ -25,6 +25,7 @@ def parse_class_name(class_name: str) -> str:
 
 
 
+
 def asc_int(ascension: int, value_dict: Dict[int, Union[Tuple[int, int], int]]) -> int:
     """
     Use this to get a value based on ascension

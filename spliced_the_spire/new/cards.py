@@ -65,6 +65,7 @@ class GreenStrike(AbstractCard, ABC):
 
 
 class GreenDefend(AbstractCard, ABC):
+    sts_name = 'Defend_G'
 
     def __init__(self):
         self.block = 5
@@ -171,6 +172,8 @@ class Shiv(AbstractCard, ABC):
 
 # Ironclad cards
 class RedStrike(AbstractCard, ABC):
+    sts_name = 'Strike_R'
+
     def __init__(self):
         self.damage = 6
         super().__init__(name='Strike', energy_cost=1, card_type=CardType.ATTACK,
@@ -184,6 +187,8 @@ class RedStrike(AbstractCard, ABC):
 
 
 class RedDefend(AbstractCard, ABC):
+    sts_name = 'Defend_R'
+
     def __init__(self):
         self.block = 5
         super().__init__(name='Defend', energy_cost=1, card_type=CardType.SKILL,

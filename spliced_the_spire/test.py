@@ -1,3 +1,6 @@
+from new.abstractions import AbstractCard
+from new.cards import *
+
 start = {
     "actor": {
         "gold": 99,
@@ -94,5 +97,6 @@ for monster in start['monsters']:
         raise e
     enemies.append(enemy)
 
-print(enemies)
-print(enemies[0].health)
+for card in start['actor']['master_deck']:
+    print(AbstractCard.create_card_from_sts_name(card['id']))
+
