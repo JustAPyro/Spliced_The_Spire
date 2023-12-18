@@ -1,17 +1,14 @@
 import json
 from enum import Enum
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 
 from spliced_the_spire.new.enemies import enemies
 from bug_enums import BugStatus, BugType, BugLocation
 
-data_base_name = 'pyredevelopment$spliced_the_spire'
-database_location = 'pyredevelopment.mysql.pythonanywhere-services.com'
-database_username = 'pyredevelopment'
-database_password = 'stssqlpassword'
+
 
 app = Flask(__name__)
 SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
@@ -30,9 +27,9 @@ class SplicedBugs(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), unique=True, nullable=False)
     tagged_by = db.Column(db.String(100), unique=False, nullable=False)
-    type = db.Column(db.Integer, nullable=False)
-    location = db.Column(db.Integer, nullable=False)
-    status = db.Column(db.Integer, unique=True, nullable=False)
+    type = db.Column(db.Enum(BugType), nullable=False)
+    location = db.Column(db.Enum(BugLocation), nullable=False)
+    status = db.Column(db.Enum(BugStatus), unique=True, nullable=False)
     description = db.Column(db.String(100))
     created_at = db.Column(db.DateTime(timezone=True),
                            server_default=func.now())
@@ -44,12 +41,18 @@ with app.app_context():
     db.create_all()
 
 
-@app.route("/")
+@app.route("/stst/status")
 def hello_world():
     return "<p>Hello, World!</p>"
 
 
-@app.route("/register/room/monster", methods=['GET', 'POST'])
+@app.route("/stst/bugs")
+def bug_page():
+    bugs = SplicedBugs.query
+    return render_template('bug_page.html', bugs=bugs)
+
+
+@app.route("stst/register/room/monster", methods=['GET', 'POST'])
 def router():
     name = 'something'
     description = f'Could not locate implementation of enemy {name}. This was reported in the following room/act: 1.2/1'

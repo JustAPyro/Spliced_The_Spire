@@ -409,6 +409,7 @@ class AbstractEnemy(ABC, EffectMixin):
                  sts_name: Optional[str] = None,
                  max_health: dict[int, tuple[int, int]] | int | None = None,
                  set_health: Optional[int] = None,
+                 testing: bool = False,
                  ascension=0,
                  act=1):
         """

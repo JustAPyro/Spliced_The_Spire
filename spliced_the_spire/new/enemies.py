@@ -87,7 +87,7 @@ class Cultist(AbstractEnemy):
         17: 5
     }
 
-    def __init__(self, environment: dict = None, ascension: int = 0, act: int = 1):
+    def __init__(self, *args, **kwargs):
         """
         Creates a Cultist.
 
@@ -102,9 +102,7 @@ class Cultist(AbstractEnemy):
         :param act:
             What act the enemy is in (Which can affect behavior)
         """
-        super().__init__(environment=environment,
-                         ascension=ascension,
-                         act=act)
+        super().__init__(*args, **kwargs)
 
     def incantation(self):
         self.intent = IntentType.BUFF,
