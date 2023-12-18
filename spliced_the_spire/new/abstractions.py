@@ -899,10 +899,3 @@ class AbstractCard(ABC):
     def __repr__(self):
         """Override the repr() method so arrays of cards print neatly"""
         return self.name
-
-    @staticmethod
-    def create_card_from_sts_name(name: str):
-        # This returns a dict of sts_name (if defined) or class name to the actual class
-        mapping = {card_cls.sts_name if hasattr(card_cls, 'sts_name') else card_cls.__name__: card_cls
-                for card_cls in AbstractCard.__subclasses__()}
-        return mapping[name]

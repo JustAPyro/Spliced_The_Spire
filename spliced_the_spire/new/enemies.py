@@ -354,3 +354,4 @@ class RedLouse(AbstractEnemy):
 
 env = {}
 enemies = {cls(env).sts_name: cls for cls in AbstractEnemy.__subclasses__()}
+

@@ -1,5 +1,5 @@
 from new.abstractions import AbstractCard
-from new.cards import *
+from new.cards import card_classes
 
 start = {
     "actor": {
@@ -97,6 +97,11 @@ for monster in start['monsters']:
         raise e
     enemies.append(enemy)
 
+print(card_classes)
 for card in start['actor']['master_deck']:
-    print(AbstractCard.create_card_from_sts_name(card['id']))
+    sts_name = card['id']
+    upgraded = card['upgraded']
+    card_cls = card_classes[sts_name]
+    new_card = card_cls(upgraded=upgraded)
+    print(new_card)
 
