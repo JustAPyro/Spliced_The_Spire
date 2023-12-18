@@ -57,6 +57,8 @@ class Intent:
 
 
 class DummyEnemy(AbstractEnemy, ABC):
+    max_health = {0: 10, 100: 10}
+
     def __init__(self, environment, health=10, ascension=0):
         super().__init__(environment=environment,
                          name='Dummy',
@@ -320,7 +322,6 @@ class RedLouse(AbstractEnemy):
                              curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))
 
         self.base_damage = base_damage
-
 
     def bite(self):
         """Deals damage based on the base_damage of the louse and the ascension."""

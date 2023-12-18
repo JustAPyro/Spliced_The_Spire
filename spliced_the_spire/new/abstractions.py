@@ -441,17 +441,31 @@ class AbstractEnemy(ABC, EffectMixin):
         self.name = name if name else lutil.parse_class_name(type(self).__name__)
         self.sts_name = self.name
 
-        # Guard against people not providing a max_health anywhere
-        if not max_health and not hasattr(self, 'max_health'):
+        # Guards
+        if not hasattr(self, 'max_health'):
             raise RuntimeError(f'Tried to call subclass AbstractEnemy without providing static max_health variable. '
-                               f'Please verify that {type(self).__name__}.max_health is a defined value. '
-                               f'You may also choose to provide it in the {type(self).__name__}.__init__ constructor.')
+                               f'Please verify that {type(self).__name__}.max_health is a defined value. ')
 
-        # Assigns a max health based on the ascension and the class.max_health property
+        # 1. If it was provided in the constructor as a value use that
         if type(max_health) is int:
             self.max_health = max_health
+        # 2. If it was provided in the constructor as a dict, calculate based on asc.
+        elif type(max_health) is dict:
+            self.max_health = asc_int(ascension, max_health)
+        # 3. Finally, if not provided elsewhere get from the class variable
         elif hasattr(self, 'max_health'):
             self.max_health = asc_int(ascension, getattr(self, 'max_health'))
+
+        if testing:
+            max_map: dict = getattr(type(self), 'max_health')
+            ascensions = sorted(list(max_map.keys()))
+            for i in range(0, len(ascensions)-1):
+                if ascension < ascensions[i + 1]:
+                    lower, upper = max_map[ascensions[i]]
+                    if self.max_health > upper or self.max_health < lower:
+                        raise Exception(f'Unexpected max health: '
+                                        f'Generated {self.name} with {self.max_health} max health, '
+                                        f'expected max_health range for {self.name} on A{ascension} is {lower}-{upper}')
 
         # Since this was just created current health should be full
         self.health = set_health if set_health else self.max_health

@@ -80,14 +80,19 @@ enemies = []
 for monster in start['monsters']:
     enemy_cls = enemy_cls_map.get(monster['id'], None)
     if not enemy_cls:
-        raise Exception()
-    enemies.append(
-        enemy_cls(
+        # TODO: Auto-tag missing enemy exception
+        raise Exception("Missing enemy")
+    try:
+        enemy = enemy_cls(
             environment=env,
             ascension=ascension,
             act=act,
             max_health=monster['max_health'],
-            testing=True))
+            testing=True)
+    except Exception as e:
+        # TODO: Auto-tag unexpected max_health
+        raise e
+    enemies.append(enemy)
 
 print(enemies)
 print(enemies[0].health)
