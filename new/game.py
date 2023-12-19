@@ -8,9 +8,14 @@ class AbstractGame(ABC):
         self.wonLastGame = wonLastGame
         self.actor = actor
 
+        # generate map
+        # TODO: self.map = SOMEONE ELSE DO THIS HELP
         self.floor = 0
 
     def startGame(self):
-        # starting choices
+        # Neow Event
+        #
         pass
 
+    def chooseNextRoom(self):
+        pass
