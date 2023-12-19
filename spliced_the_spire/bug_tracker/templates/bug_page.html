@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <table id="data" class="table table-striped">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Tagger</th>
+        <th>Status</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for bug in bugs %}
+        <tr>
+          <td>{{ bug.title }}</td>
+          <td>{{ bug.tagged_by }}</td>
+          <td>{{ bug.status }}</td>
+          <td>{{ bug.type }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
