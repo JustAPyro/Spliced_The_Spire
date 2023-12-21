@@ -1,5 +1,5 @@
-from abstractions import AbstractRelic, AbstractEffect, AbstractActor, AbstractEnemy
-from enumerations import Color, Rarity
+from abstractions import *
+from enumerations import *
 from effects import *
 
 
@@ -75,11 +75,38 @@ class AncientTeaSet(AbstractRelic):
 class ArtOfWar(AbstractRelic):
     """at the end of turn, if you have not played an attack, next turn gain 1 extra energy,
     common uncolored"""
+    def __init__(self):
+        self.noAttacks = True
+        self.doGiveEnergy = False
+        super().__init__(relic_rarity=Rarity.COMMON,
+                         relic_color=Color.COLORLESS)
+
+    def on_card_play(self, owner: AbstractActor | AbstractEnemy, environment, card: AbstractCard):
+        if card.card_type == CardType.ATTACK:
+            self.noAttacks = False
+
+    def on_end_turn(self, owner: AbstractActor | AbstractEnemy, environment):
+        if self.noAttacks:
+            self.doGiveEnergy = True
+        else:
+            self.doGiveEnergy = False
+
+    def on_start_turn(self, owner: AbstractActor | AbstractEnemy, environment):
+        self.noAttacks = True
+
+        if self.doGiveEnergy:
+            owner.increase_effect(Energy, 1)
 
 
 class BagOfMarbles(AbstractRelic):
     """at the start of combat, apply 1 vulnerable to all enemies,
     common uncolored"""
+    def __init__(self):
+        super(BagOfMarbles, self).__init__(relic_rarity=Rarity.COMMON,
+                                           relic_color=Color.COLORLESS)
+
+    def on_enter_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        pass
 
 
 class BagOfPreparation(AbstractRelic):
