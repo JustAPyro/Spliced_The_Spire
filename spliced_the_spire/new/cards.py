@@ -6,7 +6,7 @@ from copy import deepcopy
 from itertools import product
 from spliced_the_spire.new import effects
 from spliced_the_spire.new.effects import *
-from spliced_the_spire.new.enumerations import CardType, SelectEvent, CardPiles, IntentType, CardColor, CardRarity
+from spliced_the_spire.new.enumerations import CardType, SelectEvent, CardPiles, IntentType, Color, CardRarity
 
 from spliced_the_spire.new.abstractions import AbstractActor, AbstractEnemy, AbstractCard
 
@@ -54,7 +54,7 @@ class GreenStrike(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 6
         super().__init__(name='Strike', energy_cost=1, card_type=CardType.ATTACK,
-                         card_color=CardColor.GREEN, card_rarity=CardRarity.STARTER)
+                         card_color=Color.GREEN, card_rarity=CardRarity.STARTER)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         caller.deal_damage(target, self.damage)
@@ -69,7 +69,7 @@ class GreenDefend(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.block = 5
         super().__init__(name='Defend', energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.STARTER, card_color=CardColor.GREEN)
+                         card_rarity=CardRarity.STARTER, card_color=Color.GREEN)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         caller.increase_effect(Block, self.block)
@@ -83,7 +83,7 @@ class Neutralize(AbstractCard, ABC):
         self.damage = 3
         self.weak = 1
         super().__init__(name='Neutralize', energy_cost=0, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.STARTER, card_color=CardColor.GREEN)
+                         card_rarity=CardRarity.STARTER, card_color=Color.GREEN)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         caller.deal_damage(target, self.damage)
@@ -99,7 +99,7 @@ class Survivor(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.block = 8
         super().__init__(name='Survivor', energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.STARTER, card_color=CardColor.GREEN)
+                         card_rarity=CardRarity.STARTER, card_color=Color.GREEN)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         caller.increase_effect(Block, self.block)
@@ -115,7 +115,7 @@ class Acrobatics(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.cardDraw = 3
         super().__init__(name='Acrobatics', energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.GREEN)
+                         card_rarity=CardRarity.COMMON, card_color=Color.GREEN)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         caller.draw_card(quantity=self.cardDraw)
@@ -131,7 +131,7 @@ class Backflip(AbstractCard, ABC):
         self.block = 5
         self.draw = 2
         super().__init__(name='Backflip', energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.GREEN)
+                         card_rarity=CardRarity.COMMON, card_color=Color.GREEN)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         caller.increase_effect(Block, self.block)
@@ -145,7 +145,7 @@ class Bane(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 7
         super().__init__(name='Bane', energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.GREEN)
+                         card_rarity=CardRarity.COMMON, card_color=Color.GREEN)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         target.take_damage(self.damage)
@@ -160,7 +160,7 @@ class Shiv(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 4
         super().__init__(name='Shiv', energy_cost=0, card_type=CardType.ATTACK, exhaust=True,
-                         card_rarity=CardRarity.SPECIAL, card_color=CardColor.COLORLESS)
+                         card_rarity=CardRarity.SPECIAL, card_color=Color.COLORLESS)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         target.take_damage(self.damage)
@@ -176,7 +176,7 @@ class RedStrike(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 6
         super().__init__(name='Strike', energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.STARTER, card_color=CardColor.RED,
+                         card_rarity=CardRarity.STARTER, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -192,7 +192,7 @@ class RedDefend(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.block = 5
         super().__init__(name='Defend', energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.STARTER, card_color=CardColor.RED,
+                         card_rarity=CardRarity.STARTER, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -207,7 +207,7 @@ class Bash(AbstractCard, ABC):
         self.damage = 8
         self.vulnerable = 2
         super().__init__(energy_cost=2, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.STARTER, card_color=CardColor.RED,
+                         card_rarity=CardRarity.STARTER, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -223,7 +223,7 @@ class Anger(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 6
         super().__init__(energy_cost=0, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -238,7 +238,7 @@ class Armaments(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.block = 5
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller, target, environment):
@@ -258,7 +258,7 @@ class Armaments(AbstractCard, ABC):
 class BodySlam(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -274,7 +274,7 @@ class Clash(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 14
         super().__init__(energy_cost=0, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller, target, environment):
@@ -294,7 +294,7 @@ class Cleave(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 8
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller, target, environment):
@@ -310,7 +310,7 @@ class Clothesline(AbstractCard, ABC):
         self.damage = 12
         self.qty_weak = 2
         super().__init__(energy_cost=2, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     # TODO: make caller.take_damage a mangled method
@@ -327,7 +327,7 @@ class Flex(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.strength_amount = 2
         super().__init__(energy_cost=0, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller, target, environment):
@@ -341,7 +341,7 @@ class Flex(AbstractCard, ABC):
 class Havoc(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller, target, environment):
@@ -358,7 +358,7 @@ class Headbutt(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 9
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller, target, environment):
@@ -377,7 +377,7 @@ class HeavyBlade(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.extra_strength_multiplier = 3
         super().__init__(energy_cost=2, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -392,7 +392,7 @@ class IronWave(AbstractCard, ABC):
         self.damage = 5
         self.block = 5
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -409,7 +409,7 @@ class PerfectedStrike(AbstractCard, ABC):
         self.base_damage = 6
         self.increase = 2
         super().__init__(energy_cost=2, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -428,7 +428,7 @@ class PommelStrike(AbstractCard, ABC):
         self.damage = 9
         self.draw = 1
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -444,7 +444,7 @@ class ShrugItOff(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.block = 8
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -459,7 +459,7 @@ class SwordBoomerang(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage_times = 3
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -474,7 +474,7 @@ class Thunderclap(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 4
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -490,7 +490,7 @@ class TrueGrit(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.block = 7
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -509,7 +509,7 @@ class TwinStrike(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 5
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -526,7 +526,7 @@ class Warcry(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.draw_num = 1
         super().__init__(energy_cost=0, card_type=CardType.SKILL, exhaust=True,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -541,7 +541,7 @@ class WildStrike(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 12
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.COMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -556,7 +556,7 @@ class BattleTrance(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.draw_qty = 3
         super().__init__(energy_cost=0, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -571,7 +571,7 @@ class BloodForBlood(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 18
         super().__init__(energy_cost=4, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -589,7 +589,7 @@ class Bloodletting(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.energy_gain = 2
         super().__init__(energy_cost=0, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -604,7 +604,7 @@ class BurningPact(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.card_draw = 2
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -619,7 +619,7 @@ class Carnage(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 20
         super().__init__(energy_cost=2, card_type=CardType.ATTACK, ethereal=True,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -633,7 +633,7 @@ class Combust(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.stacks = 5
         super().__init__(energy_cost=1, card_type=CardType.POWER,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -646,7 +646,7 @@ class Combust(AbstractCard, ABC):
 class DarkEmbrace(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=2, card_type=CardType.POWER,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -660,7 +660,7 @@ class Disarm(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.strength_loss = 2
         super().__init__(energy_cost=1, card_type=CardType.SKILL, exhaust=True,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -674,7 +674,7 @@ class Dropkick(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 5
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -690,7 +690,7 @@ class Dropkick(AbstractCard, ABC):
 class DuelWield(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -715,7 +715,7 @@ class DuelWield(AbstractCard, ABC):
 class Entrench(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=2, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -729,7 +729,7 @@ class Evolve(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.draw = 1
         super().__init__(energy_cost=1, card_type=CardType.POWER,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -743,7 +743,7 @@ class FeelNoPain(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.block = 3
         super().__init__(energy_cost=1, card_type=CardType.POWER,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -757,7 +757,7 @@ class FireBreathing(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 6
         super().__init__(energy_cost=1, card_type=CardType.POWER,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -771,7 +771,7 @@ class FlameBarrier(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 4
         super().__init__(energy_cost=2, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -785,7 +785,7 @@ class GhostlyArmor(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.block = 10
         super().__init__(energy_cost=1, card_type=CardType.SKILL, ethereal=True,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -799,7 +799,7 @@ class Hemokinesis(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 15
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -813,7 +813,7 @@ class Hemokinesis(AbstractCard, ABC):
 class InfernalBlade(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=1, card_type=CardType.SKILL, exhaust=True,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -832,7 +832,7 @@ class Inflame(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.str = 2
         super().__init__(energy_cost=1, card_type=CardType.POWER,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -846,7 +846,7 @@ class Intimidate(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.weak = 1
         super().__init__(energy_cost=0, card_type=CardType.SKILL, exhaust=True,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -862,7 +862,7 @@ class Metallicize(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.metal = 3
         super().__init__(energy_cost=1, card_type=CardType.POWER,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -876,7 +876,7 @@ class PowerThrough(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.block_qty = 15
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -892,7 +892,7 @@ class Pummel(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.times = 4
         super().__init__(energy_cost=1, card_type=CardType.ATTACK, exhaust=True,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -907,7 +907,7 @@ class Rage(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.stack_qty = 3
         super().__init__(energy_cost=0, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -922,7 +922,7 @@ class Rampage(AbstractCard, ABC):
         self.damage = 8
         self.upgrade_amount = 5
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -937,7 +937,7 @@ class RecklessCharge(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 7
         super().__init__(energy_cost=0, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -952,7 +952,7 @@ class Rupture(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.strength = 1
         super().__init__(energy_cost=1, card_type=CardType.POWER,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -966,7 +966,7 @@ class SearingBlow(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.upgraded_qty = 0
         super().__init__(energy_cost=2, card_type=CardType.ATTACK, allow_multiple_upgrades=True,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -980,7 +980,7 @@ class SecondWind(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.block_per_card = 5
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -999,7 +999,7 @@ class SecondWind(AbstractCard, ABC):
 class SeeingRed(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=1, card_type=CardType.SKILL, exhaust=True,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1014,7 +1014,7 @@ class Sentinel(AbstractCard, ABC):
         self.block = 5
         self.energy_to_gain = 2
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1032,7 +1032,7 @@ class SeverSoul(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 16
         super().__init__(energy_cost=2, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1051,7 +1051,7 @@ class Shockwave(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.effect_amount = 3
         super().__init__(energy_cost=2, card_type=CardType.SKILL, exhaust=True,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1066,7 +1066,7 @@ class SpotWeakness(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.strength_amount = 3
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1082,7 +1082,7 @@ class Uppercut(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.effect_amount = 1
         super().__init__(energy_cost=2, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1098,7 +1098,7 @@ class Whirlwind(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 5
         super().__init__(energy_cost='X', card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.UNCOMMON, card_color=CardColor.RED,
+                         card_rarity=CardRarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1114,7 +1114,7 @@ class Whirlwind(AbstractCard, ABC):
 class Barricade(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=3, card_type=CardType.POWER,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1129,7 +1129,7 @@ class Berserk(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.vulnerable = 2
         super().__init__(energy_cost=0, card_type=CardType.POWER,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1144,7 +1144,7 @@ class Bludgeon(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 32
         super().__init__(energy_cost=3, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1158,7 +1158,7 @@ class Bludgeon(AbstractCard, ABC):
 class Brutality(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=0, card_type=CardType.POWER,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1172,7 +1172,7 @@ class Brutality(AbstractCard, ABC):
 class Corruption(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=3, card_type=CardType.POWER,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1187,7 +1187,7 @@ class DemonForm(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.demon_form_stacks = 2
         super().__init__(energy_cost=3, card_type=CardType.POWER,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1202,7 +1202,7 @@ class DoubleTap(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.double_tap_stacks = 1
         super().__init__(energy_cost=1, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1216,7 +1216,7 @@ class DoubleTap(AbstractCard, ABC):
 class Exhume(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=1, card_type=CardType.SKILL, exhaust=True,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1237,7 +1237,7 @@ class Feed(AbstractCard, ABC):
         self.damage = 10
         self.gain = 3
         super().__init__(energy_cost=1, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1256,7 +1256,7 @@ class FiendFire(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 7
         super().__init__(energy_cost=2, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1282,7 +1282,7 @@ class Immolate(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 21
         super().__init__(energy_cost=2, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1299,7 +1299,7 @@ class Impervious(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.quantity = 30
         super().__init__(energy_cost=2, card_type=CardType.SKILL,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1313,7 +1313,7 @@ class Juggernaut(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.stacks = 5
         super().__init__(energy_cost=2, card_type=CardType.POWER,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1327,7 +1327,7 @@ class Juggernaut(AbstractCard, ABC):
 class LimitBreak(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(energy_cost=1, card_type=CardType.SKILL, exhaust=True,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1344,7 +1344,7 @@ class Offering(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.cards = 3
         super().__init__(energy_cost=0, card_type=CardType.SKILL, exhaust=True,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
@@ -1364,7 +1364,7 @@ class Reaper(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 4
         super().__init__(energy_cost=2, card_type=CardType.ATTACK,
-                         card_rarity=CardRarity.RARE, card_color=CardColor.RED,
+                         card_rarity=CardRarity.RARE, card_color=Color.RED,
                          *args, **kwargs)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):

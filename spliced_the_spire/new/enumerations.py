@@ -43,13 +43,17 @@ class CardRarity(Enum):
     SPECIAL = 5
 
 
-class CardColor(Enum):
+class Color(Enum):
     UNKNOWN = 0
     COLORLESS = 1
     RED = 2
     GREEN = 3
     BLUE = 4
     PURPLE = 5
+
+
+class RelicRarity(Enum):
+    STARTER = 0
 
 
 class IntentIcon(Enum):

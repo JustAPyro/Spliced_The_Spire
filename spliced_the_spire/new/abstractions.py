@@ -7,7 +7,7 @@ from typing import Optional
 
 from spliced_the_spire import lutil
 from spliced_the_spire.lutil import C, asc_int
-from spliced_the_spire.new.enumerations import CardPiles, CardType, SelectEvent, IntentType, CardRarity, CardColor
+from spliced_the_spire.new.enumerations import CardPiles, CardType, SelectEvent, IntentType, CardRarity, Color
 
 # Card Cost Variables
 X = True
@@ -651,19 +651,6 @@ class EventHookMixin:
         return 0
 
 
-class AbstractEffect(EventHookMixin):
-    """
-    This abstraction allows the easy creation of Effects.
-    An effect in this context is a Slay The Spire Buff,
-    Debuff, or block.
-    """
-
-    def __init__(self, owner):
-        super().__init__(owner)
-        self.owner = owner
-        self.stacks = 0  # Number of stacks of this effect
-
-
 # TODO: Lots of occurances of return_param damage being passed twice awkwardly and self and self.env being passed
 def call_all(method, owner, parameters, return_param: Optional[int] = None):
     if method not in getattr(owner, 'implemented_hooks'):
@@ -700,7 +687,7 @@ class AbstractCard(ABC):
                  card_type: CardType = CardType.UNKNOWN,
                  energy_cost: int | bool = NO_COST,
                  card_rarity: CardRarity = CardRarity.UNKNOWN,
-                 card_color: CardColor = CardColor.UNKNOWN,
+                 card_color: Color = Color.UNKNOWN,
                  upgraded: bool = False,
                  name: str = None,
                  exhaust: bool = False,
@@ -774,7 +761,7 @@ class AbstractCard(ABC):
         # Type and rarity of card
         self.card_type: CardType = card_type
         self.rarity: CardRarity = card_rarity
-        self.color: CardColor = card_color
+        self.color: Color = card_color
 
         # Card behavior
         self.exhaust: bool = exhaust
@@ -899,3 +886,21 @@ class AbstractCard(ABC):
     def __repr__(self):
         """Override the repr() method so arrays of cards print neatly"""
         return self.name
+
+
+class AbstractEffect(EventHookMixin):
+    """
+    This abstraction allows the easy creation of Effects.
+    An effect in this context is a Slay The Spire Buff,
+    Debuff, or block.
+    """
+
+    def __init__(self, owner):
+        super().__init__(owner)
+        self.owner = owner
+        self.stacks = 0  # Number of stacks of this effect
+
+
+class AbstractRelic(ABC, EventHookMixin):
+    """an abstract relic"""
+
