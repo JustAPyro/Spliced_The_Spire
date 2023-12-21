@@ -1,15 +1,27 @@
-from abstractions import AbstractRelic
+from abstractions import AbstractRelic, AbstractEffect, AbstractActor, AbstractEnemy
+from enumerations import Color, Rarity
+from effects import Vigor
 
 
 class BurningBlood(AbstractRelic):
     """Gain 6 health at the end of combat."""
-    pass
+    def __init__(self):
+        super().__init__(relic_color=Color.RED,
+                         relic_rarity=Rarity.STARTER)
+
+    def on_end_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.heal(6)
 
 
 class Akabeko(AbstractRelic):
     """at the start of combat gain 8 vigor,
      common uncolored"""
-    pass
+    def __init__(self):
+        super().__init__(relic_color=Color.COLORLESS,
+                         relic_rarity=Rarity.COMMON)
+
+    def on_start_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.increase_effect(Vigor, 8)
 
 
 class Anchor(AbstractRelic):

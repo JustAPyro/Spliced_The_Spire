@@ -34,7 +34,7 @@ class CardType(Enum):
         return CardType.ATTACK, CardType.SKILL, CardType.POWER, CardType.STATUS, CardType.CURSE
 
 
-class CardRarity(Enum):
+class Rarity(Enum):
     UNKNOWN = 0
     STARTER = 1
     COMMON = 2
@@ -50,10 +50,6 @@ class Color(Enum):
     GREEN = 3
     BLUE = 4
     PURPLE = 5
-
-
-class RelicRarity(Enum):
-    STARTER = 0
 
 
 class IntentIcon(Enum):

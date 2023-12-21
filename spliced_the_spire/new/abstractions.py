@@ -7,7 +7,8 @@ from typing import Optional
 
 from spliced_the_spire import lutil
 from spliced_the_spire.lutil import C, asc_int
-from spliced_the_spire.new.enumerations import CardPiles, CardType, SelectEvent, IntentType, CardRarity, Color
+from spliced_the_spire.new.enumerations import CardPiles, CardType, SelectEvent, IntentType, Rarity, Color,\
+    Rarity
 
 # Card Cost Variables
 X = True
@@ -621,9 +622,17 @@ class EventHookMixin:
 
     # Turn related hooks
 
+    def on_start_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        pass
+
+    def on_end_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        """
+        cue on end of combat
+        """
+
     def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         """
-        Effects overriding this can cause things to happen on the end of turn.
+        Effects overriding this can cause things to happen on the start of turn.
         """
         pass
 
@@ -686,7 +695,7 @@ class AbstractCard(ABC):
     def __init__(self,
                  card_type: CardType = CardType.UNKNOWN,
                  energy_cost: int | bool = NO_COST,
-                 card_rarity: CardRarity = CardRarity.UNKNOWN,
+                 card_rarity: Rarity = Rarity.UNKNOWN,
                  card_color: Color = Color.UNKNOWN,
                  upgraded: bool = False,
                  name: str = None,
@@ -760,7 +769,7 @@ class AbstractCard(ABC):
 
         # Type and rarity of card
         self.card_type: CardType = card_type
-        self.rarity: CardRarity = card_rarity
+        self.rarity: Rarity = card_rarity
         self.color: Color = card_color
 
         # Card behavior
@@ -903,4 +912,13 @@ class AbstractEffect(EventHookMixin):
 
 class AbstractRelic(ABC, EventHookMixin):
     """an abstract relic"""
+    def __init__(self,
+                 relic_rarity: Rarity.STARTER,
+                 relic_color: Color = Color.UNKNOWN,
+                 ):
+
+        self.relic_rarity = relic_rarity
+        self.relic_color = relic_color
+
+        super().__init__()
 

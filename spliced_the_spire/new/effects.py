@@ -30,6 +30,13 @@ class Block(AbstractEffect):
             owner.set_effect(Block, 0)
 
 
+class Vigor(AbstractEffect):
+    def modify_damage_dealt(self, owner, environment, damage: int) -> int:
+        add_damage = self.stacks
+        self.stacks = 0
+        return add_damage
+
+
 class Vulnerable(AbstractEffect):
     def on_end_turn(self, owner, environment):
         owner.decrease_effect(Vulnerable, 1)
