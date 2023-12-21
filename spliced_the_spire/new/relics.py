@@ -1,6 +1,6 @@
 from abstractions import AbstractRelic, AbstractEffect, AbstractActor, AbstractEnemy
 from enumerations import Color, Rarity
-from effects import Vigor
+from effects import *
 
 
 class BurningBlood(AbstractRelic):
@@ -13,6 +13,25 @@ class BurningBlood(AbstractRelic):
         owner.heal(6)
 
 
+class RingOfTheSnake(AbstractRelic):
+    """At the start of combat draw 2 additional cards"""
+
+    def __init__(self):
+        super(RingOfTheSnake, self).__init__(relic_rarity=Rarity.STARTER,
+                                             relic_color=Color.GREEN)
+
+    def on_enter_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.draw_card(quantity=2)
+
+
+class CrackedCore(AbstractRelic):
+    pass
+
+
+class PureWater(AbstractRelic):
+    pass
+
+
 class Akabeko(AbstractRelic):
     """at the start of combat gain 8 vigor,
      common uncolored"""
@@ -20,7 +39,7 @@ class Akabeko(AbstractRelic):
         super().__init__(relic_color=Color.COLORLESS,
                          relic_rarity=Rarity.COMMON)
 
-    def on_start_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+    def on_enter_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         owner.increase_effect(Vigor, 8)
 
 
@@ -28,10 +47,29 @@ class Anchor(AbstractRelic):
     """at the start of combat gain 10 block,
      common uncolored"""
 
+    def __init__(self):
+        super(Anchor, self).__init__(relic_rarity=Rarity.COMMON,
+                                     relic_color=Color.COLORLESS)
+
+    def on_enter_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.increase_effect(effect=Block, value=10)
+
 
 class AncientTeaSet(AbstractRelic):
     """enter rest site, next combat start with 2 additional energy,
      common uncolored"""
+    def __init__(self):
+        self.DrankTea = False
+        super().__init__(relic_rarity=Rarity.COMMON,
+                         relic_color=Color.COLORLESS)
+
+    def on_enter_rest_site(self, owner: AbstractActor | AbstractEnemy, environment):
+        self.DrankTea = True
+
+    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment):
+        if self.DrankTea:  # bless tea time.
+            owner.increase_effect(Energy, 2)
+            self.DrankTea = False  # tea is gone, quite sad.
 
 
 class ArtOfWar(AbstractRelic):

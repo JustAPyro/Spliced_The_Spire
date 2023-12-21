@@ -7,6 +7,16 @@ from spliced_the_spire.new.enumerations import CardType
 from spliced_the_spire.new.abstractions import AbstractActor, AbstractEnemy, AbstractEffect
 
 
+class Energy(AbstractEffect):
+    def __init__(self, owner):
+        self.max = 3
+        self.stacks = 3
+        super().__init__(owner)
+
+    def on_enter_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        self.stacks = self.max
+
+
 class Poison(AbstractEffect):
     def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         owner.take_damage(self.stacks)

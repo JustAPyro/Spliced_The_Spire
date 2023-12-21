@@ -620,10 +620,17 @@ class EventHookMixin:
                        damaging_enemy: AbstractEnemy):
         pass
 
+    # floor entering
+
+    def on_enter_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        pass
+
+    def on_enter_rest_site(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        pass
+
     # Turn related hooks
 
-    def on_start_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        pass
+
 
     def on_end_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         """
@@ -906,6 +913,7 @@ class AbstractEffect(EventHookMixin):
 
     def __init__(self, owner):
         super().__init__(owner)
+        self.max = None
         self.owner = owner
         self.stacks = 0  # Number of stacks of this effect
 
