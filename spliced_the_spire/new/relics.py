@@ -349,6 +349,13 @@ class PreservedInsect(AbstractRelic):
 class RegalPillow(AbstractRelic):
     """heal an additional 15 hp when you rest,
     common uncolored"""
+    
+    def __init__(self):
+        super(RegalPillow, self).__init__(relic_rarity=Rarity.COMMON,
+                                          relic_color=Color.COLORLESS)
+    
+    def on_rest(self, owner: AbstractActor, environment):
+        owner.heal(15)
 
 
 class SmilingMask(AbstractRelic):
@@ -359,6 +366,13 @@ class SmilingMask(AbstractRelic):
 class Strawberry(AbstractRelic):
     """upon pickup raise max hp by 7,
     common uncolored"""
+    
+    def __init__(self):
+        super(Strawberry, self).__init__(relic_rarity=Rarity.COMMON,
+                                         relic_color=Color.COLORLESS)
+
+    def on_pickup_relic(self, owner: AbstractActor, environment, card):
+        owner.increase_max_health(7)
 
 
 class TheBoot(AbstractRelic):
@@ -380,6 +394,13 @@ class Vajra(AbstractRelic):
     """at the start of combat gain 1 strength,
     common uncolored"""
 
+    def __init__(self):
+        super(Vajra, self).__init__(relic_rarity=Rarity.COMMON,
+                                    relic_color=Color.COLORLESS)
+
+    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment: AbstractCombat):
+        owner.increase_effect(Strength, 1)
+
 
 class WarPaint(AbstractRelic):
     """upon pickup upgrade 2 random skills,
@@ -389,3 +410,576 @@ class WarPaint(AbstractRelic):
 class Whetstone(AbstractRelic):
     """upon pickup upgrade 2 random attacks,
     common uncolored"""
+
+
+class RedSkull(AbstractRelic):
+    pass
+
+class SneckoSkull(AbstractRelic):
+    pass
+
+
+class DataDisk(AbstractRelic):
+    pass
+
+
+class Damaru(AbstractRelic):
+    pass
+
+
+class BlueCandle(AbstractRelic):
+    pass
+
+
+class BottledFlame(AbstractRelic):
+    pass
+
+
+class BottledLightning(AbstractRelic):
+    pass
+
+
+class BottledTornado(AbstractRelic):
+    pass
+
+
+class DarkStonePeriapt(AbstractRelic):
+    pass
+
+
+class EternalFeather(AbstractRelic):
+    pass
+
+
+class FrozenEggs(AbstractRelic):
+    pass
+
+
+class GremlinHold(AbstractRelic):
+    pass
+
+
+class HornCleat(AbstractRelic):
+    pass
+
+
+class InkBottle(AbstractRelic):
+    pass
+
+
+class Kunai(AbstractRelic):
+    pass
+
+
+class LetterOpener(AbstractRelic):
+    pass
+
+
+class Matryoshka(AbstractRelic):
+    pass
+
+
+class MeatOnTheBone(AbstractRelic):
+    pass
+
+
+class MercuryHourglass(AbstractRelic):
+    pass
+
+
+class MoltenEgg(AbstractRelic):
+    pass
+
+
+
+class MummifiedHand(AbstractRelic):
+    pass
+
+
+class OrnamentalFan(AbstractRelic):
+    pass
+
+
+class Pantograph(AbstractRelic):
+    pass
+
+
+class Pear(AbstractRelic):
+    pass
+
+
+class QuestionCard(AbstractRelic):
+    pass
+
+
+class Shuriken(AbstractRelic):
+    pass
+
+
+class SingingBowl(AbstractRelic):
+    pass
+
+
+class StrikeDummy(AbstractRelic):
+    pass
+
+
+class Sundial(AbstractRelic):
+    pass
+
+
+class TheCourier(AbstractRelic):
+    pass
+
+
+class ToxicEgg(AbstractRelic):
+    pass
+
+
+class WhiteBeastStatue(AbstractRelic):
+    pass
+
+
+class PaperPhrog(AbstractRelic):
+    pass
+
+
+class SelfFormingClay(AbstractRelic):
+    pass
+
+
+class NinjaScroll(AbstractRelic):
+    pass
+
+
+class PaperKrane(AbstractRelic):
+    pass
+
+
+class GoldPlatedCables(AbstractRelic):
+    pass
+
+
+class SymbioticVirus(AbstractRelic):
+    pass
+
+
+class Duality(AbstractRelic):
+    pass
+
+
+class TearDropLocket(AbstractRelic):
+    pass
+
+
+class BirdFacedUrn(AbstractRelic):
+    pass
+
+
+class Calipers(AbstractRelic):
+    pass
+
+
+class CaptainsWheel(AbstractRelic):
+    pass
+
+
+class DeadBranch(AbstractRelic):
+    pass
+
+
+class DuVuDoll(AbstractRelic):
+    pass
+
+
+class FossilizedHelix(AbstractRelic):
+    pass
+
+
+class GamblingChip(AbstractRelic):
+    pass
+
+
+class Ginger(AbstractRelic):
+    pass
+
+
+class Girya(AbstractRelic):
+    pass
+
+
+class Icecream(AbstractRelic):
+    pass
+
+
+class IncenseBurner(AbstractRelic):
+    pass
+
+
+class LizardTail(AbstractRelic):
+    pass
+
+
+class Mango(AbstractRelic):
+    pass
+
+
+class OldCoin(AbstractRelic):
+    pass
+
+
+class PeacePipe(AbstractRelic):
+    pass
+
+
+class PocketWatch(AbstractRelic):
+    pass
+
+
+class PrayerWheel(AbstractRelic):
+    pass
+
+
+class Shovel(AbstractRelic):
+    pass
+
+
+class StoneCalender(AbstractRelic):
+    pass
+
+
+class ThreadAndNeedle(AbstractRelic):
+    pass
+
+
+class Torii(AbstractRelic):
+    pass
+
+
+class TungstenRod(AbstractRelic):
+    pass
+
+
+class Turnip(AbstractRelic):
+    pass
+
+
+class UnceasingTop(AbstractRelic):
+    pass
+
+
+class WingBoots(AbstractRelic):
+    pass
+
+
+class ChampionBelt(AbstractRelic):
+    pass
+
+
+class CharonsAshes(AbstractRelic):
+    pass
+
+
+class MagicFlower(AbstractRelic):
+    pass
+
+
+class TheSpecimen(AbstractRelic):
+    pass
+
+
+class Tingsha(AbstractRelic):
+    pass
+
+
+class ToughBandages(AbstractRelic):
+    pass
+
+
+class EmotionChip(AbstractRelic):
+    pass
+
+
+class CloakClasp(AbstractRelic):
+    pass
+
+
+class GoldenEye(AbstractRelic):
+    pass
+
+
+class Cauldron(AbstractRelic):
+    pass
+
+
+class ChemicalX(AbstractRelic):
+    pass
+
+
+class ClockworkSouvenir(AbstractRelic):
+    pass
+
+
+class DollysMirror(AbstractRelic):
+    pass
+
+
+class FrozenEye(AbstractRelic):
+    pass
+
+
+class HandDrill(AbstractRelic):
+    pass
+
+
+class LeesWaffle(AbstractRelic):
+    pass
+
+
+class MedicalKit(AbstractRelic):
+    pass
+
+
+class MembershipCard(AbstractRelic):
+    pass
+
+
+class OrangePellets(AbstractRelic):
+    pass
+
+
+class Orrery(AbstractRelic):
+    pass
+
+
+class PrismaticShard(AbstractRelic):
+    pass
+
+
+class SlingOfCourage(AbstractRelic):
+    pass
+
+
+class StrangeSpoon(AbstractRelic):
+    pass
+
+
+class Abacus(AbstractRelic):
+    pass
+
+
+class Toolbox(AbstractRelic):
+    pass
+
+
+class BrimStone(AbstractRelic):
+    pass
+
+
+class TwistedFunnel(AbstractRelic):
+    pass
+
+
+class RunicCapacitor(AbstractRelic):
+    pass
+
+
+class Melange(AbstractRelic):
+    pass
+
+
+class Astrolabe(AbstractRelic):
+    pass
+
+
+class BlackStar(AbstractRelic):
+    pass
+
+
+class BustedCrown(AbstractRelic):
+    pass
+
+
+class CallingBell(AbstractRelic):
+    pass
+
+
+class CoffeeDripper(AbstractRelic):
+    pass
+
+
+class CursedKey(AbstractRelic):
+    pass
+
+
+class Ectoplasm(AbstractRelic):
+    pass
+
+
+
+class EmptyCage(AbstractRelic):
+    pass
+
+
+class FusionHammer(AbstractRelic):
+    pass
+
+
+class PandorasBox(AbstractRelic):
+    pass
+
+
+class PhilosophersStone(AbstractRelic):
+    pass
+
+
+class RunicDome(AbstractRelic):
+    pass
+
+
+class RunicPyramid(AbstractRelic):
+    pass
+
+
+class ScaredBark(AbstractRelic):
+    pass
+
+
+class SlaversCollar(AbstractRelic):
+    pass
+
+
+class SneckoEye(AbstractRelic):
+    pass
+
+
+class Suzo(AbstractRelic):
+    pass
+
+
+class TinyHouse(AbstractRelic):
+    pass
+
+
+class VelvetChoker(AbstractRelic):
+    pass
+
+
+class BlackBlood(AbstractRelic):
+    pass
+
+
+class MarkOfPain(AbstractRelic):
+    pass
+
+
+class RunicCube(AbstractRelic):
+    pass
+
+
+class RingOfTheSerpent(AbstractRelic):
+    pass
+
+
+class WristBlade(AbstractRelic):
+    pass
+
+
+class HoveringKite(AbstractRelic):
+    pass
+
+
+class FrozenCore(AbstractRelic):
+    pass
+
+
+class Inserter(AbstractRelic):
+    pass
+
+
+class NuclearBattery(AbstractRelic):
+    pass
+
+
+class HolyWater(AbstractRelic):
+    pass
+
+
+class VioletLotus(AbstractRelic):
+    pass
+
+
+class BloodyIdol(AbstractRelic):
+    pass
+
+
+class CultistHeadpiece(AbstractRelic):
+    pass
+
+
+class Enchiridion(AbstractRelic):
+    pass
+
+
+class FaceOfCleric(AbstractRelic):
+    pass
+
+
+class GoldenIdol(AbstractRelic):
+    pass
+
+
+class GremlinVisage(AbstractRelic):
+    pass
+
+
+class MarkOfTheBloom(AbstractRelic):
+    pass
+
+
+class MutagenicStrength(AbstractRelic):
+    pass
+
+
+class NlothsGift(AbstractRelic):
+    pass
+
+
+class NlothsHungryFace(AbstractRelic):
+    pass
+
+
+class Necronomicon(AbstractRelic):
+    pass
+
+
+class NeowsLament(AbstractRelic):
+    pass
+
+
+class NilrysCodex(AbstractRelic):
+    pass
+
+
+class OddMushroom(AbstractRelic):
+    pass
+
+
+class RedMask(AbstractRelic):
+    pass
+
+
+class SpiritPoop(AbstractRelic):
+    pass
+
+
+class SerpentHead(AbstractRelic):
+    pass
+
+
+class WarpedTongs(AbstractRelic):
+    pass
+
+
+class Circlet(AbstractRelic):
+    pass

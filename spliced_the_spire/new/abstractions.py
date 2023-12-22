@@ -174,6 +174,10 @@ class AbstractActor(EffectMixin):
     def heal(self, increase: int):
         self.health += increase
 
+    def increase_max_health(self, increase):
+        self.max_health += increase
+        self.heal(increase)
+
     def add_card_to_draw(self, card, shuffle=False):
         if shuffle:
             insert_at = random.randint(0, len(self.draw_pile))
