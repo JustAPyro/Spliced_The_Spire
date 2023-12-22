@@ -106,7 +106,8 @@ class BagOfMarbles(AbstractRelic):
                                            relic_color=Color.COLORLESS)
 
     def on_enter_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        pass
+        for enemy in environment.enemies:
+            enemy.increaseEffect(Vulnerable, 1)
 
 
 class BagOfPreparation(AbstractRelic):

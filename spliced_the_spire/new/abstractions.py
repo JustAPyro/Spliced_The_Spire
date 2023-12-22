@@ -613,24 +613,22 @@ class EventHookMixin:
         """
         pass
 
-    def on_receive_damage_from_card(self: AbstractEffect, owner, environment, card):
+    def on_receive_damage_from_card(self, owner, environment, card):
         pass
 
-    def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment,
+    def on_take_damage(self, owner: AbstractActor | AbstractEnemy, environment,
                        damaging_enemy: AbstractEnemy):
         pass
 
     # floor entering
 
-    def on_enter_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment: AbstractCombat):
         pass
 
-    def on_enter_rest_site(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+    def on_enter_rest_site(self, owner: AbstractActor | AbstractEnemy, environment):
         pass
 
     # Turn related hooks
-
-
 
     def on_end_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         """
@@ -929,4 +927,55 @@ class AbstractRelic(ABC, EventHookMixin):
         self.relic_color = relic_color
 
         super().__init__()
+
+
+class AbstractGame(ABC):
+    def __init__(self,
+                 actor: AbstractActor = None,
+                 ascension: int = 0,
+                 wonLastGame: bool = False,
+                 actNumber: int = 0):
+
+        self.ascension = ascension
+        self.wonLastGame = wonLastGame
+        self.actor = actor
+        self.actNumber = actNumber
+
+    def selectCharacter(self):
+        pass
+
+    def startGame(self):
+        # starting choices
+        pass
+
+
+class AbstractRoom(AbstractGame):
+    def __init__(self,
+                 floor: int
+                 ):
+        self.floor = floor
+        super().__init__()
+
+
+class AbstractCombat(AbstractRoom):
+    def __init__(self,
+                 enemies: (AbstractEnemy,),
+                 isElite: bool,
+                 isBoss: bool,
+                 floor: int):
+
+        self.enemies = enemies
+        self.isElite = isElite
+        self.isBoss = isBoss
+
+        super().__init__(floor)
+
+
+class AbstractShop(AbstractRoom):
+    pass
+
+
+class AbstractUnknown(AbstractRoom):
+    pass
+
 
