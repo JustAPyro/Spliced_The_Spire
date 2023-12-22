@@ -304,11 +304,28 @@ class Orichalcum(AbstractRelic):
     """if you end your turn without block, gain 6 block,
     common uncolored"""
 
+    def __init__(self):
+        super(Orichalcum, self).__init__(relic_rarity=Rarity.COMMON,
+                                         relic_color=Color.COLORLESS)
+
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        if owner.has_effect(Block, 0):
+            owner.increase_effect(Block, 6)
+
 
 class PenNib(AbstractRelic):
     """every 10th attack you play deals double damage,
     common uncolored"""
+    def __init__(self):
+        super(PenNib, self).__init__(relic_rarity=Rarity.COMMON,
+                                     relic_color=Color.COLORLESS)
+        self.numberOfAttacks = 0
 
+    def on_card_play(self, owner: AbstractActor | AbstractEnemy, environment, card):
+        if card.card_type == CardType.ATTACK:
+            self.numberOfAttacks += 1
+            if self.numberOfAttacks >= 9:
+                pass  # increase double damage effect
 
 class PotionBelt(AbstractRelic):
     """upon pickup gain 2 potion slots,
