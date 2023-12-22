@@ -54,6 +54,12 @@ class Block(AbstractEffect):
             owner.set_effect(Block, 0)
 
 
+class DoubleDamageForOneAttack(AbstractEffect):
+    def modify_damage_dealt(self, owner, environment, damage: int) -> int:
+        self.stacks = 0
+        return damage * 2
+
+
 class Vigor(AbstractEffect):
     def modify_damage_dealt(self, owner, environment, damage: int) -> int:
         add_damage = self.stacks

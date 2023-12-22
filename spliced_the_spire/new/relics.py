@@ -325,7 +325,8 @@ class PenNib(AbstractRelic):
         if card.card_type == CardType.ATTACK:
             self.numberOfAttacks += 1
             if self.numberOfAttacks >= 9:
-                pass  # increase double damage effect
+                owner.increase_effect(DoubleDamageForOneAttack, 1)
+                self.numberOfAttacks = 0
 
 class PotionBelt(AbstractRelic):
     """upon pickup gain 2 potion slots,
