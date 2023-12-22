@@ -181,6 +181,9 @@ class AbstractActor(EffectMixin):
     def add_card_to_deck(self, card):
         self.card_piles[CardPiles.DRAW].append(card)
 
+    def gain_gold(self, goldAmount):
+        self.gold += goldAmount
+
     def add_card_to_exhaust(self, card):
         self.card_piles[CardPiles.DISCARD].append(card)
 
@@ -628,6 +631,9 @@ class EventHookMixin:
 
     # floor entering
 
+    def on_floor_climb(self, owner: AbstractActor | AbstractEnemy, environment):
+        pass
+
     def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment: AbstractCombat):
         pass
 
@@ -640,6 +646,9 @@ class EventHookMixin:
     # inventory changes
 
     def on_add_card_to_deck(self, owner: AbstractActor, environment, card):
+        pass
+
+    def on_gold_spent_shopping(self, owner: AbstractActor, environment, card):
         pass
 
     # Turn related hooks

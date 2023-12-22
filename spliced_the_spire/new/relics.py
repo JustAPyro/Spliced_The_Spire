@@ -192,6 +192,18 @@ class HappyFlower(AbstractRelic):
     """every 3 turns gain 1 energy
     common uncolored"""
 
+    def __init__(self):
+        super(HappyFlower, self).__init__(relic_rarity=Rarity.COMMON,
+                                          relic_color=Color.COLORLESS)
+        self.numberOfTurns = 0
+
+    def on_start_turn(self, owner: AbstractActor | AbstractEnemy, environment):
+        if self.numberOfTurns >= 3:
+            self.numberOfTurns = 0
+            owner.increase_effect(Energy, 1)
+        else:
+            self.numberOfTurns += 1
+
 
 class JuzuBracelet(AbstractRelic):
     """regular enemy combats are no longer encountered in ? rooms,
@@ -202,10 +214,29 @@ class Lantern(AbstractRelic):
     """gain 1 energy, at the start of each combat,
     common uncolored"""
 
+    def __init__(self):
+        super(Lantern, self).__init__(relic_rarity=Rarity.COMMON,
+                                      relic_color=Color.COLORLESS)
+
+    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment: AbstractCombat):
+        owner.increase_effect(Energy, 1)
+
 
 class MawBank(AbstractRelic):
     """when you climb a floor gain 12 gold, unless you shopped since getting this.
     common uncolored"""
+
+    def __init__(self):
+        super(MawBank, self).__init__(relic_rarity=Rarity.COMMON,
+                                      relic_color=Color.COLORLESS)
+        self.goldEveryFloor = True
+
+    def on_floor_climb(self, owner: AbstractActor | AbstractEnemy, environment):
+        if self.goldEveryFloor:
+            owner.gain_gold(12)
+
+    def on_gold_spent_shopping(self, owner: AbstractActor, environment, card):
+        self.goldEveryFloor = False
 
 
 class MealTicket(AbstractRelic):
