@@ -91,6 +91,8 @@ class AbstractActor(EffectMixin):
         self.name: str = "Actor"
         self.max_health: int = clas.health
         self.health: int = clas.health
+        self.potionSlotsOpen = 3
+        self.potions = []
         self.gold: int = 99
         # self.relics: list[AbstractRelics] = [clas.relic]
         self.max_energy: int = 3
@@ -164,6 +166,10 @@ class AbstractActor(EffectMixin):
                 'target': target,
                 'message': f'{self.name} used {card.name} on {target.name}'
             })
+
+    def use_potion(self, target, potion: AbstractPotion):
+        self.potionSlotsOpen += 1
+        self.potions.remove(potion)
 
     def heal(self, increase: int):
         self.health += increase
@@ -662,6 +668,12 @@ class EventHookMixin:
     def on_gold_spent_shopping(self, owner: AbstractActor, environment, card):
         pass
 
+    def on_pickup_relic(self, owner: AbstractActor, environment, card):
+        pass
+
+    def on_pickup_potion(self, owner: AbstractActor, environment, card):
+        pass
+
     # Turn related hooks
 
     def on_end_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
@@ -948,6 +960,14 @@ class AbstractEffect(EventHookMixin):
         self.max = None
         self.owner = owner
         self.stacks = 0  # Number of stacks of this effect
+
+
+class AbstractPotion(EventHookMixin):
+
+    def __init__(self, owner, potion_rarity, potion_color):
+        super().__init__(owner)
+        self.potion_rarity = potion_rarity
+        self.potion_color = potion_color
 
 
 class AbstractRelic(ABC, EventHookMixin):

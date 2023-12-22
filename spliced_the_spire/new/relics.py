@@ -328,9 +328,17 @@ class PenNib(AbstractRelic):
                 owner.increase_effect(DoubleDamageForOneAttack, 1)
                 self.numberOfAttacks = 0
 
+
 class PotionBelt(AbstractRelic):
     """upon pickup gain 2 potion slots,
     common uncolored"""
+
+    def __init__(self):
+        super(PotionBelt, self).__init__(relic_rarity=Rarity.COMMON,
+                                         relic_color=Color.COLORLESS)
+
+    def on_pickup_relic(self, owner: AbstractActor, environment, card):
+        owner.potionSlotsOpen += 2
 
 
 class PreservedInsect(AbstractRelic):
