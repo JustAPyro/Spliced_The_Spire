@@ -19,8 +19,8 @@ class Energy(AbstractEffect):
 
 class Thorns(AbstractEffect):
 
-    def on_take_damage(self, owner: AbstractActor | AbstractEnemy, environment,
-                       damaging_enemy: AbstractEnemy):
+    def on_victim_of_attack(self, owner: AbstractActor | AbstractEnemy, environment,
+                            damaging_enemy: AbstractEnemy):
 
         damaging_enemy.take_damage(damage=self.stacks)
 
@@ -130,7 +130,7 @@ class FireBreathingEffect(AbstractEffect):
 
 class FlameBarrierEffect(AbstractEffect):
 
-    def on_take_damage(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damaging_enemy):
+    def on_victim_of_attack(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment, damaging_enemy):
         damaging_enemy.take_damage(self.stacks)
 
 

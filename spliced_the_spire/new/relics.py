@@ -150,16 +150,42 @@ class CentennialPuzzle(AbstractRelic):
     """the first time you lose hp this combat, draw 3 cards,
     common uncolored"""
 
+    def __init__(self):
+        super(CentennialPuzzle, self).__init__(relic_rarity=Rarity.COMMON,
+                                               relic_color=Color.COLORLESS)
+
+        self.notLostHealth = True
+
+    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment: AbstractCombat):
+        self.notLostHealth = True
+
+    def on_lose_hp(self, owner: AbstractActor | AbstractEnemy, environment):
+        owner.draw_card(3)
+        self.notLostHealth = False
 
 
 class CeramicFish(AbstractRelic):
     """when you add a card to your deck, gain 9 gold,
     common uncolored"""
 
+    def __init__(self):
+        super(CeramicFish, self).__init__(relic_rarity=Rarity.COMMON,
+                                          relic_color=Color.COLORLESS)
+
+    def on_add_card_to_deck(self, owner:AbstractActor | AbstractEnemy, environment, card):
+        owner.gold += 9
+
 
 class DreamCatcher(AbstractRelic):
     """when you rest, you may add a card to your deck,
     common uncolored"""
+
+    def __init__(self):
+        super(DreamCatcher, self).__init__(relic_rarity=Rarity.COMMON,
+                                           relic_color=Color.COLORLESS)
+
+    def on_rest(self, owner: AbstractActor, environment):
+        environment.promptCardReward()
 
 
 class HappyFlower(AbstractRelic):

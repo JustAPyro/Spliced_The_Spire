@@ -8,6 +8,7 @@ class SelectEvent(Enum):
     COPY = 4
     RECOVER_FROM_EXHAUST = 5
     DISCARD = 6
+    ADD_CARD_TO_DECK = 7
 
 
 class CardPiles(Enum):

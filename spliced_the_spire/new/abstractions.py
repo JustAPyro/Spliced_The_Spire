@@ -178,6 +178,9 @@ class AbstractActor(EffectMixin):
     def add_card_to_hand(self, card):
         self.card_piles[CardPiles.HAND].append(card)
 
+    def add_card_to_deck(self, card):
+        self.card_piles[CardPiles.DRAW].append(card)
+
     def add_card_to_exhaust(self, card):
         self.card_piles[CardPiles.DISCARD].append(card)
 
@@ -266,7 +269,7 @@ class AbstractActor(EffectMixin):
         self.health -= actual_damage
         if actual_damage > 0:
             self.times_received_damage += 1
-            call_all(method=EventHookMixin.on_take_damage,
+            call_all(method=EventHookMixin.on_victim_of_attack,
                      owner=self,
                      parameters=(self, self.environment, damaging_enemy))
 
@@ -357,7 +360,7 @@ class AbstractActor(EffectMixin):
         pass
 
     @abstractmethod
-    def select_card(self, options: list[AbstractCard], event_type: SelectEvent) -> AbstractCard:
+    def select_card(self, options: [AbstractCard], event_type: SelectEvent) -> AbstractCard:
         pass
 
     def gain_energy(self, qty=1):
@@ -616,8 +619,11 @@ class EventHookMixin:
     def on_receive_damage_from_card(self, owner, environment, card):
         pass
 
-    def on_take_damage(self, owner: AbstractActor | AbstractEnemy, environment,
-                       damaging_enemy: AbstractEnemy):
+    def on_lose_hp(self, owner: AbstractActor | AbstractEnemy, environment):
+        pass
+
+    def on_victim_of_attack(self, owner: AbstractActor | AbstractEnemy, environment,
+                            damaging_enemy: AbstractEnemy):
         pass
 
     # floor entering
@@ -626,6 +632,14 @@ class EventHookMixin:
         pass
 
     def on_enter_rest_site(self, owner: AbstractActor | AbstractEnemy, environment):
+        pass
+
+    def on_rest(self, owner: AbstractActor, environment):
+        pass
+
+    # inventory changes
+
+    def on_add_card_to_deck(self, owner: AbstractActor, environment, card):
         pass
 
     # Turn related hooks
@@ -947,6 +961,16 @@ class AbstractGame(ABC):
     def startGame(self):
         # starting choices
         pass
+
+    def promptCardReward(self):
+        #TODO: card reward random creation
+        options = [AbstractCard, None]
+
+        newCard = self.actor.select_card(options, event_type=SelectEvent.ADD_CARD_TO_DECK)
+
+        if newCard is not None:
+            self.actor.add_card_to_deck(newCard)
+        # else: choose skip card
 
 
 class AbstractRoom(AbstractGame):
