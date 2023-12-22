@@ -17,6 +17,14 @@ class Energy(AbstractEffect):
         self.stacks = self.max
 
 
+class Thorns(AbstractEffect):
+
+    def on_take_damage(self, owner: AbstractActor | AbstractEnemy, environment,
+                       damaging_enemy: AbstractEnemy):
+
+        damaging_enemy.take_damage(damage=self.stacks)
+
+
 class Poison(AbstractEffect):
     def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
         owner.take_damage(self.stacks)

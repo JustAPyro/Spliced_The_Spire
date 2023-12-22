@@ -114,20 +114,42 @@ class BagOfPreparation(AbstractRelic):
     """at the start of combat draw 2 additional cards,
     common uncolored"""
 
+    def __init__(self):
+        super(BagOfPreparation, self).__init__(relic_rarity=Rarity.COMMON,
+                                               relic_color=Color.COLORLESS)
+
+    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment: AbstractCombat):
+        owner.draw_card(2)
+
 
 class BloodVial(AbstractRelic):
     """at the start of combat heal 2 hp,
     common uncolored"""
+
+    def __init__(self):
+        super(BloodVial, self).__init__(relic_rarity=Rarity.COMMON,
+                                        relic_color=Color.COLORLESS)
+
+    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment: AbstractCombat):
+        owner.heal(2)
 
 
 class BronzeScales(AbstractRelic):
     """at the start of combat gain 3 thorns,
     common uncolored"""
 
+    def __init__(self):
+        super(BronzeScales, self).__init__(relic_rarity=Rarity.COMMON,
+                                           relic_color=Color.COLORLESS)
+
+    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment: AbstractCombat):
+        owner.increase_effect(Thorns, 3)
+
 
 class CentennialPuzzle(AbstractRelic):
     """the first time you lose hp this combat, draw 3 cards,
     common uncolored"""
+
 
 
 class CeramicFish(AbstractRelic):
