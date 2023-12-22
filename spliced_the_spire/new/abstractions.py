@@ -629,12 +629,20 @@ class EventHookMixin:
                             damaging_enemy: AbstractEnemy):
         pass
 
+    # Effects
+
+    def on_gain_block_from_card(self, owner: AbstractActor | AbstractEnemy, environment, block):
+        pass
+
     # floor entering
 
     def on_floor_climb(self, owner: AbstractActor | AbstractEnemy, environment):
         pass
 
     def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment: AbstractCombat):
+        pass
+
+    def on_enter_shop(self, owner: AbstractActor | AbstractEnemy, environment):
         pass
 
     def on_enter_rest_site(self, owner: AbstractActor | AbstractEnemy, environment):
@@ -644,6 +652,9 @@ class EventHookMixin:
         pass
 
     # inventory changes
+
+    def on_add_curse_to_deck(self, owner: AbstractActor, environment, curse):
+        pass
 
     def on_add_card_to_deck(self, owner: AbstractActor, environment, card):
         pass

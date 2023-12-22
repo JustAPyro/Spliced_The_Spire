@@ -17,6 +17,12 @@ class Energy(AbstractEffect):
         self.stacks = self.max
 
 
+class Dexterity(AbstractEffect):
+
+    def on_gain_block_from_card(self, owner: AbstractActor | AbstractEnemy, environment, block):
+        owner.increase_effect(Block, self.stacks)
+
+
 class Thorns(AbstractEffect):
 
     def on_victim_of_attack(self, owner: AbstractActor | AbstractEnemy, environment,

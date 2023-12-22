@@ -243,20 +243,61 @@ class MealTicket(AbstractRelic):
     """whenever you enter a shop heal 15 hp
     common uncolored"""
 
+    def __init__(self):
+        super(MealTicket, self).__init__(relic_rarity=Rarity.COMMON,
+                                         relic_color=Color.COLORLESS)
+
+    def on_enter_shop(self, owner: AbstractActor | AbstractEnemy, environment):
+        owner.heal(15)
+
 
 class Nunchaku(AbstractRelic):
     """every time you play 10 attacks gain 1 energy,
     common uncolored"""
+
+    def __init__(self):
+        super(Nunchaku, self).__init__(relic_rarity=Rarity.COMMON,
+                                       relic_color=Color.COLORLESS)
+
+        self.countAttacks = 0
+
+    def on_card_play(self, owner: AbstractActor | AbstractEnemy, environment, card):
+        if card.card_type == CardType.ATTACK:
+            self.countAttacks += 1
+
+            if self.countAttacks >= 10:
+                owner.increase_effect(Energy, 1)
+                self.countAttacks = 0
 
 
 class OddlySmoothStone(AbstractRelic):
     """at the start of combat gain 1 dexterity,
     common uncolored"""
 
+    def __init__(self):
+        super(OddlySmoothStone, self).__init__(relic_rarity=Rarity.COMMON,
+                                               relic_color=Color.COLORLESS)
+
+    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, environment: AbstractCombat):
+        owner.increase_effect(Dexterity, 1)
+
 
 class Omamori(AbstractRelic):
     """negate the next 2 curses you obtain
     common uncolored"""
+
+    def __init__(self):
+        super(Omamori, self).__init__(relic_rarity=Rarity.COMMON,
+                                      relic_color=Color.COLORLESS)
+
+        self.negateThisCountCurses = 2
+
+    def on_add_curse_to_deck(self, owner: AbstractActor, environment, curse):
+
+        if self.negateThisCountCurses > 0:
+            self.negateThisCountCurses -= 1
+        else:
+            owner.add_card_to_hand(curse)
 
 
 class Orichalcum(AbstractRelic):
