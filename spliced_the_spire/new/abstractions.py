@@ -641,6 +641,9 @@ class EventHookMixin:
 
     # Effects
 
+    def on_apply_effect(self, owner: AbstractActor | AbstractEnemy, environment, effect: AbstractEffect, target: AbstractEnemy):
+        pass
+
     def on_gain_block_from_card(self, owner: AbstractActor | AbstractEnemy, environment, block):
         pass
 
@@ -676,6 +679,9 @@ class EventHookMixin:
         pass
 
     def on_pickup_potion(self, owner: AbstractActor, environment, card):
+        pass
+
+    def on_use_potion(self, owner: AbstractActor, environment: AbstractRoom, card: AbstractCard):
         pass
 
     # Turn related hooks

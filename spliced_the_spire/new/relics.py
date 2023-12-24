@@ -2,6 +2,7 @@ from abstractions import *
 from enumerations import *
 from effects import *
 from math import floor
+from random import Random
 
 class BurningBlood(AbstractRelic):
     """Gain 6 health at the end of combat."""
@@ -388,6 +389,13 @@ class TinyChest(AbstractRelic):
 class ToyOrnithopter(AbstractRelic):
     """whenever you use a potion heal 5 hp,
     common uncolored"""
+    
+    def __init__(self):
+        super(ToyOrnithopter, self).__init__(relic_rarity=Rarity.COMMON,
+                                             relic_color=Color.COLORLESS)
+
+    def on_use_potion(self, owner: AbstractActor, environment: AbstractRoom, card: AbstractCard):
+        owner.heal(5)
 
 
 class Vajra(AbstractRelic):
@@ -405,6 +413,17 @@ class Vajra(AbstractRelic):
 class WarPaint(AbstractRelic):
     """upon pickup upgrade 2 random skills,
     common uncolored"""
+    def __init__(self):
+        super(WarPaint, self).__init__(relic_rarity=Rarity.COMMON,
+                                       relic_color=Color.COLORLESS)
+
+    def on_pickup_relic(self, owner: AbstractActor, environment, card):
+        """
+        rand = Random()
+        rand.randint(0, len(owner.get_cards(with_types=CardType.SKILL)))
+        upgrade1
+        upgrade2
+        """
 
 
 class Whetstone(AbstractRelic):
@@ -417,7 +436,14 @@ class RedSkull(AbstractRelic):
 
 
 class SneckoSkull(AbstractRelic):
-    pass
+    
+    def __init__(self):
+        super(SneckoSkull, self).__init__(relic_rarity=Rarity.COMMON,
+                                          relic_color=Color.GREEN)
+
+    def on_apply_effect(self, owner: AbstractActor | AbstractEnemy, environment, effect: AbstractEffect, target: AbstractEnemy):
+        if type(effect) == Poison:
+            target.increase_effect(Poison, 1)
 
 
 class DataDisk(AbstractRelic):
