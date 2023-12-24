@@ -758,7 +758,8 @@ class AbstractCard(ABC):
                  ethereal: bool = False,
                  innate: bool = False,
                  unplayable: bool = False,
-                 allow_multiple_upgrades: bool = False):
+                 allow_multiple_upgrades: bool = False,
+                 remove_after_combat: bool = False):
         """
         Primarily designed tobe called in subclassed cards.
 
@@ -992,12 +993,18 @@ class AbstractGame(ABC):
                  actor: AbstractActor = None,
                  ascension: int = 0,
                  wonLastGame: bool = False,
-                 actNumber: int = 0):
+                 actNumber: int = 0,
+                 combatEncounters: int = 0,
+                 color: Color = Color.UNKNOWN,
+                 room: AbstractRoom = None):
 
         self.ascension = ascension
         self.wonLastGame = wonLastGame
         self.actor = actor
         self.actNumber = actNumber
+
+    def climbFloor(self):
+        pass
 
     def selectCharacter(self):
         pass
@@ -1017,7 +1024,7 @@ class AbstractGame(ABC):
         # else: choose skip card
 
 
-class AbstractRoom(AbstractGame):
+class AbstractRoom(ABC):
     def __init__(self,
                  floor: int
                  ):
@@ -1027,7 +1034,7 @@ class AbstractRoom(AbstractGame):
 
 class AbstractCombat(AbstractRoom):
     def __init__(self,
-                 enemies: (AbstractEnemy,),
+                 enemies: [AbstractEnemy, ],
                  isElite: bool,
                  isBoss: bool,
                  floor: int):
@@ -1045,5 +1052,4 @@ class AbstractShop(AbstractRoom):
 
 class AbstractUnknown(AbstractRoom):
     pass
-
 

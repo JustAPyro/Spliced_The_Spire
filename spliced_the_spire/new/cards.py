@@ -8,7 +8,7 @@ from spliced_the_spire.new import effects
 from spliced_the_spire.new.effects import *
 from spliced_the_spire.new.enumerations import CardType, SelectEvent, CardPiles, IntentType, Color, Rarity
 
-from spliced_the_spire.new.abstractions import AbstractActor, AbstractEnemy, AbstractCard
+from spliced_the_spire.new.abstractions import *
 
 
 ################
@@ -159,14 +159,170 @@ class Bane(AbstractCard, ABC):
 class Shiv(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         self.damage = 4
-        super().__init__(name='Shiv', energy_cost=0, card_type=CardType.ATTACK, exhaust=True,
-                         card_rarity=Rarity.SPECIAL, card_color=Color.COLORLESS)
+        super().__init__(name='Shiv',
+                         energy_cost=0,
+                         card_type=CardType.ATTACK,
+                         exhaust=True,
+                         card_rarity=Rarity.SPECIAL,
+                         card_color=Color.COLORLESS,
+                         remove_after_combat=True)
 
     def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
         target.take_damage(self.damage)
 
     def upgrade_logic(self):
         self.damage = 6
+
+
+class CloakAndDagger(AbstractCard, ABC):
+    def __init__(self):
+        super().__init__(energy_cost=1,
+                         card_type=CardType.SKILL,
+                         card_rarity=Rarity.COMMON,
+                         card_color=Color.GREEN)
+
+        self.numberOfDaggers = 1
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        caller.increase_effect(Block, 6)
+        for i in range(self.numberOfDaggers):
+            caller.add_card_to_hand(Shiv())
+
+    def upgrade_logic(self):
+        self.numberOfDaggers = 2
+
+
+class DaggerSpray(AbstractCard, ABC):
+
+    def __init__(self):
+        super(DaggerSpray, self).__init__(energy_cost=1,
+                                          card_rarity=Rarity.COMMON,
+                                          card_type=CardType.ATTACK,
+                                          card_color=Color.GREEN)
+        self.damage = 4
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment: AbstractCombat):
+        for i in range(2):
+
+            for enemy in environment.enemies:
+                enemy.take_damage(self.damage)
+
+    def upgrade_logic(self):
+        self.damage = 6
+
+
+class DaggerThrow(AbstractCard, ABC):
+    def __init__(self):
+        super(DaggerThrow, self).__init__(energy_cost=1,
+                                          card_rarity=Rarity.COMMON,
+                                          card_type=CardType.ATTACK,
+                                          card_color=Color.GREEN)
+        self.damage = 9
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        target.take_damage(self.damage)
+        caller.draw_card(1)
+        caller.select_card(caller.get_hand(), SelectEvent.DISCARD)
+
+    def upgrade_logic(self):
+        self.damage = 12
+
+
+class DeadlyPoison(AbstractCard, ABC):
+    def __init__(self):
+        super(DeadlyPoison, self).__init__(energy_cost=1,
+                                           card_rarity=Rarity.COMMON,
+                                           card_type=CardType.SKILL,
+                                           card_color=Color.GREEN)
+        self.poisonAmount = 5
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        target.increase_effect(Poison, self.poisonAmount)
+
+    def upgrade_logic(self):
+        self.poisonAmount = 7
+
+
+class Deflect(AbstractCard, ABC):
+    def __init__(self):
+        super(Deflect, self).__init__(energy_cost=0,
+                                      card_rarity=Rarity.COMMON,
+                                      card_type=CardType.SKILL,
+                                      card_color=Color.GREEN)
+        self.block = 4
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        caller.increase_effect(Block, self.block)
+
+    def upgrade_logic(self):
+        self.block = 7
+
+
+class DodgeAndRoll(AbstractCard, ABC):
+    def __init__(self):
+        super(DodgeAndRoll, self).__init__(energy_cost=1,
+                                           card_rarity=Rarity.COMMON,
+                                           card_type=CardType.SKILL,
+                                           card_color=Color.GREEN)
+        self.block = 4
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        caller.increase_effect(Block, self.block)
+        caller.increase_effect(ThisBlockNextTurn, self.block)
+
+    def upgrade_logic(self):
+        self.block = 6
+
+
+class FlyingKnee(AbstractCard, ABC):
+    def __init__(self):
+        super(FlyingKnee, self).__init__(energy_cost=1,
+                                         card_rarity=Rarity.COMMON,
+                                         card_type=CardType.ATTACK,
+                                         card_color=Color.GREEN)
+        self.damage = 8
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        target.take_damage(self.damage)
+        caller.increase_effect(ThisEnergyNextTurn, 1)
+
+    def upgrade_logic(self):
+        self.damage = 11
+
+
+class Outmaneuver(AbstractCard, ABC):
+    def __init__(self):
+        super(Outmaneuver, self).__init__(energy_cost=1,
+                                          card_rarity=Rarity.COMMON,
+                                          card_type=CardType.SKILL,
+                                          card_color=Color.GREEN)
+        self.energy = 2
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        caller.increase_effect(ThisEnergyNextTurn, self.energy)
+
+    def upgrade_logic(self):
+        self.energy = 3
+
+
+class PiercingWail(AbstractCard, ABC):
+    def __init__(self):
+        super(PiercingWail, self).__init__(energy_cost=1,
+                                           card_rarity=Rarity.COMMON,
+                                           card_type=CardType.SKILL,
+                                           card_color=Color.GREEN,
+                                           exhaust=True)
+        self.amountStrength = 6
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+        for enemy in environment.enemies:
+            enemy.increase_effect(ThisStrengthNextTurn, self.amountStrength)
+            enemy.increase_effect(Strength, self.amountStrength * -1)
+
+    def upgrade_logic(self):
+        self.amountStrength = 8
+
+
 
 
 # Ironclad cards
@@ -332,7 +488,7 @@ class Flex(AbstractCard, ABC):
 
     def use(self, caller, target, environment):
         caller.increase_effect(Strength, self.strength_amount)
-        caller.increase_effect(StrengthDown, self.strength_amount)
+        caller.increase_effect(StrengthDownAtEndOfTurn, self.strength_amount)
 
     def upgrade_logic(self):
         self.strength_amount = 4

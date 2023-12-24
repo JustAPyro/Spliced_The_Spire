@@ -67,6 +67,26 @@ class Vigor(AbstractEffect):
         return add_damage
 
 
+class ThisBlockNextTurn(AbstractEffect):
+
+    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.increase_effect(Block, self.stacks)
+        self.stacks = 0
+
+
+class ThisEnergyNextTurn(AbstractEffect):
+    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.increase_effect(Energy, self.stacks)
+        self.stacks = 0
+
+
+class ThisStrengthNextTurn(AbstractEffect):
+
+    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+        owner.increase_effect(Strength, self.stacks)
+        self.stacks = 0
+
+
 class Vulnerable(AbstractEffect):
     def on_end_turn(self, owner, environment):
         owner.decrease_effect(Vulnerable, 1)
@@ -95,11 +115,11 @@ class Weak(AbstractEffect):
         owner.decrease_effect(Weak, 1)
 
 
-class StrengthDown(AbstractEffect):
+class StrengthDownAtEndOfTurn(AbstractEffect):
 
     def on_end_turn(self: AbstractEffect, owner, environment):
         owner.decrease_effect(Strength, self.stacks)
-        owner.set_effect(StrengthDown, 0)
+        owner.set_effect(StrengthDownAtEndOfTurn, 0)
 
 
 class NoDraw(AbstractEffect):

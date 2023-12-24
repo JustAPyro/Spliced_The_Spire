@@ -1,5 +1,9 @@
 
-from abc import ABC, abstractmethod
+from abstractions import *
+from room import *
+
+
+newGame = AbstractGame()
 
 
 
