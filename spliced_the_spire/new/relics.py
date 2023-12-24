@@ -1,7 +1,7 @@
 from abstractions import *
 from enumerations import *
 from effects import *
-
+from math import floor
 
 class BurningBlood(AbstractRelic):
     """Gain 6 health at the end of combat."""
@@ -415,6 +415,7 @@ class Whetstone(AbstractRelic):
 class RedSkull(AbstractRelic):
     pass
 
+
 class SneckoSkull(AbstractRelic):
     pass
 
@@ -448,11 +449,23 @@ class DarkStonePeriapt(AbstractRelic):
 
 
 class EternalFeather(AbstractRelic):
-    pass
+    def __init__(self):
+        super(EternalFeather, self).__init__(relic_rarity=Rarity.UNCOMMON,
+                                             relic_color=Color.COLORLESS)
+
+    def on_enter_rest_site(self, owner: AbstractActor | AbstractEnemy, environment):
+        healAmount = floor((len(owner.get_hand()) / 5) * 3)
+        owner.heal(healAmount)
 
 
-class FrozenEggs(AbstractRelic):
-    pass
+class FrozenEgg(AbstractRelic):
+    def __init__(self):
+        super(FrozenEgg, self).__init__(relic_rarity=Rarity.UNCOMMON,
+                                        relic_color=Color.COLORLESS)
+
+    def on_add_card_to_deck(self, owner: AbstractActor, environment, card:AbstractCard):
+        if card.card_type == CardType.POWER:
+            card.upgrade()
 
 
 class GremlinHold(AbstractRelic):
@@ -489,7 +502,6 @@ class MercuryHourglass(AbstractRelic):
 
 class MoltenEgg(AbstractRelic):
     pass
-
 
 
 class MummifiedHand(AbstractRelic):

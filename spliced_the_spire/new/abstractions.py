@@ -1026,7 +1026,7 @@ class AbstractGame(ABC):
 
 class AbstractRoom(ABC):
     def __init__(self,
-                 floor: int
+                 floor: int = 0
                  ):
         self.floor = floor
         super().__init__()
@@ -1050,6 +1050,9 @@ class AbstractShop(AbstractRoom):
     pass
 
 
-class AbstractUnknown(AbstractRoom):
-    pass
+class AbstractEventChoices(AbstractRoom):
+    def __init__(self,
+                 actor: AbstractActor):
+        super(AbstractEventChoices, self).__init__()
+
 
