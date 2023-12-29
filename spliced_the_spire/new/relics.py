@@ -992,7 +992,9 @@ class Necronomicon(AbstractRelic):
 
 
 class NeowsLament(AbstractRelic):
-    pass
+    def __init__(self):
+        super(NeowsLament, self).__init__(relic_rarity=Rarity.EVENT,
+                                          relic_color=Color.COLORLESS)
 
 
 class NilrysCodex(AbstractRelic):

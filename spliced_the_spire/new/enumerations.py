@@ -11,6 +11,11 @@ class SelectEvent(Enum):
     ADD_CARD_TO_DECK = 7
 
 
+class EventNames(Enum):
+    NEOW = 0
+    BIGFISH = 1
+
+
 class CardPiles(Enum):
     DRAW = 1
     HAND = 2
@@ -42,6 +47,7 @@ class Rarity(Enum):
     UNCOMMON = 3
     RARE = 4
     SPECIAL = 5
+    EVENT = 6
 
 
 class Color(Enum):

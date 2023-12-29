@@ -7,7 +7,7 @@ from typing import Optional
 from room import Neow
 from spliced_the_spire import lutil
 from spliced_the_spire.lutil import C, asc_int
-from spliced_the_spire.new.enumerations import CardPiles, CardType, SelectEvent, IntentType, Rarity, Color
+from spliced_the_spire.new.enumerations import *
 
 # Card Cost Variables
 X = True
@@ -84,7 +84,7 @@ class EffectMixin:
 
 
 class AbstractActor(EffectMixin):
-    def __init__(self, clas, environment, cards: list[AbstractCard] = None):
+    def __init__(self, clas, environment, color: Color, cards: list[AbstractCard] = None):
         super().__init__()
         self.times_received_damage: int = 0
         self.name: str = "Actor"
@@ -96,6 +96,8 @@ class AbstractActor(EffectMixin):
         # self.relics: list[AbstractRelics] = [clas.relic]
         self.max_energy: int = 3
         self.energy: int = 3
+        self.color = color
+        self.relics = []
 
         self.draw_pile: list[AbstractCard] = (clas.start_cards if cards is None else cards)
         self.hand_pile: list[AbstractCard] = []
@@ -116,6 +118,12 @@ class AbstractActor(EffectMixin):
         # Save the environment to class and add self to it
         self.environment = environment
         self.environment['actor'] = self
+
+    def is_dead(self):
+        if self.health <= 0:
+            return True
+        else:
+            return False
 
     def set_start(self, health, hand):
         # TODO: Assert start
@@ -373,6 +381,10 @@ class AbstractActor(EffectMixin):
 
     @abstractmethod
     def select_card(self, options: [AbstractCard], event_type: SelectEvent) -> AbstractCard:
+        pass
+
+    @abstractmethod
+    def select_option(self, options: [], event: EventNames) -> int:
         pass
 
     def gain_energy(self, qty=1):
@@ -1016,10 +1028,15 @@ class AbstractGame(ABC):
 
     def startGame(self):
         if self.room is None:
-            self.room = Neow(actor=self.actor)
+            self.room = Neow(actor=self.actor, hasWonLastGame=self.wonLastGame)
 
-        # hey room do it
-        pass
+        # returns true if still alive
+        if self.room.simulateRoom():
+            self._promptCardReward()
+            self._climbFloor()
+
+        else:
+            print("end game")
 
     def _climbFloor(self):
         # next room
@@ -1038,24 +1055,34 @@ class AbstractGame(ABC):
 
 class AbstractRoom(ABC):
     def __init__(self,
-                 floor: int = 0
+                 actor: AbstractActor,
                  ):
-        self.floor = floor
+        self.actor = actor
+        self.exitRoom = False
         super().__init__()
+
+    def _roomFinished(self):
+        if self.actor.is_dead():
+            return False
+        else:
+            return True
+
+    def simulateRoom(self):
+        self._roomFinished()
 
 
 class AbstractCombat(AbstractRoom):
     def __init__(self,
+                 actor: AbstractActor,
                  enemies: [AbstractEnemy, ],
                  isElite: bool,
-                 isBoss: bool,
-                 floor: int):
-
+                 isBoss: bool):
+        self.actor = actor
         self.enemies = enemies
         self.isElite = isElite
         self.isBoss = isBoss
 
-        super().__init__(floor)
+        super().__init__(actor=actor)
 
 
 class AbstractShop(AbstractRoom):
@@ -1065,6 +1092,7 @@ class AbstractShop(AbstractRoom):
 class AbstractEventChoices(AbstractRoom):
     def __init__(self,
                  actor: AbstractActor):
-        super(AbstractEventChoices, self).__init__()
+        super(AbstractEventChoices, self).__init__(actor=actor)
+        self.actor = actor
 
 
