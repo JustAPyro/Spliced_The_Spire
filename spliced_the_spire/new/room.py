@@ -29,6 +29,12 @@ class SmallSlimeRoom(AbstractCombat):
 
 # unknown rooms
 
+class Neow(AbstractEventChoices):
+    def __init__(self, actor):
+        super(Neow, self).__init__(actor=actor)
+        self.actor = actor
+
+
 class BigFish(AbstractEventChoices):
     def __init__(self, actor):
         super(BigFish, self).__init__(actor=actor)

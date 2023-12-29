@@ -4,11 +4,10 @@ import random
 from abc import abstractmethod, ABC
 from copy import copy
 from typing import Optional
-
+from room import Neow
 from spliced_the_spire import lutil
 from spliced_the_spire.lutil import C, asc_int
-from spliced_the_spire.new.enumerations import CardPiles, CardType, SelectEvent, IntentType, Rarity, Color,\
-    Rarity
+from spliced_the_spire.new.enumerations import CardPiles, CardType, SelectEvent, IntentType, Rarity, Color
 
 # Card Cost Variables
 X = True
@@ -1008,18 +1007,25 @@ class AbstractGame(ABC):
         self.wonLastGame = wonLastGame
         self.actor = actor
         self.actNumber = actNumber
+        self.color = color
+        self.room = room
+        self.combatEncounters = combatEncounters
 
-    def climbFloor(self):
-        pass
-
-    def selectCharacter(self):
-        pass
+    def selectCharacter(self, color: Color):
+        self.color = color
 
     def startGame(self):
-        # starting choices
+        if self.room is None:
+            self.room = Neow(actor=self.actor)
+
+        # hey room do it
         pass
 
-    def promptCardReward(self):
+    def _climbFloor(self):
+        # next room
+        pass
+
+    def _promptCardReward(self):
         #TODO: card reward random creation
         options = [AbstractCard, None]
 

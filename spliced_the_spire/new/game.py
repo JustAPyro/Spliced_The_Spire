@@ -1,9 +1,10 @@
-
+from enumerations import *
 from abstractions import *
 from room import *
 
 
-newGame = AbstractGame()
+testGame = AbstractGame()
 
+testGame.selectCharacter(Color.GREEN)
 
 
