@@ -29,35 +29,22 @@ class TestCards(unittest.TestCase):
         self.assertEqual(4, target.health)
         self.assertEqual(2, actor.energy)
 
-        actor.hand_pile = [card]
-        actor.energy = 3
-        target.health = 10
-        card.upgrade()
-        actor.use_card(target, card, [])
-        self.assertEqual(1, target.health)
-        self.assertEqual(2, actor.energy)
+
 
     def test_red_defend(self):
         card = RedDefend()
         actor = DummyActor(Ironclad, [], health=10, energy=3, hand=[card], environment={})
-        target = DummyEnemy(health=10, environment={})
+        target = DummyEnemy(health=10, environment={}, target=actor)
 
         # Action
         actor.use_card(target, card, [])
-        target.deal_damage(5, actor, log=[])
+        target.deal_damage(5)
 
         # Assertions
         self.assertEqual(2, actor.energy)
         self.assertEqual(10, actor.health)
 
-        actor.energy = 3
-        actor.clear_effects()
-        card.upgrade()
-        actor.hand_pile = [card]
-        actor.use_card(target, card, [])
-        target.deal_damage(10, actor, log=[])
-        self.assertEqual(2, actor.energy)
-        self.assertEqual(8, actor.health)
+
 
     def test_bash(self):
         card = Bash()

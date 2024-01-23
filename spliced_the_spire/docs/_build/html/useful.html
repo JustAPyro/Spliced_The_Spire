@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Useful API’s &#8212; Spliced The Spire 0.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=cb25574f" />
+    <script src="_static/documentation_options.js?v=7026087e"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Abstractions" href="abstractions.html" />
+    <link rel="prev" title="Contributing Cards" href="contributing/cards.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="useful-api-s">
+<h1>Useful API’s<a class="headerlink" href="#useful-api-s" title="Link to this heading">¶</a></h1>
+<p>The spliced the spire codebase has many abstractions that attempt
+to simplify the creation of middle level code- The implementation of cards,
+enemies, effects and relics. This page documents the methods most useful
+to middle level development, organized by caller object.</p>
+<section id="actor">
+<h2>Actor<a class="headerlink" href="#actor" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="new.actors.AbstractActor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">new.actors.</span></span><span class="sig-name descname"><span class="pre">AbstractActor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cards</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="abstractions.html#new.cards.AbstractCard" title="new.cards.AbstractCard"><span class="pre">AbstractCard</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#new.actors.AbstractActor" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The actor abstraction represents the player, AI, or machine learning algorithm.
+It manages traits owned by the player in slay the spire such as card decks,
+drawing and discarding, effects, and so on. The following are useful methods the
+AbstractActor provides to help give you information on these traits.</p>
+<section id="card-information-api">
+<h3>Card Information API<a class="headerlink" href="#card-information-api" title="Link to this heading">¶</a></h3>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.actors.AbstractActor.get_draw">
+<span class="sig-prename descclassname"><span class="pre">new.actors.AbstractActor.</span></span><span class="sig-name descname"><span class="pre">get_draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="abstractions.html#new.cards.AbstractCard" title="new.cards.AbstractCard"><span class="pre">AbstractCard</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#new.actors.AbstractActor.get_draw" title="Link to this definition">¶</a></dt>
+<dd><p>Returns all the cards currently in the players draw pile.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.actors.AbstractActor.get_hand">
+<span class="sig-prename descclassname"><span class="pre">new.actors.AbstractActor.</span></span><span class="sig-name descname"><span class="pre">get_hand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="abstractions.html#new.cards.AbstractCard" title="new.cards.AbstractCard"><span class="pre">AbstractCard</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#new.actors.AbstractActor.get_hand" title="Link to this definition">¶</a></dt>
+<dd><p>Returns all the cards currently in the players hand.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.actors.AbstractActor.draw_card">
+<span class="sig-prename descclassname"><span class="pre">new.actors.AbstractActor.</span></span><span class="sig-name descname"><span class="pre">draw_card</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="abstractions.html#new.cards.AbstractCard" title="new.cards.AbstractCard"><span class="pre">AbstractCard</span></a></span></span><a class="headerlink" href="#new.actors.AbstractActor.draw_card" title="Link to this definition">¶</a></dt>
+<dd><p>Draws quantity of cards, if the draw pile is empty it will auto shuffle and pull from discard.
+If card quantity is not specified this will draw 1 card.
+This will return the card that is drawn.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.actors.AbstractActor.get_discard">
+<span class="sig-prename descclassname"><span class="pre">new.actors.AbstractActor.</span></span><span class="sig-name descname"><span class="pre">get_discard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="abstractions.html#new.cards.AbstractCard" title="new.cards.AbstractCard"><span class="pre">AbstractCard</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#new.actors.AbstractActor.get_discard" title="Link to this definition">¶</a></dt>
+<dd><p>Returns all the cards currently in the players discard pile.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.actors.AbstractActor.discard_card">
+<span class="sig-prename descclassname"><span class="pre">new.actors.AbstractActor.</span></span><span class="sig-name descname"><span class="pre">discard_card</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">card</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="abstractions.html#new.cards.AbstractCard" title="new.cards.AbstractCard"><span class="pre">AbstractCard</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#new.actors.AbstractActor.discard_card" title="Link to this definition">¶</a></dt>
+<dd><p>This method allows you to discard a card. This will move it from your hand
+to the discard pile without expending energy or initiating any of its use effects.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.actors.AbstractActor.discard_hand">
+<span class="sig-prename descclassname"><span class="pre">new.actors.AbstractActor.</span></span><span class="sig-name descname"><span class="pre">discard_hand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#new.actors.AbstractActor.discard_hand" title="Link to this definition">¶</a></dt>
+<dd><p>Discard your entire hand. This is the same discard that is used on end of turn,
+All the players cards will be moved to the discard pile.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.actors.AbstractActor.exhaust_card">
+<span class="sig-prename descclassname"><span class="pre">new.actors.AbstractActor.</span></span><span class="sig-name descname"><span class="pre">exhaust_card</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">card</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="abstractions.html#new.cards.AbstractCard" title="new.cards.AbstractCard"><span class="pre">AbstractCard</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#new.actors.AbstractActor.exhaust_card" title="Link to this definition">¶</a></dt>
+<dd><p>This method allows you to exhaust a card. This moves it to the exhaust pile
+without expending energy or initiating any of its use effects.
+If the card is not in your hand this will throw a runtime error.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="enemy">
+<h2>Enemy<a class="headerlink" href="#enemy" title="Link to this heading">¶</a></h2>
+</section>
+<section id="effects-actor-and-enemy">
+<h2>Effects (Actor and Enemy)<a class="headerlink" href="#effects-actor-and-enemy" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="new.effects.EffectMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">new.effects.</span></span><span class="sig-name descname"><span class="pre">EffectMixin</span></span><a class="headerlink" href="#new.effects.EffectMixin" title="Link to this definition">¶</a></dt>
+<dd><p>This EffectMixin class is added to both the actors and the enemies, and allows for
+managing different effects.</p>
+<p>Below are listed common API methods you are encouraged to use in the development
+of cards, enemies, relics, and effects. (Note that entity in this case means a player
+or enemy)</p>
+<ul class="simple">
+<li><p>entity.clear_effects() -&gt; Remove all effects from an entity</p></li>
+<li><p>entity.add_effects(effect, qty) -&gt; increments stacks of effect by qty</p></li>
+<li><p>entity.set_effects(effect, qty) -&gt; sets the stacks of effect to qty</p></li>
+<li><p>entity.has_effect(effect) -&gt; Returns true if entity has effect</p></li>
+<li><p>entity.has_effect(effect, qty) -&gt; returns true if entity has at least qty stacks of effect</p></li>
+<li><p>entity.get_stacks(effect) -&gt; Returns the number of stacks of effect</p></li>
+</ul>
+</dd></dl>
+
+<p>The Effect Mixin is inherited by both Actors and Enemies. This
+mixin provides abstractions related to effects to both of these children.
+Power abilities are also represented by effects.</p>
+<section id="actor-enemy-effect-api">
+<h3>Actor/Enemy Effect API<a class="headerlink" href="#actor-enemy-effect-api" title="Link to this heading">¶</a></h3>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.effects.EffectMixin.increase_effect">
+<span class="sig-prename descclassname"><span class="pre">new.effects.EffectMixin.</span></span><span class="sig-name descname"><span class="pre">increase_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="abstractions.html#new.effects.AbstractEffect" title="new.effects.AbstractEffect"><span class="pre">AbstractEffect</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#new.effects.EffectMixin.increase_effect" title="Link to this definition">¶</a></dt>
+<dd><p>Increase the stacks of this effect by the value provided.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.effects.EffectMixin.decrease_effect">
+<span class="sig-prename descclassname"><span class="pre">new.effects.EffectMixin.</span></span><span class="sig-name descname"><span class="pre">decrease_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="abstractions.html#new.effects.AbstractEffect" title="new.effects.AbstractEffect"><span class="pre">AbstractEffect</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#new.effects.EffectMixin.decrease_effect" title="Link to this definition">¶</a></dt>
+<dd><p>Decreases the stacks of this effect by the value provided.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.effects.EffectMixin.set_effect">
+<span class="sig-prename descclassname"><span class="pre">new.effects.EffectMixin.</span></span><span class="sig-name descname"><span class="pre">set_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="abstractions.html#new.effects.AbstractEffect" title="new.effects.AbstractEffect"><span class="pre">AbstractEffect</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#new.effects.EffectMixin.set_effect" title="Link to this definition">¶</a></dt>
+<dd><p>Set the number of stacks of this effect to the value provided.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.effects.EffectMixin.has_effect">
+<span class="sig-prename descclassname"><span class="pre">new.effects.EffectMixin.</span></span><span class="sig-name descname"><span class="pre">has_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="abstractions.html#new.effects.AbstractEffect" title="new.effects.AbstractEffect"><span class="pre">AbstractEffect</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#new.effects.EffectMixin.has_effect" title="Link to this definition">¶</a></dt>
+<dd><p>This API has two behaviors depending on if the quantity value was specified or not.
+If the quantity was not specified, this will check if the player has any number of stacks
+of a given effect, and return true if they do. If the quantity value is specified however, this
+will only return true if the player has <em>at least</em> that number of stacks of the given effect.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="new.effects.EffectMixin.stacks_of_effect">
+<span class="sig-prename descclassname"><span class="pre">new.effects.EffectMixin.</span></span><span class="sig-name descname"><span class="pre">stacks_of_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="abstractions.html#new.effects.AbstractEffect" title="new.effects.AbstractEffect"><span class="pre">AbstractEffect</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#new.effects.EffectMixin.stacks_of_effect" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the current number of stacks of a given effect.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Spliced The Spire</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing/how.html">How to Contribute</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Useful API’s</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#actor">Actor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#enemy">Enemy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#effects-actor-and-enemy">Effects (Actor and Enemy)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="abstractions.html">Abstractions</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="contributing/cards.html" title="previous chapter">Contributing Cards</a></li>
+      <li>Next: <a href="abstractions.html" title="next chapter">Abstractions</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Mark Hanna, Luke Hanna, Daniel Larrabee.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/useful.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

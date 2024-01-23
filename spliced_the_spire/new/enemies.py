@@ -59,12 +59,13 @@ class Intent:
 class DummyEnemy(AbstractEnemy, ABC):
     max_health = {0: 10, 100: 10}
 
-    def __init__(self, environment, health=10, ascension=0):
+    def __init__(self, environment, health=10, ascension=0, target=None):
         super().__init__(environment=environment,
                          name='Dummy',
                          max_health=health,
                          ascension=ascension,
-                         act=1)
+                         act=1,
+                         target=target)
         self.environment = environment
 
     def pattern(self):

@@ -1,5 +1,5 @@
 from spliced_the_spire.new.cards import *
-from spliced_the_spire.new.relics import Burning_Blood
+from spliced_the_spire.new.relics import BurningBlood
 
 class STSClass():
     pass
@@ -8,7 +8,7 @@ class STSClass():
 class Ironclad(STSClass):
     health = 80
 
-    start_relic = Burning_Blood()
+    #start_relic = BurningBlood()
 
     start_cards = [
         RedStrike(),

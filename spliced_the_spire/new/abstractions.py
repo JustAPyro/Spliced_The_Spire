@@ -4,7 +4,7 @@ import random
 from abc import abstractmethod, ABC
 from copy import copy
 from typing import Optional
-from room import Neow
+#from room import Neow
 from spliced_the_spire import lutil
 from spliced_the_spire.lutil import C, asc_int
 from spliced_the_spire.new.enumerations import *
@@ -84,7 +84,7 @@ class EffectMixin:
 
 
 class AbstractActor(EffectMixin):
-    def __init__(self, clas, environment, color: Color, cards: list[AbstractCard] = None):
+    def __init__(self, clas, environment,  cards: list[AbstractCard] = None, hand: Optional[list[AbstractCard]] = None):
         super().__init__()
         self.times_received_damage: int = 0
         self.name: str = "Actor"
@@ -96,11 +96,10 @@ class AbstractActor(EffectMixin):
         # self.relics: list[AbstractRelics] = [clas.relic]
         self.max_energy: int = 3
         self.energy: int = 3
-        self.color = color
         self.relics = []
 
         self.draw_pile: list[AbstractCard] = (clas.start_cards if cards is None else cards)
-        self.hand_pile: list[AbstractCard] = []
+        self.hand_pile: list[AbstractCard] = [] if hand is None else hand
         self.discard_pile: list[AbstractCard] = []
         self._exhaust_pile: list[AbstractCard] = []
 
@@ -439,7 +438,8 @@ class AbstractEnemy(ABC, EffectMixin):
                  set_health: Optional[int] = None,
                  testing: bool = False,
                  ascension=0,
-                 act=1):
+                 act=1,
+                 target=None):
         """
         Create an enemy.
 
@@ -502,7 +502,7 @@ class AbstractEnemy(ABC, EffectMixin):
         self.ascension = ascension
         self.act = act
 
-        self.actor = NotImplemented
+        self.actor = target if target else NotImplemented
 
         # Add self to the environment
         self.environment = environment
@@ -1028,7 +1028,8 @@ class AbstractGame(ABC):
 
     def startGame(self):
         if self.room is None:
-            self.room = Neow(actor=self.actor, hasWonLastGame=self.wonLastGame)
+            pass
+            #self.room = Neow(actor=self.actor, hasWonLastGame=self.wonLastGame)
 
         # returns true if still alive
         if self.room.simulateRoom():

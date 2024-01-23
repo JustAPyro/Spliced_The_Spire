@@ -1,9 +1,10 @@
 import unittest
 
-from new.actors import DummyActor
-from new.cards import *
-from new.classes import Ironclad
-from new.enemies import DummyEnemy
+from spliced_the_spire.new.actors import DummyActor
+from spliced_the_spire.new.cards import RedStrike, RedDefend, Bash, Anger, Armaments, BodySlam, Wound
+from spliced_the_spire.new.classes import Ironclad
+from spliced_the_spire.new.effects import Vulnerable, Block
+from spliced_the_spire.new.enemies import DummyEnemy
 
 
 class TestCards(unittest.TestCase):

@@ -1,8 +1,12 @@
-from abstractions import *
-from enumerations import *
-from effects import *
+from __future__ import annotations
+
+from spliced_the_spire.new.effects import *
 from math import floor
 from random import Random
+
+from spliced_the_spire.new.enumerations import *
+from spliced_the_spire.new.abstractions import AbstractRelic
+
 
 class BurningBlood(AbstractRelic):
     """Gain 6 health at the end of combat."""
