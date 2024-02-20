@@ -1,8 +1,8 @@
-from new.cards import *
-from new.enemies import Cultist, JawWorm
-from new.actors import LeftToRightAI
-from new.abstractions import AbstractActor, AbstractEnemy
-from new.classes import Ironclad
+from main.cards import *
+from main.enemies import Cultist, JawWorm
+from main.actors import LeftToRightAI
+from main.abstractions import AbstractActor, AbstractEnemy
+from main.classes import Ironclad
 from lutil import C
 
 

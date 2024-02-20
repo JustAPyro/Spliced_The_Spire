@@ -7,7 +7,7 @@ from typing import Optional
 #from room import Neow
 from spliced_the_spire import lutil
 from spliced_the_spire.lutil import C, asc_int
-from spliced_the_spire.new.enumerations import *
+from spliced_the_spire.main.enumerations import *
 
 # Card Cost Variables
 X = True
@@ -894,7 +894,7 @@ class AbstractCard(ABC):
 
         parameters
         ----------
-        caller: new.abstractions.AbstractActor
+        caller: main.abstractions.AbstractActor
             The player using the card.
         """
         return True

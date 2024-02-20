@@ -1,5 +1,5 @@
-from new.abstractions import AbstractCard
-from new.cards import card_classes
+from main.abstractions import AbstractCard
+from main.cards import card_classes
 
 start = {
     "actor": {
@@ -74,7 +74,7 @@ start = {
     "floor": 1
 }
 
-from new.enemies import enemies as enemy_cls_map
+from main.enemies import enemies as enemy_cls_map
 
 env = {}
 ascension = start['ascension']

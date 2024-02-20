@@ -1,7 +1,7 @@
 # importing the module
 import json
 
-from spliced_the_spire.new.abstractions import AbstractEnemy
+from spliced_the_spire.main.abstractions import AbstractEnemy
 
 from spliced_the_spire.tests.BugTracker import BugTracker, BugType, BugArea
 

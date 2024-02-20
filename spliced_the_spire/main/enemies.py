@@ -5,9 +5,9 @@ from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
 from spliced_the_spire.lutil import asc_int
-from spliced_the_spire.new.abstractions import AbstractEnemy
-from spliced_the_spire.new.effects import Ritual, Block, Strength, Weak, CurlUp
-from spliced_the_spire.new.enumerations import IntentType
+from spliced_the_spire.main.abstractions import AbstractEnemy
+from spliced_the_spire.main.effects import Ritual, Block, Strength, Weak, CurlUp
+from spliced_the_spire.main.enumerations import IntentType
 
 if TYPE_CHECKING:
     pass

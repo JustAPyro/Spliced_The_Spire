@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import math
 
-from spliced_the_spire.new.enumerations import CardType
+from spliced_the_spire.main.enumerations import CardType
 
-from spliced_the_spire.new.abstractions import AbstractActor, AbstractEnemy, AbstractEffect
+from spliced_the_spire.main.abstractions import AbstractActor, AbstractEnemy, AbstractEffect
 
 
 class Energy(AbstractEffect):
