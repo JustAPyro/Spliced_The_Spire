@@ -29,8 +29,6 @@ class TestCards(unittest.TestCase):
         self.assertEqual(4, target.health)
         self.assertEqual(2, actor.energy)
 
-
-
     def test_red_defend(self):
         card = RedDefend()
         actor = DummyActor(Ironclad, [], health=10, energy=3, hand=[card], environment={})
@@ -43,8 +41,6 @@ class TestCards(unittest.TestCase):
         # Assertions
         self.assertEqual(2, actor.energy)
         self.assertEqual(10, actor.health)
-
-
 
     def test_bash(self):
         card = Bash()
@@ -99,3 +95,37 @@ class TestCards(unittest.TestCase):
         self.assertEqual(1, actor.energy)
         self.assertEqual(5, actor.get_effect_stacks(Block))
         self.assertEqual(target.health, 5)
+
+    def test_clash(self):
+        # ---- Test for 14 damage and correct energy usage
+        card = Clash()
+        actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card], environment={})
+        target = DummyEnemy(health=20, environment={})
+
+        actor.use_card(target, card, [])
+
+        self.assertEqual(6, target.health)
+        self.assertEqual(3, actor.energy)
+
+        # ---- Test to make sure you can't use it with a non-attack in your hand
+        card2 = RedDefend()
+        actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card, card2], environment={})
+        target = DummyEnemy(health=20, environment={})
+
+        self.assertTrue(card not in actor.get_playable_cards())
+        exception = None
+        try:
+            actor.use_card(target, card, [])
+        except CardNotPlayable as e:
+            exception = e
+        self.assertIsNotNone(exception)
+
+        # ---- Test upgraded damage
+        card.upgrade()
+        actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card], environment={})
+        target = DummyEnemy(health=20, environment={})
+
+        actor.use_card(target, card, [])
+
+        self.assertEqual(2, actor.health)
+        self.assertEqual(3, actor.energy)
