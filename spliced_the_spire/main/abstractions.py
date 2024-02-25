@@ -140,6 +140,8 @@ class AbstractActor(EffectMixin):
                  will_discard=True):
         if card not in self.get_cards(from_piles=CardPiles.HAND):
             raise RuntimeError("Tried to play card not in hand")
+        if not card.is_playable(self):
+            raise CardNotPlayable('Cannot play this card.')
         # TODO: ???? Fix 'x' cost
         if card.energy_cost == 'x':
             card.energy_cost = self.energy
@@ -1097,3 +1099,6 @@ class AbstractEventChoices(AbstractRoom):
         self.actor = actor
 
 
+class CardNotPlayable(Exception):
+    def __init__(self, message):
+        super().__init__(message)

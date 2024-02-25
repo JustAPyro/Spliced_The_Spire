@@ -108,6 +108,7 @@ class TestCards(unittest.TestCase):
         self.assertEqual(3, actor.energy)
 
         # ---- Test to make sure you can't use it with a non-attack in your hand
+        card = Clash()
         card2 = RedDefend()
         actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card, card2], environment={})
         target = DummyEnemy(health=20, environment={})
@@ -121,6 +122,7 @@ class TestCards(unittest.TestCase):
         self.assertIsNotNone(exception)
 
         # ---- Test upgraded damage
+        card = Clash()
         card.upgrade()
         actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card], environment={})
         target = DummyEnemy(health=20, environment={})
