@@ -129,5 +129,5 @@ class TestCards(unittest.TestCase):
 
         actor.use_card(target, card, [])
 
-        self.assertEqual(2, actor.health)
+        self.assertEqual(2, target.health)
         self.assertEqual(3, actor.energy)
