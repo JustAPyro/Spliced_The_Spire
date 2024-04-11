@@ -11,15 +11,13 @@ if TYPE_CHECKING:
 
 
 class DummyActor(AbstractActor, ABC):
-    def __init__(self, clas, cards, health, hand, energy, environment):
-        super().__init__(clas, cards=cards, environment=environment, hand=hand)
+    def __init__(self, clas, cards, health, hand, energy, *args, **kwargs):
+        super().__init__(clas, cards=cards, hand=hand, *args, **kwargs)
         self.health = health
         self.max_health = health
 
         self.energy = energy
         self.max_energy = energy
-
-        self.environment = environment
 
         self.logging = False
 

@@ -450,8 +450,8 @@ class Cleave(AbstractCard, ABC):
                          card_rarity=Rarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller, target, environment):
-        for enemy in environment['enemies']:
+    def use(self, caller, target, room):
+        for enemy in room.enemies:
             caller.deal_damage(enemy, self.damage)
 
     def upgrade_logic(self):

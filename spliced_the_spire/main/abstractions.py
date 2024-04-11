@@ -84,7 +84,7 @@ class EffectMixin:
 
 
 class AbstractActor(EffectMixin):
-    def __init__(self, clas, environment,  cards: list[AbstractCard] = None, hand: Optional[list[AbstractCard]] = None):
+    def __init__(self, clas, cards: list[AbstractCard] = None, hand: Optional[list[AbstractCard]] = None, room: Room = None):
         super().__init__()
         self.times_received_damage: int = 0
         self.name: str = "Actor"
@@ -114,9 +114,7 @@ class AbstractActor(EffectMixin):
         self.logging: bool = True
         self.turn_log = []
 
-        # Save the environment to class and add self to it
-        self.environment = environment
-        self.environment['actor'] = self
+        self.room = room
 
     def is_dead(self):
         if self.health <= 0:
@@ -136,8 +134,7 @@ class AbstractActor(EffectMixin):
         call_all(method=EventHookMixin.on_receive_damage_from_card,
                  parameters=(self, self.environment, card))
 
-    def use_card(self, target: AbstractEnemy, card: AbstractCard, all_enemies: list[AbstractEnemy], is_free=False,
-                 will_discard=True):
+    def use_card(self, target: AbstractEnemy, card: AbstractCard, is_free=False, will_discard=True):
         if card not in self.get_cards(from_piles=CardPiles.HAND):
             raise RuntimeError("Tried to play card not in hand")
         if not card.is_playable(self):
@@ -145,20 +142,20 @@ class AbstractActor(EffectMixin):
         # TODO: ???? Fix 'x' cost
         if card.energy_cost == 'x':
             card.energy_cost = self.energy
-        card.use(self, target, self.environment)
+        card.use(self, target, self.room)
 
         # If enemy was killed call the on_fatal effect
         card.on_fatal(self)
 
         call_all(method=EventHookMixin.on_card_play,
                  owner=self,
-                 parameters=(self, self, self.environment, card))
+                 parameters=(self, self, self.room, card))
 
         # Exhaust Card logic
         if card in self.hand_pile and card.exhaust:
             self.exhaust_card(card)
             call_all(method=EventHookMixin.on_card_exhaust,
-                     parameters=(self, self.environment,))
+                     parameters=(self, self.room,))
         # Poof card logic (powers)
         elif card.poof:
             self.hand_pile.remove(card)
@@ -274,7 +271,7 @@ class AbstractActor(EffectMixin):
     def deal_damage(self, target, damage):
         damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
                               owner=self,
-                              parameters=(self, self.environment, damage),
+                              parameters=(self, self.room, damage),
                               return_param=damage)
         actual_damage = damage + damage_mod
         target.take_damage(actual_damage)
@@ -425,6 +422,25 @@ class AbstractActor(EffectMixin):
 
         return self.turn_log[-1]
 
+class Room:
+    def __init__(self,
+            actor: AbstractActor = None,
+            enemies: List[AbstractEnemiy] = None):
+
+        self.actor = actor
+        self.enemies = enemies if enemies is not None else []
+        
+        for entity in [self.actor, *self.enemies]:
+            if entity is not None:
+                entity.room = self
+
+    def set_actor(self, actor: AbstractActor):
+        self.actor = actor
+        actor.room = self
+
+    def add_enemy(self, enemy: AbstractEnemy):
+        self.enemies.append(enemy)
+        enemy.room = self
 
 class AbstractEnemy(ABC, EffectMixin):
     """
@@ -433,13 +449,14 @@ class AbstractEnemy(ABC, EffectMixin):
     https://slay-the-spire.fandom.com/wiki/Monsters
     """
 
-    def __init__(self, environment: dict,
+    def __init__(self, environment: dict = None,
                  name: Optional[str] = None,
                  sts_name: Optional[str] = None,
                  max_health: dict[int, tuple[int, int]] | int | None = None,
                  set_health: Optional[int] = None,
                  testing: bool = False,
                  ascension=0,
+                 room=None,
                  act=1,
                  target=None):
         """
@@ -503,12 +520,10 @@ class AbstractEnemy(ABC, EffectMixin):
         # Information about the environment that is relevant to the battle
         self.ascension = ascension
         self.act = act
+        self.room = room 
 
         self.actor = target if target else NotImplemented
 
-        # Add self to the environment
-        self.environment = environment
-        self.environment.setdefault('enemies', []).append(self)
 
         # This stores the move pattern of the enemy,
         # It will populate with a generator the first time
@@ -776,6 +791,7 @@ class AbstractCard(ABC):
                  exhaust: bool = False,
                  ethereal: bool = False,
                  innate: bool = False,
+                 room = None,
                  unplayable: bool = False,
                  allow_multiple_upgrades: bool = False,
                  remove_after_combat: bool = False):
@@ -847,6 +863,9 @@ class AbstractCard(ABC):
         self.rarity: Rarity = card_rarity
         self.color: Color = card_color
 
+        # The room?
+        self.room = room
+
         # Card behavior
         self.exhaust: bool = exhaust
         self.ethereal: bool = ethereal
@@ -863,7 +882,7 @@ class AbstractCard(ABC):
                 raise RuntimeError('WAT? (Power card with exhaust/ethereal found)')
 
     @abstractmethod
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', environment):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies: List['AbstractEnemy']):
         """
         * You are REQUIRED to implement this method in subclasses. *
         Overriding this method provides the default behavior of a card.
