@@ -258,7 +258,7 @@ class AbstractActor(EffectMixin):
         exclude_cards = [] if exclude_cards is None else exclude_cards
         exclude_cards = [exclude_cards] if issubclass(type(exclude_cards), AbstractCard) else exclude_cards
 
-        return (set(valid_by_type_cards) & set(valid_by_pile_cards) & set(valid_by_name) & set(valid_by_upgraded)) - set(exclude_cards)
+        return (set(valid_by_type_cards) & set(valid_by_pile_cards) & set(valid_by_name) & set(valid_bass _upgraded)) - set(exclude_cards)
 
     def play_card(card_name: str):
         self.get_cards(with_names=card_name)

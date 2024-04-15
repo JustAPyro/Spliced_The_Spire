@@ -85,7 +85,7 @@ class TestEndToEndCombat(unittest.TestCase):
         self.assertEqual(12, room.enemies[1].health)
 
         # T1.C2, Strike+ on Left Green Louse:
-        actor.use_card(room.enemies[0], actor.get_cards(with_names='Strike', upgraded=True).pop())
+        actor.use_card(room.enemies[0], actor.get_card(with_names='Strike', upgraded=True))
 
         self.assertEqual(0, actor.energy)
         self.assertTrue(left_green_louse.is_dead())
