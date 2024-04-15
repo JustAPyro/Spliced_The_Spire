@@ -206,9 +206,9 @@ class GreenLouse(AbstractEnemy, ABC):
         17: (9, 12)
     }
 
-    def __init__(self, room: dict, ascension=0, act=1,
+    def __init__(self, room: Room = None, ascension=0, act=1,
                  base_damage: int = random.randint(5, 7),
-                 curl_up_stacks: Optional[int] = None):
+                 curl_up_stacks: Optional[int] = None, *args, **kwargs):
         """
         Create a Green louse. Note that base damage may be provided as a static value, but
         if it is not, then it will be randomly selected between 5 and 7 on enemy creation,
@@ -234,7 +234,7 @@ class GreenLouse(AbstractEnemy, ABC):
             GreenLouse.curl_up_stack_map. If you would like to create a Green Louse
             starting with a specific number of curl up, you may provide it here.
         """
-        super().__init__(room=room, ascension=ascension, act=act)
+        super().__init__(room=room, ascension=ascension, act=act, *args, **kwargs)
         # Apply the curl up stacks, calculating an appropriate one if none was provided
         self.increase_effect(CurlUp,
                              curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))

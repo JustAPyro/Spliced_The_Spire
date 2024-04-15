@@ -83,12 +83,13 @@ class EffectMixin:
 
 
 class AbstractActor(EffectMixin):
-    def __init__(self, clas, cards: list[AbstractCard] = None, hand: Optional[list[AbstractCard]] = None, room: Room = None):
+    def __init__(self, clas, cards: list[AbstractCard] = None, hand: Optional[list[AbstractCard]] = None, room: Room = None, health: int = None, max_health: int = None):
         super().__init__()
         self.times_received_damage: int = 0
         self.name: str = "Actor"
-        self.max_health: int = clas.health
-        self.health: int = clas.health
+        self.max_health: int = max_health if max_health is not None else clas.health
+        self.health: int = health if health is not None else max_health if max_health is not None else clas.health
+
         self.potionSlotsOpen = 3
         self.potions = []
         self.gold: int = 99
@@ -200,10 +201,15 @@ class AbstractActor(EffectMixin):
 
     def add_card_to_exhaust(self, card):
         self.card_piles[CardPiles.DISCARD].append(card)
+    
+    def get_card(self, **kwargs):
+        return self.get_cards(**kwargs).pop()
 
     def get_cards(self,
                   from_piles: CardPiles | list[CardPiles] = None,  # DRAW, HAND, DISCARD, EXHAUST | Default: All
+                  with_names: str | list[str] = None,
                   with_types: CardType | list[CardType] = None,  # ATTACK, SKILL, POWER, STATUS, CURSE | Default: All
+                  upgraded: bool = None,
                   exclude_cards: AbstractCard | list[AbstractCard] = None):
         """
         Get a set of cards based on search criteria
@@ -224,6 +230,22 @@ class AbstractActor(EffectMixin):
         for pile in from_piles:
             valid_by_pile_cards += self.card_piles.get(pile)
 
+        if upgraded == None:
+            valid_by_upgraded = self.get_all_cards()
+        else:
+            valid_by_upgraded = [card for card in self.get_all_cards() if card.upgraded == upgraded]
+
+        if with_names == None:
+            valid_by_name = self.get_all_cards()
+        else:
+            if type(with_names) == str:
+                with_names = [with_names]
+
+            valid_by_name = []
+            for card in self.get_all_cards():
+                if card.name in with_names:
+                    valid_by_name.append(card)
+
         # 1. Default to using all options if none are specified
         # 2. If a singular option was provided auto-insert it into a list
         # 3. Fetch all the cards based on the options provided
@@ -236,7 +258,10 @@ class AbstractActor(EffectMixin):
         exclude_cards = [] if exclude_cards is None else exclude_cards
         exclude_cards = [exclude_cards] if issubclass(type(exclude_cards), AbstractCard) else exclude_cards
 
-        return (set(valid_by_type_cards) & set(valid_by_pile_cards)) - set(exclude_cards)
+        return (set(valid_by_type_cards) & set(valid_by_pile_cards) & set(valid_by_name) & set(valid_by_upgraded)) - set(exclude_cards)
+
+    def play_card(card_name: str):
+        self.get_cards(with_names=card_name)
 
     def get_all_cards(self):
         cards = []
@@ -556,6 +581,10 @@ class AbstractEnemy(ABC, EffectMixin):
         actual_damage = damage + damage_mod
         if actual_damage:  # TODO: Fix bad coding here
             self.health -= actual_damage
+        if actual_damage > 0:
+            call_all(method=EventHookMixin.on_victim_of_attack,
+                     owner=self,
+                     parameters=(self, self.room, self.room.actor))
 
     def deal_damage(self, damage: int):
         damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
