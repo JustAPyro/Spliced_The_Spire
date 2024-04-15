@@ -59,14 +59,14 @@ class Intent:
 class DummyEnemy(AbstractEnemy, ABC):
     max_health = {0: 10, 100: 10}
 
-    def __init__(self, environment=None, health=10, ascension=0, target=None):
-        super().__init__(environment=environment,
+    def __init__(self, room=None, health=10, ascension=0, target=None):
+        super().__init__(room=room,
                          name='Dummy',
                          max_health=health,
                          ascension=ascension,
                          act=1,
                          target=target)
-        self.environment = environment
+        self.room = room
 
     def pattern(self):
         pass
@@ -96,8 +96,8 @@ class Cultist(AbstractEnemy):
 
         Parameters
         ----------
-        :param environment:
-            The environment the enemy is acting in.
+        :param room:
+            The room the enemy is acting in.
 
         :param ascension:
             The ascension the enemy is fighting on.
@@ -136,8 +136,8 @@ class JawWorm(AbstractEnemy):
         7: (42, 46)  # A7+ Health is 50-56
     }
 
-    def __init__(self, environment: dict = None, ascension=0, act=1):
-        super().__init__(environment=environment,
+    def __init__(self, room: dict = None, ascension=0, act=1):
+        super().__init__(room=room,
                          ascension=ascension,
                          act=act)
 
@@ -206,7 +206,7 @@ class GreenLouse(AbstractEnemy, ABC):
         17: (9, 12)
     }
 
-    def __init__(self, environment: dict, ascension=0, act=1,
+    def __init__(self, room: dict, ascension=0, act=1,
                  base_damage: int = random.randint(5, 7),
                  curl_up_stacks: Optional[int] = None):
         """
@@ -234,7 +234,7 @@ class GreenLouse(AbstractEnemy, ABC):
             GreenLouse.curl_up_stack_map. If you would like to create a Green Louse
             starting with a specific number of curl up, you may provide it here.
         """
-        super().__init__(environment=environment, ascension=ascension, act=act)
+        super().__init__(room=room, ascension=ascension, act=act)
         # Apply the curl up stacks, calculating an appropriate one if none was provided
         self.increase_effect(CurlUp,
                              curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))
@@ -289,7 +289,7 @@ class RedLouse(AbstractEnemy):
     }
 
     # TODO: Is 5, 7 right? Is this inclusive or exclusive?
-    def __init__(self, environment, ascension=0, act=1,
+    def __init__(self, room, ascension=0, act=1,
                  base_damage: int = random.randint(5, 7),
                  curl_up_stacks: Optional[int] = None):
         """
@@ -317,7 +317,7 @@ class RedLouse(AbstractEnemy):
             RedLouse.curl_up_stack_map. If you would like to create a Red Louse
             starting with a specific number of curl up, you may provide it here.
         """
-        super().__init__(environment, ascension=ascension, act=act)
+        super().__init__(room, ascension=ascension, act=act)
         # Apply the curl up stacks, calculating an appropriate one if none was provided
         self.increase_effect(CurlUp,
                              curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))
