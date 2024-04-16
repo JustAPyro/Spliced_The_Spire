@@ -13,6 +13,7 @@ from spliced_the_spire.main.enumerations import *
 X = True
 NO_COST = False
 
+
 class EffectMixin:
     """
     This EffectMixin class is added to both the actors and the enemies, and allows for
@@ -83,7 +84,8 @@ class EffectMixin:
 
 
 class AbstractActor(EffectMixin):
-    def __init__(self, clas, cards: list[AbstractCard] = None, hand: Optional[list[AbstractCard]] = None, room: Room = None, health: int = None, max_health: int = None):
+    def __init__(self, clas, cards: list[AbstractCard] = None, hand: Optional[list[AbstractCard]] = None,
+                 room: Room = None, health: int = None, max_health: int = None):
         super().__init__()
         self.times_received_damage: int = 0
         self.name: str = "Actor"
@@ -201,7 +203,7 @@ class AbstractActor(EffectMixin):
 
     def add_card_to_exhaust(self, card):
         self.card_piles[CardPiles.DISCARD].append(card)
-    
+
     def get_card(self, **kwargs):
         return self.get_cards(**kwargs).pop()
 
@@ -258,10 +260,8 @@ class AbstractActor(EffectMixin):
         exclude_cards = [] if exclude_cards is None else exclude_cards
         exclude_cards = [exclude_cards] if issubclass(type(exclude_cards), AbstractCard) else exclude_cards
 
-        return (set(valid_by_type_cards) & set(valid_by_pile_cards) & set(valid_by_name) & set(valid_bass _upgraded)) - set(exclude_cards)
-
-    def play_card(card_name: str):
-        self.get_cards(with_names=card_name)
+        return (set(valid_by_type_cards) & set(valid_by_pile_cards) & set(valid_by_name) & set(
+            valid_by_upgraded)) - set(exclude_cards)
 
     def get_all_cards(self):
         cards = []
@@ -443,14 +443,15 @@ class AbstractActor(EffectMixin):
 
         return self.turn_log[-1]
 
+
 class Room:
     def __init__(self,
-            actor: AbstractActor = None,
-            enemies: List[AbstractEnemy] = None):
+                 actor: AbstractActor = None,
+                 enemies: List[AbstractEnemy] = None):
 
         self.actor = actor
         self.enemies = enemies if enemies is not None else []
-        
+
         for entity in [self.actor, *self.enemies]:
             if entity is not None:
                 entity.room = self
@@ -462,6 +463,7 @@ class Room:
     def add_enemy(self, enemy: AbstractEnemy):
         self.enemies.append(enemy)
         enemy.room = self
+
 
 class AbstractEnemy(ABC, EffectMixin):
     """
@@ -527,7 +529,7 @@ class AbstractEnemy(ABC, EffectMixin):
         if testing:
             max_map: dict = getattr(type(self), 'max_health')
             ascensions = sorted(list(max_map.keys()))
-            for i in range(0, len(ascensions)-1):
+            for i in range(0, len(ascensions) - 1):
                 if ascension < ascensions[i + 1]:
                     lower, upper = max_map[ascensions[i]]
                     if self.max_health > upper or self.max_health < lower:
@@ -541,10 +543,9 @@ class AbstractEnemy(ABC, EffectMixin):
         # Information about the room that is relevant to the battle
         self.ascension = ascension
         self.act = act
-        self.room = room 
+        self.room = room
 
         self.actor = target if target else NotImplemented
-
 
         # This stores the move pattern of the enemy,
         # It will populate with a generator the first time
@@ -584,7 +585,7 @@ class AbstractEnemy(ABC, EffectMixin):
         if actual_damage > 0:
             call_all(method=EventHookMixin.on_victim_of_attack,
                      owner=self,
-                     parameters=(self, self.room, self.room.actor))
+                     parameters=(self, self.room, self.actor))
 
     def deal_damage(self, damage: int):
         damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
@@ -694,7 +695,8 @@ class EventHookMixin:
 
     # Effects
 
-    def on_apply_effect(self, owner: AbstractActor | AbstractEnemy, room, effect: AbstractEffect, target: AbstractEnemy):
+    def on_apply_effect(self, owner: AbstractActor | AbstractEnemy, room, effect: AbstractEffect,
+                        target: AbstractEnemy):
         pass
 
     def on_gain_block_from_card(self, owner: AbstractActor | AbstractEnemy, room, block):
@@ -816,7 +818,7 @@ class AbstractCard(ABC):
                  exhaust: bool = False,
                  ethereal: bool = False,
                  innate: bool = False,
-                 room = None,
+                 room=None,
                  unplayable: bool = False,
                  allow_multiple_upgrades: bool = False,
                  remove_after_combat: bool = False):
@@ -1040,11 +1042,11 @@ class AbstractPotion(EventHookMixin):
 
 class AbstractRelic(ABC, EventHookMixin):
     """an abstract relic"""
+
     def __init__(self,
                  relic_rarity: Rarity.STARTER,
                  relic_color: Color = Color.UNKNOWN,
                  ):
-
         self.relic_rarity = relic_rarity
         self.relic_color = relic_color
 

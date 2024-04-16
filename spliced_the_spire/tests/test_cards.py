@@ -155,7 +155,7 @@ class TestCards(unittest.TestCase):
         # because you DO need a reference to actor to use the card.
         card = Cleave()
         card.upgrade()
-        
+
         rm = Room()
         rm.set_actor(DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card]))
         rm.add_enemy(DummyEnemy(health=20))
@@ -166,6 +166,26 @@ class TestCards(unittest.TestCase):
         for enemy in rm.enemies:
             self.assertEqual(9, enemy.health)
 
+    def test_clothesline(self):
+        card = Clothesline()
+        target = DummyEnemy(health=20)
+        actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card])
+
+        _ = Room(actor, [target])
+
+        actor.use_card(target, card)
+
+        self.assertEqual(8, target.health)
+        self.assertEqual(2, target.get_effect_stacks(Weak))
+
+    def test_flex(self):
+        card = Flex()
+        target = DummyEnemy(health=20)
+        actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card])
+        _ = Room(actor, [target])
+        actor.use_card(target, card)
+        self.assertEqual(2, actor.get_effect_stacks(Strength))
+
+
 if __name__ == '__main__':
     unittest.main()
-

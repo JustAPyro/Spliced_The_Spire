@@ -466,7 +466,6 @@ class Clothesline(AbstractCard, ABC):
                          card_rarity=Rarity.COMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    # TODO: make caller.take_damage a mangled method
     def use(self, caller, target, room: Room):
         caller.deal_damage(target, self.damage)
         target.increase_effect(Weak, self.qty_weak)
