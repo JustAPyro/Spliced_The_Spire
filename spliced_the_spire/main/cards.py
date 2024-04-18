@@ -18,6 +18,20 @@ class Burn(AbstractCard, ABC):
     pass
 
 
+class Slimed(AbstractCard, ABC):
+    def __init__(self, *args, **kwargs):
+        super().__init__(name='Slimed', energy_cost=1, card_type=CardType.STATUS, exhaust=True)
+
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+        pass
+
+    def upgrade_logic(self):
+        pass
+
+    def is_playable(self, caller):
+        return True
+
+
 class Dazed(AbstractCard, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(name='Dazed', energy_cost=0, card_type=CardType.STATUS, ethereal=True)

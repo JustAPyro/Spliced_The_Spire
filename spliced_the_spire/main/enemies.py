@@ -5,8 +5,9 @@ from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
 from spliced_the_spire.lutil import asc_int
-from spliced_the_spire.main.abstractions import AbstractEnemy
-from spliced_the_spire.main.effects import Ritual, Block, Strength, Weak, CurlUp
+from spliced_the_spire.main.abstractions import AbstractEnemy, Room
+from spliced_the_spire.main.cards import Slimed
+from spliced_the_spire.main.effects import Ritual, Block, Strength, Weak, CurlUp, Frail
 from spliced_the_spire.main.enumerations import IntentType
 
 if TYPE_CHECKING:
@@ -282,7 +283,7 @@ class RedLouse(AbstractEnemy):
     }
 
     # Curl Up effect applied at start
-    curl_up_power = {
+    curl_up_stack_map = {
         +0: (3, 7),
         +7: (4, 8),
         17: (9, 12)
@@ -320,7 +321,7 @@ class RedLouse(AbstractEnemy):
         super().__init__(room, ascension=ascension, act=act)
         # Apply the curl up stacks, calculating an appropriate one if none was provided
         self.increase_effect(CurlUp,
-                             curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))
+                             curl_up_stacks if curl_up_stacks else asc_int(ascension, RedLouse.curl_up_stack_map))
 
         self.base_damage = base_damage
 
@@ -353,6 +354,189 @@ class RedLouse(AbstractEnemy):
                     self.bite: 3})
 
 
+class AcidSlimeSmall(AbstractEnemy):
+    max_health = {
+        0: (8, 12),
+        7: (9, 13)
+    }
+
+    def __init__(self, room, ascension=0, act=1):
+        super().__init__(room, ascension=ascension, act=act)
+
+    def lick(self):
+        self.get_actor().increase_effect(Weak, 1)
+
+    def tackle(self):
+        self.deal_damage(3) if self.ascension < 2 else self.deal_damage(4)
+
+    def pattern(self):
+        if self.ascension >= 17 or random.randint(0, 1) == 0:
+            first_ability = self.lick
+            second_ability = self.tackle
+        else:
+            first_ability = self.tackle
+            second_ability = self.lick
+
+        while True:
+            yield first_ability
+            yield second_ability
+
+
+class AcidSlimeMedium(AbstractEnemy):
+    max_health = {
+        0: (28, 32),
+        7: (29, 34)
+    }
+
+    def __init__(self, room, ascension=0, act=1, *args, **kwargs):
+        super().__init__(room, ascension=ascension, act=act, *args, **kwargs)
+
+    def corrosive_spit(self):
+        self.deal_damage(7) if self.ascension < 2 else self.deal_damage(8)
+        self.get_actor().discard_pile.append(Slimed())
+
+    def lick(self):
+        self.get_actor().increase_effect(Weak, 1)
+
+    def tackle(self):
+        self.deal_damage(10) if self.ascension < 2 else self.deal_damage(12)
+
+    def pattern(self):
+        while True:
+            yield self.rule_pattern(
+                chances={
+                    self.corrosive_spit: 30 if self.ascension < 17 else 40,
+                    self.tackle: 40,
+                    self.lick: 30 if self.ascension < 17 else 20},
+                successive_limit_dict={
+                    self.tackle: 2,
+                    self.lick: 3 if self.ascension < 17 else 2,
+                    self.corrosive_spit: 3})
+
+
+class AcidSlimeLarge(AbstractEnemy):
+    max_health = {
+        0: (65, 69),
+        7: (68, 72)
+    }
+
+    def __init__(self, room, ascension=0, act=1):
+        super().__init__(room, ascension=ascension, act=act)
+
+    def corrosive_spit(self):
+        self.deal_damage(11) if self.ascension < 2 else self.deal_damage(12)
+        self.get_actor().discard_pile.extend([Slimed(), Slimed()])
+
+    def lick(self):
+        self.get_actor().increase_effect(Weak, 2)
+
+    def tackle(self):
+        self.deal_damage(16) if self.ascension < 2 else self.deal_damage(18)
+
+    def split(self):
+        self.room.enemies.extend(
+            [AcidSlimeMedium(max_health=self.health, ascension=self.ascension, room=self.room, act=self.act),
+             AcidSlimeMedium(max_health=self.health, ascension=self.ascension, room=self.room, act=self.act)])
+        self.room.enemies.remove(self)
+        self.health = 0
+
+    def pattern(self):
+        while True:
+            if self.health <= self.max_health * 0.5:
+                yield self.split
+            else:
+                yield self.rule_pattern(
+                    chances={
+                        self.corrosive_spit: 30 if self.ascension < 17 else 40,
+                        self.tackle: 40,
+                        self.lick: 30 if self.ascension < 17 else 20},
+                    successive_limit_dict={
+                        self.tackle: 2,
+                        self.lick: 3 if self.ascension < 17 else 2,
+                        self.corrosive_spit: 3})
+
+
+class SpikeSlimeSmall(AbstractEnemy):
+    max_health = {
+        0: (10, 14),
+        7: (11, 15)
+    }
+
+    def __init__(self, room, ascension=0, act=1):
+        super().__init__(room, ascension=ascension, act=act)
+
+    def tackle(self):
+        self.deal_damage(5) if self.ascension < 2 else self.deal_damage(6)
+
+    def pattern(self):
+        while True:
+            yield self.tackle
+
+
+class SpikeSlimeMedium(AbstractEnemy):
+    max_health = {
+        0: (28, 32),
+        7: (29, 34)
+    }
+
+    def __init__(self, room, ascension=0, act=1, *args, **kwargs):
+        super().__init__(room, ascension=ascension, act=act, *args, **kwargs)
+
+    def lick(self):
+        self.get_actor().increase_effect(Frail, 1)
+
+    def flame_tackle(self):
+        self.deal_damage(8) if self.ascension < 2 else self.deal_damage(10)
+        self.get_actor().discard_pile.append(Slimed())
+
+    def pattern(self):
+        while True:
+            yield self.rule_pattern(
+                chances={
+                    self.flame_tackle: 30,
+                    self.lick: 70},
+                successive_limit_dict={
+                    self.flame_tackle: 3,
+                    self.lick: 3 if self.ascension < 17 else 2, })
+
+
+class SpikeSlimeLarge(AbstractEnemy):
+    max_health = {
+        0: (64, 70),
+        7: (67, 73)
+    }
+
+    def __init__(self, room, ascension=0, act=1):
+        super().__init__(room, ascension=ascension, act=act)
+
+    def lick(self):
+        frail = 2 if self.ascension < 17 else 3
+        self.get_actor().increase_effect(Frail, frail)
+
+    def flame_tackle(self):
+        self.deal_damage(16) if self.ascension < 2 else self.deal_damage(18)
+        self.get_actor().discard_pile.extend([Slimed(), Slimed()])
+
+    def split(self):
+        self.room.enemies.extend(
+            [SpikeSlimeMedium(max_health=self.health, ascension=self.ascension, room=self.room, act=self.act),
+             SpikeSlimeMedium(max_health=self.health, ascension=self.ascension, room=self.room, act=self.act)])
+        self.room.enemies.remove(self)
+        self.health = 0
+
+    def pattern(self):
+        while True:
+            if self.health <= self.max_health * 0.5:
+                yield self.split
+            else:
+                yield self.rule_pattern(
+                    chances={
+                        self.flame_tackle: 30,
+                        self.lick: 70},
+                    successive_limit_dict={
+                        self.flame_tackle: 3,
+                        self.lick: 3 if self.ascension < 17 else 2, })
+
+
 env = {}
 enemies = {cls(env).sts_name: cls for cls in AbstractEnemy.__subclasses__()}
-
