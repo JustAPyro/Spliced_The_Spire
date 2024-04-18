@@ -19,6 +19,9 @@ class DummyActor(AbstractActor, ABC):
 
         self.logging = False
 
+    def select_card(self, options: list[AbstractCard], event_type: SelectEvent) -> AbstractCard:
+        return options[-1]
+
 
 class LeftToRightAI(AbstractActor):
     def __init__(self, clas, environment, cards):

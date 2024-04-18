@@ -499,7 +499,7 @@ class Havoc(AbstractCard, ABC):
     def use(self, caller, target, room: Room):
         did_we_draw_card = caller.draw_card(1)
         if did_we_draw_card:
-            caller.use_card(target, caller.hand_pile[-1], room.enemies, is_free=True, will_discard=False)
+            caller.use_card(target, caller.hand_pile[-1], is_free=True, will_discard=False)
             caller.exhaust_card(caller.hand_pile[-1])
 
     def upgrade_logic(self):

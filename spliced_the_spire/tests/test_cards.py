@@ -186,6 +186,96 @@ class TestCards(unittest.TestCase):
         actor.use_card(target, card)
         self.assertEqual(2, actor.get_effect_stacks(Strength))
 
+    def test_havoc(self):
+        card = Havoc()
+        card2 = RedStrike()
+        card3 = RedDefend()
+        target = DummyEnemy(health=20)
+        actor = DummyActor(Ironclad, cards=[card2, card3], health=10, energy=3, hand=[card])
+        _ = Room(actor, [target])
+        actor.use_card(target, card)
+
+        self.assertEqual(5, actor.get_effect_stacks(Block))
+        self.assertEqual(*actor.draw_pile, card2)
+        self.assertEqual(*actor.discard_pile, card)
+
+    def test_headbutt(self):
+        card = Headbutt()
+        card2 = RedStrike()
+        target = DummyEnemy(health=20)
+        actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card])
+        _ = Room(actor, [target])
+        actor.discard_pile.append(card2)
+        actor.use_card(target, card)
+
+        self.assertEqual(actor.draw_pile[0], card2)
+        self.assertEqual(11, target.health)
+
+    def test_heavyblade(self):
+        card = HeavyBlade()
+        card2 = HeavyBlade()
+        target = DummyEnemy(health=80)
+        actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card, card2])
+        _ = Room(actor, [target])
+        actor.use_card(target, card)
+
+        self.assertEqual(66, target.health)
+
+        actor.increase_effect(Strength, 2)
+        actor.use_card(target, card2)
+
+        self.assertEqual(46, target.health)
+
+    def test_ironwave(self):
+        card = IronWave()
+        target = DummyEnemy(health=80)
+        actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card])
+        _ = Room(actor, [target])
+        actor.use_card(target, card)
+
+        self.assertEqual(75, target.health)
+        self.assertEqual(actor.get_effect_stacks(Block), 5)
+
+    def test_perfectedstrike(self):
+        card = PerfectedStrike()
+        card2 = RedStrike()
+        card3 = TwinStrike()
+        card4 = WildStrike()
+        card5 = PommelStrike()
+        target = DummyEnemy(health=80)
+        actor = DummyActor(Ironclad, cards=[card3], health=10, energy=3, hand=[card, card2])
+        _ = Room(actor, [target])
+        actor.discard_pile.append(card4)
+        actor.discard_pile.append(card5)
+        actor.use_card(target, card)
+
+        self.assertEqual(64, target.health)
+
+    def test_pommelstrike(self):
+        card = PommelStrike()
+        card2 = RedStrike()
+        card3 = RedStrike()
+        target = DummyEnemy(health=80)
+        actor = DummyActor(Ironclad, cards=[card2, card3], health=10, energy=3, hand=[card])
+        _ = Room(actor, [target])
+        actor.use_card(target, card)
+
+        self.assertEqual(71, target.health)
+        self.assertEqual(*actor.hand_pile, card3)
+
+    def test_shrugitoff(self):
+        card = ShrugItOff()
+        card2 = RedStrike()
+        card3 = RedStrike()
+        target = DummyEnemy(health=80)
+        actor = DummyActor(Ironclad, cards=[card2, card3], health=10, energy=3, hand=[card])
+        _ = Room(actor, [target])
+        actor.use_card(target, card)
+
+        self.assertEqual(actor.get_effect_stacks(Block), 8)
+        self.assertEqual(*actor.hand_pile, card3)
+
+
 
 if __name__ == '__main__':
     unittest.main()
