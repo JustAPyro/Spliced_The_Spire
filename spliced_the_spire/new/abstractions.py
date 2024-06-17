@@ -4,7 +4,6 @@ import random
 from abc import abstractmethod, ABC
 from copy import copy
 from typing import Optional
-from room import Neow
 from spliced_the_spire import lutil
 from spliced_the_spire.lutil import C, asc_int
 from spliced_the_spire.new.enumerations import *
@@ -1002,7 +1001,7 @@ class AbstractRelic(ABC, EventHookMixin):
         self.relic_rarity = relic_rarity
         self.relic_color = relic_color
 
-        super().__init__()
+        super().__init__(self)
 
 
 class AbstractGame(ABC):

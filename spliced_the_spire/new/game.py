@@ -1,10 +1,12 @@
 from enumerations import *
 from abstractions import *
+from actors import *
+from classes import *
 from room import *
 
 
-testGame = AbstractGame()
+player = AbstractActor(clas=Ironclad, environment=None, color=Color.RED)
 
-testGame.selectCharacter(Color.GREEN)
+
 
 
