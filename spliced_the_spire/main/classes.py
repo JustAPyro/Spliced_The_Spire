@@ -1,5 +1,5 @@
-from spliced_the_spire.new.cards import *
-from spliced_the_spire.new.relics import *
+from spliced_the_spire.main.cards import *
+from spliced_the_spire.main.relics import *
 
 class STSClass():
     pass

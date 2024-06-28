@@ -671,7 +671,11 @@ class EventHookMixin:
                 # Add this object to the list of things that should be called for methods
                 parent_method = getattr(EventHookMixin, method)
                 #implemented_hooks.setdefault(parent_method, []).append(self)
-                implemented_hooks.append(parent_method)
+                if type(implemented_hooks) == dict:
+                    pass
+
+                else:
+                    implemented_hooks.append(parent_method)
 
     # Damage hooks
 
