@@ -5,7 +5,7 @@ from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 
-from spliced_the_spire.new.enemies import enemies
+from spliced_the_spire.main.enemies import enemies
 from bug_enums import BugStatus, BugType, BugLocation
 
 

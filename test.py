@@ -1,6 +1,6 @@
-from itertools import product
+import unittest
+from spliced_the_spire.tests import test_cards, test_e2e_combat, test_enemies
 
-x = [5]
-x = [x] if type(x) == int else x
+suite = unittest.TestLoader().loadTestsFromModule(test_enemies)
+unittest.TextTestRunner(verbosity=2).run(suite)
 
-print(x)

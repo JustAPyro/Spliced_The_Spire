@@ -1,8 +1,11 @@
-from abstractions import *
-from enumerations import *
-from effects import *
+from __future__ import annotations
+
+from spliced_the_spire.main.effects import *
 from math import floor
 from random import Random
+
+from spliced_the_spire.main.enumerations import *
+from spliced_the_spire.main.abstractions import AbstractRelic
 
 
 class BurningBlood(AbstractRelic):

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import math
 
-from spliced_the_spire.new.enumerations import CardType
+from spliced_the_spire.main.enumerations import CardType
 
-from spliced_the_spire.new.abstractions import AbstractActor, AbstractEnemy, AbstractEffect
+from spliced_the_spire.main.abstractions import AbstractActor, AbstractEnemy, AbstractEffect
 
 
 class Energy(AbstractEffect):
@@ -27,7 +27,6 @@ class Thorns(AbstractEffect):
 
     def on_victim_of_attack(self, owner: AbstractActor | AbstractEnemy, environment,
                             damaging_enemy: AbstractEnemy):
-
         damaging_enemy.take_damage(damage=self.stacks)
 
 
@@ -94,6 +93,14 @@ class Vulnerable(AbstractEffect):
     def modify_damage_taken(self, owner, environment, damage: int) -> int:
         # Vulnerable adds 50% damage
         return int(damage * .5)
+
+
+class Frail(AbstractEffect):
+    def on_end_turn(self, owner, environment):
+        owner.decrease_effect(Frail, 1)
+
+    def on_gain_block_from_card(self, owner: AbstractActor | AbstractEnemy, environment, block):
+        owner.increase_effect(Block, math.floor(block * 0.75))
 
 
 class Strength(AbstractEffect):
@@ -180,7 +187,9 @@ class RageEffect(AbstractEffect):
 
 
 class CurlUp(AbstractEffect):
-    pass
+    def on_victim_of_attack(self, owner, room, damaging_enemy):
+        owner.increase_effect(Block, self.stacks)
+        owner.set_effect(CurlUp, 0)
 
 
 class RuptureEffect(AbstractEffect):
@@ -214,4 +223,3 @@ class DoubleTapEffect(AbstractEffect):
 
 class JuggernautEffect(AbstractEffect):
     pass
-
