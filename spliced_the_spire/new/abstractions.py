@@ -994,8 +994,9 @@ class AbstractPotion(EventHookMixin):
 class AbstractRelic(ABC, EventHookMixin):
     """an abstract relic"""
     def __init__(self,
-                 relic_rarity: Rarity.STARTER,
-                 relic_color: Color = Color.UNKNOWN,
+                 relic_rarity: Rarity,
+                 relic_color: Color,
+                 implemented_hooks: []
                  ):
 
         self.relic_rarity = relic_rarity
@@ -1083,6 +1084,8 @@ class AbstractCombat(AbstractRoom):
 
         super().__init__(actor=actor)
 
+    def printRoom(self):
+        pass
 
 class AbstractShop(AbstractRoom):
     pass
