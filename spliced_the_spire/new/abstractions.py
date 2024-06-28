@@ -115,8 +115,8 @@ class AbstractActor(EffectMixin):
         self.turn_log = []
 
         # Save the environment to class and add self to it
-        self.environment = environment
-        self.environment['actor'] = self
+        #self.environment = environment
+        #self.environment['actor'] = self
 
     def is_dead(self):
         if self.health <= 0:
@@ -431,7 +431,7 @@ class AbstractEnemy(ABC, EffectMixin):
     https://slay-the-spire.fandom.com/wiki/Monsters
     """
 
-    def __init__(self, environment: dict,
+    def __init__(self,
                  name: Optional[str] = None,
                  sts_name: Optional[str] = None,
                  max_health: dict[int, tuple[int, int]] | int | None = None,
@@ -464,6 +464,7 @@ class AbstractEnemy(ABC, EffectMixin):
             This will be thrown if max_health is not provided and the subclass does not
             implement its own static class "max_health" variable.
         """
+
         # Use the provided name if there is, otherwise parse it from class name
         self.name = name if name else lutil.parse_class_name(type(self).__name__)
         self.sts_name = self.name
@@ -481,6 +482,8 @@ class AbstractEnemy(ABC, EffectMixin):
             self.max_health = asc_int(ascension, max_health)
         # 3. Finally, if not provided elsewhere get from the class variable
         elif hasattr(self, 'max_health'):
+            if ascension == {}:
+                ascension = 0
             self.max_health = asc_int(ascension, getattr(self, 'max_health'))
 
         if testing:
@@ -502,10 +505,6 @@ class AbstractEnemy(ABC, EffectMixin):
         self.act = act
 
         self.actor = NotImplemented
-
-        # Add self to the environment
-        self.environment = environment
-        self.environment.setdefault('enemies', []).append(self)
 
         # This stores the move pattern of the enemy,
         # It will populate with a generator the first time
@@ -537,7 +536,7 @@ class AbstractEnemy(ABC, EffectMixin):
     def take_damage(self, damage: int):
         damage_mod = call_all(method=EventHookMixin.modify_damage_taken,
                               owner=self,
-                              parameters=(self, self.environment, damage),
+                              parameters=(self, damage),
                               return_param=damage)
         actual_damage = damage + damage_mod
         if actual_damage:  # TODO: Fix bad coding here
@@ -546,7 +545,7 @@ class AbstractEnemy(ABC, EffectMixin):
     def deal_damage(self, damage: int):
         damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
                               owner=self,
-                              parameters=(self, self.environment, damage),
+                              parameters=(self, damage),
                               return_param=damage)
         damage = damage + damage_mod
         actor = self.get_actor()
@@ -585,7 +584,7 @@ class AbstractEnemy(ABC, EffectMixin):
     def take_turn(self):
         call_all(method=EventHookMixin.on_start_turn,
                  owner=self,
-                 parameters=(self, self.environment,))
+                 parameters=(self))
 
         self.intent = None
         self.message = None
@@ -602,7 +601,7 @@ class AbstractEnemy(ABC, EffectMixin):
         self.print_log.append(self.message)
         call_all(method=EventHookMixin.on_end_turn,
                  owner=self,
-                 parameters=(self, self.environment,))
+                 parameters=(self))
         return self.print_log
 
 
@@ -619,7 +618,8 @@ class EventHookMixin:
             if getattr(EventHookMixin, method) != getattr(type(self), method):
                 # Add this object to the list of things that should be called for methods
                 parent_method = getattr(EventHookMixin, method)
-                implemented_hooks.setdefault(parent_method, []).append(self)
+                #implemented_hooks.setdefault(parent_method, []).append(self)
+                implemented_hooks.append(parent_method)
 
     # Damage hooks
 
@@ -1085,7 +1085,9 @@ class AbstractCombat(AbstractRoom):
         super().__init__(actor=actor)
 
     def printRoom(self):
-        pass
+        print("Player health: ", self.actor.health, " / ", self.actor.max_health)
+        for enemy in self.enemies:
+            print("enemy Health: ", enemy.health)
 
 class AbstractShop(AbstractRoom):
     pass

@@ -8,6 +8,7 @@ from enemies import *
 
 player = AbstractActor(clas=Ironclad, environment=None, color=Color.RED)
 
-AbstractCombat(actor=player, enemies=[RedLouse], isElite=False, isBoss=False)
+myFight = AbstractCombat(actor=player, enemies=[RedLouse()], isElite=False, isBoss=False)
 
 
+myFight.printRoom()
