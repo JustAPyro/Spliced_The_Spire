@@ -14,3 +14,6 @@ myFight = AbstractCombat(actor=player, enemies=[RedLouse()], isElite=False, isBo
 
 myFight.printRoom()
 
+myFight.playerTurn()
+
+myFight.printRoom()

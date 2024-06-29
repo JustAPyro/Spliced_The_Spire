@@ -7,6 +7,7 @@ from typing import Optional
 from spliced_the_spire import lutil
 from spliced_the_spire.lutil import C, asc_int
 from spliced_the_spire.main.enumerations import *
+from effects import *
 
 # Card Cost Variables
 X = True
@@ -169,12 +170,15 @@ class AbstractActor(EffectMixin):
         if not is_free:
             self.energy -= card.energy_cost
         if self.logging:
-            self.turn_log[-1]['turn_actions'].append({
-                'type': 'use_card',
-                'card': card,
-                'target': target,
-                'message': f'{self.name} used {card.name} on {target.name}'
-            })
+            if len(self.turn_log) == 0:
+                pass
+            else:
+                self.turn_log[-1]['turn_actions'].append({
+                    'type': 'use_card',
+                    'card': card,
+                    'target': target,
+                    'message': f'{self.name} used {card.name} on {target.name}'
+                })
 
     def use_potion(self, target, potion: AbstractPotion):
         self.potionSlotsOpen += 1
@@ -701,8 +705,8 @@ class EventHookMixin:
     def on_lose_hp(self, owner: AbstractActor | AbstractEnemy, room):
         pass
 
-    def on_victim_of_attack(self, owner: AbstractActor | AbstractEnemy, room,
-                            damaging_enemy: AbstractEnemy):
+    def on_victim_of_attack(self, owner: AbstractActor | AbstractEnemy,
+                            damaging_enemy: AbstractEnemy | AbstractActor):
         pass
 
     # Effects
@@ -1150,6 +1154,19 @@ class AbstractCombat(AbstractRoom):
         print("Player health: ", self.actor.health, " / ", self.actor.max_health)
         for enemy in self.enemies:
             print("enemy Health: ", enemy.health)
+            print(enemy.get_effect_stacks(Block))
+            print(enemy.get_effect_stacks(CurlUp))
+
+    def playerTurn(self):
+        self.actor.draw_card(quantity=5)
+        useSet = self.actor.get_cards(from_piles=CardPiles.HAND, with_types=CardType.ATTACK)
+        useCard = None
+        for i in useSet:
+            useCard = i
+            break
+        print(useCard)
+        self.actor.use_card(target=self.enemies[0], card=useCard)
+
 
 class AbstractShop(AbstractRoom):
     pass

@@ -187,7 +187,7 @@ class RageEffect(AbstractEffect):
 
 
 class CurlUp(AbstractEffect):
-    def on_victim_of_attack(self, owner, room, damaging_enemy):
+    def on_victim_of_attack(self, owner, damaging_enemy):
         owner.increase_effect(Block, self.stacks)
         owner.set_effect(CurlUp, 0)
 
