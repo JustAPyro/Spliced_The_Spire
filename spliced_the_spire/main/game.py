@@ -11,6 +11,7 @@ player = AbstractActor(clas=Ironclad)
 
 myFight = AbstractCombat(actor=player, enemies=[RedLouse()], isElite=False, isBoss=False)
 
+myFight.beginRoom()
 
 myFight.printRoom()
 

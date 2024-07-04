@@ -320,7 +320,6 @@ class RedLouse(AbstractEnemy):
         # Apply the curl up stacks, calculating an appropriate one if none was provided
         self.increase_effect(CurlUp,
                              curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))
-        self.increase_effect(CurlUp, 10)
         self.base_damage = base_damage
 
     def bite(self):

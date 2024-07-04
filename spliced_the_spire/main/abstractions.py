@@ -74,6 +74,7 @@ class EffectMixin:
         self._check_instantiate_effect(effect)
         self.effects.get(effect).stacks += value
 
+
     def decrease_effect(self, effect, value):
         self._check_instantiate_effect(effect)
         self.effects.get(effect).stacks -= value
@@ -82,8 +83,138 @@ class EffectMixin:
         self._check_instantiate_effect(effect)
         return self.effects.get(effect).stacks
 
+class EventHookMixin:
+    def __init__(self, owner):
+        implemented_hooks = getattr(owner, 'implemented_hooks')
 
-class AbstractActor(EffectMixin):
+        # Should in theory be every method in EventHookMixin
+        all_subclass_implemented_methods = [method for method in dir(EventHookMixin)
+                                            if not method.startswith('__') and method != 'implements_method']
+        for method in all_subclass_implemented_methods:
+
+            # If child overrode method this should activate
+            if getattr(EventHookMixin, method) != getattr(type(self), method):
+                # Add this object to the list of things that should be called for methods
+                parent_method = getattr(EventHookMixin, method)
+                #implemented_hooks.setdefault(parent_method, []).append(self)
+                if type(implemented_hooks) == dict:
+                    pass
+
+                else:
+                    implemented_hooks.append(parent_method)
+
+    # Damage hooks
+
+    def modify_damage_taken(self, owner, room, damage: int) -> int:
+        """
+        Effects overriding this can modify the damage taken by an actor or enemy.
+        The return value of this method will be added to the damage, you can lower the damage
+        received by returning a negative value.
+        """
+        pass
+
+    def modify_damage_dealt(self, owner, room, damage: int) -> int:
+        """
+        Effects overriding this can modify the damage dealt by an actor or enemy.
+        The return value of this method will be added to the damage, you can lower the damage
+        dealt by returning a negative value.
+        """
+        pass
+
+    def on_receive_damage_from_card(self, owner, room, card):
+        pass
+
+    def on_lose_hp(self, owner: AbstractActor | AbstractEnemy, room):
+        pass
+
+    def on_victim_of_attack(self, owner: AbstractActor | AbstractEnemy,
+                            damaging_enemy: AbstractEnemy | AbstractActor):
+        pass
+
+    # Effects
+
+    def on_apply_effect(self, owner: AbstractActor | AbstractEnemy, room, effect: AbstractEffect,
+                        target: AbstractEnemy):
+        pass
+
+    def on_gain_block_from_card(self, owner: AbstractActor | AbstractEnemy, room, block):
+        pass
+
+    # floor entering
+
+    def on_floor_climb(self, owner: AbstractActor | AbstractEnemy, room):
+        pass
+
+    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, room: AbstractCombat):
+        pass
+
+    def on_enter_shop(self, owner: AbstractActor | AbstractEnemy, room):
+        pass
+
+    def on_enter_rest_site(self, owner: AbstractActor | AbstractEnemy, room):
+        pass
+
+    def on_rest(self, owner: AbstractActor, room):
+        pass
+
+    # inventory changes
+
+    def on_add_curse_to_deck(self, owner: AbstractActor, room, curse):
+        pass
+
+    def on_add_card_to_deck(self, owner: AbstractActor, room, card):
+        pass
+
+    def on_gold_spent_shopping(self, owner: AbstractActor, room, card):
+        pass
+
+    def on_pickup_relic(self, owner: AbstractActor, room, card):
+        pass
+
+    def on_pickup_potion(self, owner: AbstractActor, room, card):
+        pass
+
+    def on_use_potion(self, owner: AbstractActor, room: AbstractRoom, card: AbstractCard):
+        pass
+
+    # Turn related hooks
+
+    def on_end_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room):
+        """
+        cue on end of combat
+        """
+
+    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room):
+        """
+        Effects overriding this can cause things to happen on the start of turn.
+        """
+        pass
+
+    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room):
+        """
+        Effects overriding this can cause things to happen on the end of turn.
+        """
+        pass
+
+    def on_card_play(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room, card):
+        pass
+
+    # Card draw related hooks
+
+    def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room, card):
+        pass
+
+    def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room):
+        pass
+
+    def modify_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room, quantity):
+        """
+        Effects overriding this will modify the number of cards drawn
+        """
+        return 0
+
+
+class AbstractActor(EffectMixin, EventHookMixin):
     def __init__(self, clas, cards: list[AbstractCard] = None, hand: Optional[list[AbstractCard]] = None,
                  room: Room = None, health: int = None, max_health: int = None):
         super().__init__()
@@ -147,7 +278,8 @@ class AbstractActor(EffectMixin):
         # TODO: ???? Fix 'x' cost
         if card.energy_cost == 'x':
             card.energy_cost = self.energy
-        card.use(self, target, self.room)
+
+        card.use(self, target)
 
         # If enemy was killed call the on_fatal effect
         card.on_fatal(self)
@@ -160,7 +292,8 @@ class AbstractActor(EffectMixin):
         if card in self.hand_pile and card.exhaust:
             self.exhaust_card(card)
             call_all(method=EventHookMixin.on_card_exhaust,
-                     parameters=(self, self.room,))
+                     parameters=(self, self.room),
+                     owner=self)
         # Poof card logic (powers)
         elif card.poof:
             self.hand_pile.remove(card)
@@ -179,7 +312,7 @@ class AbstractActor(EffectMixin):
                     'target': target,
                     'message': f'{self.name} used {card.name} on {target.name}'
                 })
-
+        target.on_victim_of_attack(owner=target, damaging_enemy=self)
     def use_potion(self, target, potion: AbstractPotion):
         self.potionSlotsOpen += 1
         self.potions.remove(potion)
@@ -471,7 +604,7 @@ class Room:
         enemy.room = self
 
 
-class AbstractEnemy(ABC, EffectMixin):
+class AbstractEnemy(ABC, EffectMixin, EventHookMixin):
     """
     This class is an abstract class designed to streamline the implementation
     of enemies and elites.
@@ -597,7 +730,6 @@ class AbstractEnemy(ABC, EffectMixin):
             call_all(method=EventHookMixin.on_victim_of_attack,
                      owner=self,
                      parameters=(self, self.room, self.actor))
-
     def deal_damage(self, damage: int):
         damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
                               owner=self,
@@ -661,135 +793,6 @@ class AbstractEnemy(ABC, EffectMixin):
         return self.print_log
 
 
-class EventHookMixin:
-    def __init__(self, owner):
-        implemented_hooks = getattr(owner, 'implemented_hooks')
-
-        # Should in theory be every method in EventHookMixin
-        all_subclass_implemented_methods = [method for method in dir(EventHookMixin)
-                                            if not method.startswith('__') and method != 'implements_method']
-        for method in all_subclass_implemented_methods:
-
-            # If child overrode method this should activate
-            if getattr(EventHookMixin, method) != getattr(type(self), method):
-                # Add this object to the list of things that should be called for methods
-                parent_method = getattr(EventHookMixin, method)
-                #implemented_hooks.setdefault(parent_method, []).append(self)
-                if type(implemented_hooks) == dict:
-                    pass
-
-                else:
-                    implemented_hooks.append(parent_method)
-
-    # Damage hooks
-
-    def modify_damage_taken(self, owner, room, damage: int) -> int:
-        """
-        Effects overriding this can modify the damage taken by an actor or enemy.
-        The return value of this method will be added to the damage, you can lower the damage
-        received by returning a negative value.
-        """
-        pass
-
-    def modify_damage_dealt(self, owner, room, damage: int) -> int:
-        """
-        Effects overriding this can modify the damage dealt by an actor or enemy.
-        The return value of this method will be added to the damage, you can lower the damage
-        dealt by returning a negative value.
-        """
-        pass
-
-    def on_receive_damage_from_card(self, owner, room, card):
-        pass
-
-    def on_lose_hp(self, owner: AbstractActor | AbstractEnemy, room):
-        pass
-
-    def on_victim_of_attack(self, owner: AbstractActor | AbstractEnemy,
-                            damaging_enemy: AbstractEnemy | AbstractActor):
-        pass
-
-    # Effects
-
-    def on_apply_effect(self, owner: AbstractActor | AbstractEnemy, room, effect: AbstractEffect,
-                        target: AbstractEnemy):
-        pass
-
-    def on_gain_block_from_card(self, owner: AbstractActor | AbstractEnemy, room, block):
-        pass
-
-    # floor entering
-
-    def on_floor_climb(self, owner: AbstractActor | AbstractEnemy, room):
-        pass
-
-    def on_enter_combat(self, owner: AbstractActor | AbstractEnemy, room: AbstractCombat):
-        pass
-
-    def on_enter_shop(self, owner: AbstractActor | AbstractEnemy, room):
-        pass
-
-    def on_enter_rest_site(self, owner: AbstractActor | AbstractEnemy, room):
-        pass
-
-    def on_rest(self, owner: AbstractActor, room):
-        pass
-
-    # inventory changes
-
-    def on_add_curse_to_deck(self, owner: AbstractActor, room, curse):
-        pass
-
-    def on_add_card_to_deck(self, owner: AbstractActor, room, card):
-        pass
-
-    def on_gold_spent_shopping(self, owner: AbstractActor, room, card):
-        pass
-
-    def on_pickup_relic(self, owner: AbstractActor, room, card):
-        pass
-
-    def on_pickup_potion(self, owner: AbstractActor, room, card):
-        pass
-
-    def on_use_potion(self, owner: AbstractActor, room: AbstractRoom, card: AbstractCard):
-        pass
-
-    # Turn related hooks
-
-    def on_end_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room):
-        """
-        cue on end of combat
-        """
-
-    def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room):
-        """
-        Effects overriding this can cause things to happen on the start of turn.
-        """
-        pass
-
-    def on_end_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room):
-        """
-        Effects overriding this can cause things to happen on the end of turn.
-        """
-        pass
-
-    def on_card_play(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room, card):
-        pass
-
-    # Card draw related hooks
-
-    def on_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room, card):
-        pass
-
-    def on_card_exhaust(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room):
-        pass
-
-    def modify_card_draw(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, room, quantity):
-        """
-        Effects overriding this will modify the number of cards drawn
-        """
-        return 0
 
 
 # TODO: Lots of occurances of return_param damage being passed twice awkwardly and self and self.env being passed
@@ -826,7 +829,7 @@ class AbstractCard(ABC):
 
     def __init__(self,
                  card_type: CardType = CardType.UNKNOWN,
-                 energy_cost: int | bool = NO_COST,
+                 energy_cost: int | str = NO_COST,
                  card_rarity: Rarity = Rarity.UNKNOWN,
                  card_color: Color = Color.UNKNOWN,
                  upgraded: bool = False,
@@ -925,7 +928,7 @@ class AbstractCard(ABC):
                 raise RuntimeError('WAT? (Power card with exhaust/ethereal found)')
 
     @abstractmethod
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', enemies: List['AbstractEnemy']):
+    def use(self, caller: 'AbstractActor', enemies: ['AbstractEnemy']):
         """
         * You are REQUIRED to implement this method in subclasses. *
         Overriding this method provides the default behavior of a card.
@@ -1152,10 +1155,17 @@ class AbstractCombat(AbstractRoom):
 
     def printRoom(self):
         print("Player health: ", self.actor.health, " / ", self.actor.max_health)
+        print("player Energy: ", self.actor.get_effect_stacks(Energy))
         for enemy in self.enemies:
             print("enemy Health: ", enemy.health)
-            print(enemy.get_effect_stacks(Block))
-            print(enemy.get_effect_stacks(CurlUp))
+            print('block', enemy.get_effect_stacks(Block))
+            print('curlUp' ,enemy.get_effect_stacks(CurlUp))
+            print("vunverable", enemy.get_effect_stacks(Vulnerable))
+
+            print()
+
+    def beginRoom(self):
+        self.actor.increase_effect(Energy, self.actor.max_energy)
 
     def playerTurn(self):
         self.actor.draw_card(quantity=5)
@@ -1164,7 +1174,8 @@ class AbstractCombat(AbstractRoom):
         for i in useSet:
             useCard = i
             break
-        print(useCard)
+        print("player plays ", useCard)
+
         self.actor.use_card(target=self.enemies[0], card=useCard)
 
 

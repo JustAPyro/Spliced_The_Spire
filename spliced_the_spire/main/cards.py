@@ -377,9 +377,11 @@ class Bash(AbstractCard, ABC):
                          card_rarity=Rarity.STARTER, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: ['AbstractEnemy']):
         caller.deal_damage(target, self.damage)
+        caller.increase_effect(Energy, -self.energy_cost)
         target.increase_effect(Vulnerable, self.vulnerable)
+
 
     def upgrade_logic(self):
         self.damage = 10
