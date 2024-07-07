@@ -7,16 +7,6 @@ from spliced_the_spire.main.enumerations import CardType
 from spliced_the_spire.main.abstractions import AbstractActor, AbstractEnemy, AbstractEffect
 
 
-class Energy(AbstractEffect):
-    def __init__(self, owner):
-        self.max = 3
-        self.stacks = 3
-        super().__init__(owner)
-
-    def on_enter_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        self.stacks = self.max
-
-
 class Dexterity(AbstractEffect):
 
     def on_gain_block_from_card(self, owner: AbstractActor | AbstractEnemy, environment, block):
@@ -27,7 +17,6 @@ class Thorns(AbstractEffect):
 
     def on_victim_of_attack(self, owner: AbstractActor | AbstractEnemy, environment,
                             damaging_enemy: AbstractEnemy):
-
         damaging_enemy.take_damage(damage=self.stacks)
 
 
@@ -76,7 +65,7 @@ class ThisBlockNextTurn(AbstractEffect):
 
 class ThisEnergyNextTurn(AbstractEffect):
     def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        owner.increase_effect(Energy, self.stacks)
+        owner.energy += self.stacks
         self.stacks = 0
 
 
@@ -94,6 +83,14 @@ class Vulnerable(AbstractEffect):
     def modify_damage_taken(self, owner, environment, damage: int) -> int:
         # Vulnerable adds 50% damage
         return int(damage * .5)
+
+
+class Frail(AbstractEffect):
+    def on_end_turn(self, owner, environment):
+        owner.decrease_effect(Frail, 1)
+
+    def on_gain_block_from_card(self, owner: AbstractActor | AbstractEnemy, environment, block):
+        owner.increase_effect(Block, math.floor(block * 0.75))
 
 
 class Strength(AbstractEffect):
@@ -180,7 +177,10 @@ class RageEffect(AbstractEffect):
 
 
 class CurlUp(AbstractEffect):
-    pass
+    def on_victim_of_attack(self, owner, damaging_enemy):
+        print("hello victim")
+        owner.increase_effect(Block, self.stacks)
+        owner.set_effect(CurlUp, 0)
 
 
 class RuptureEffect(AbstractEffect):
@@ -214,4 +214,3 @@ class DoubleTapEffect(AbstractEffect):
 
 class JuggernautEffect(AbstractEffect):
     pass
-

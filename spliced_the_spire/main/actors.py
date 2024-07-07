@@ -11,17 +11,16 @@ if TYPE_CHECKING:
 
 
 class DummyActor(AbstractActor, ABC):
-    def __init__(self, clas, cards, health, hand, energy, environment):
-        super().__init__(clas, cards=cards, environment=environment, hand=hand)
-        self.health = health
-        self.max_health = health
+    def __init__(self, clas, cards, hand, energy, *args, **kwargs):
+        super().__init__(clas, cards=cards, hand=hand, *args, **kwargs)
 
         self.energy = energy
         self.max_energy = energy
 
-        self.environment = environment
-
         self.logging = False
+
+    def select_card(self, options: list[AbstractCard], event_type: SelectEvent) -> AbstractCard:
+        return options[-1]
 
 
 class LeftToRightAI(AbstractActor):

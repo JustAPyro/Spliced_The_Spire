@@ -64,6 +64,9 @@ def asc_int(ascension: int, value_dict: Dict[int, Union[Tuple[int, int], int]]) 
 
     # Iterate through to try and match the ascension to a range
     for i in range(len(ascension_bounds) - 1):
+        if ascension == {}:
+            ascension = 1
+
         if ascension < ascension_bounds[i + 1]:
             return process_val(i)
 

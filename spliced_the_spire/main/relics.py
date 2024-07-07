@@ -11,11 +11,14 @@ from spliced_the_spire.main.abstractions import AbstractRelic
 class BurningBlood(AbstractRelic):
     """Gain 6 health at the end of combat."""
     def __init__(self):
+        self.implemented_hooks = [self.on_end_combat]
         super().__init__(relic_color=Color.RED,
-                         relic_rarity=Rarity.STARTER)
+                         relic_rarity=Rarity.STARTER,
+                         implemented_hooks=self.implemented_hooks)
 
-    def on_end_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
+    def on_end_combat(self, owner: AbstractActor | AbstractEnemy, environment):
         owner.heal(6)
+
 
 
 class RingOfTheSnake(AbstractRelic):
