@@ -7,7 +7,7 @@ from typing import Optional
 from spliced_the_spire import lutil
 from spliced_the_spire.lutil import C, asc_int
 from spliced_the_spire.main.enumerations import *
-from effects import *
+from spliced_the_spire.main.effects import *
 
 # Card Cost Variables
 X = True
@@ -1140,7 +1140,7 @@ class AbstractCombat(AbstractRoom):
         print("player Energy: ", self.actor.energy)
         print()
         for enemy in self.enemies:
-            print("enemy Health: ", enemy.health)
+            print("enemy Health: ", enemy.health, " / ", enemy.max_health)
             print('block', enemy.get_effect_stacks(Block))
             print('curlUp', enemy.get_effect_stacks(CurlUp))
             print("vunverable", enemy.get_effect_stacks(Vulnerable))
