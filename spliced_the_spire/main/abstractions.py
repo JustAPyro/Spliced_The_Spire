@@ -74,7 +74,6 @@ class EffectMixin:
         self._check_instantiate_effect(effect)
         self.effects.get(effect).stacks += value
 
-
     def decrease_effect(self, effect, value):
         self._check_instantiate_effect(effect)
         self.effects.get(effect).stacks -= value
@@ -82,6 +81,7 @@ class EffectMixin:
     def get_effect_stacks(self, effect):
         self._check_instantiate_effect(effect)
         return self.effects.get(effect).stacks
+
 
 class EventHookMixin:
     def __init__(self, owner):
@@ -583,27 +583,6 @@ class AbstractActor(EffectMixin, EventHookMixin):
         return self.turn_log[-1]
 
 
-class Room:
-    def __init__(self,
-                 actor: AbstractActor = None,
-                 enemies: List[AbstractEnemy] = None):
-
-        self.actor = actor
-        self.enemies = enemies if enemies is not None else []
-
-        for entity in [self.actor, *self.enemies]:
-            if entity is not None:
-                entity.room = self
-
-    def set_actor(self, actor: AbstractActor):
-        self.actor = actor
-        actor.room = self
-
-    def add_enemy(self, enemy: AbstractEnemy):
-        self.enemies.append(enemy)
-        enemy.room = self
-
-
 class AbstractEnemy(ABC, EffectMixin, EventHookMixin):
     """
     This class is an abstract class designed to streamline the implementation
@@ -707,6 +686,9 @@ class AbstractEnemy(ABC, EffectMixin, EventHookMixin):
         # Initialize the EffectMixin
         super().__init__()
 
+    def set_start(self):
+        pass
+
     def set_actor(self, actor):
         self.actor = actor
 
@@ -721,15 +703,17 @@ class AbstractEnemy(ABC, EffectMixin, EventHookMixin):
     def take_damage(self, damage: int):
         damage_mod = call_all(method=EventHookMixin.modify_damage_taken,
                               owner=self,
-                              parameters=(self, self.room, damage),
+                              parameters=(self, damage),
                               return_param=damage)
         actual_damage = damage + damage_mod
         if actual_damage:  # TODO: Fix bad coding here
             self.health -= actual_damage
         if actual_damage > 0:
+            print("hello world")
             call_all(method=EventHookMixin.on_victim_of_attack,
                      owner=self,
-                     parameters=(self, self.room, self.actor))
+                     parameters=(self, self.actor))
+
     def deal_damage(self, damage: int):
         damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
                               owner=self,
@@ -793,9 +777,7 @@ class AbstractEnemy(ABC, EffectMixin, EventHookMixin):
         return self.print_log
 
 
-
-
-# TODO: Lots of occurances of return_param damage being passed twice awkwardly and self and self.env being passed
+# TODO: Lots of occurrences of return_param damage being passed twice awkwardly and self and self.env being passed
 def call_all(method, owner, parameters, return_param: Optional[int] = None):
     if method not in getattr(owner, 'implemented_hooks'):
         return 0 if return_param else return_param
@@ -1037,7 +1019,7 @@ class AbstractCard(ABC):
         return self.name
 
 
-class AbstractEffect(EventHookMixin):
+class AbstractEffect(EventHookMixin, EffectMixin):
     """
     This abstraction allows the easy creation of Effects.
     An effect in this context is a Slay The Spire Buff,
@@ -1155,17 +1137,19 @@ class AbstractCombat(AbstractRoom):
 
     def printRoom(self):
         print("Player health: ", self.actor.health, " / ", self.actor.max_health)
-        print("player Energy: ", self.actor.get_effect_stacks(Energy))
+        print("player Energy: ", self.actor.energy)
+        print()
         for enemy in self.enemies:
             print("enemy Health: ", enemy.health)
             print('block', enemy.get_effect_stacks(Block))
-            print('curlUp' ,enemy.get_effect_stacks(CurlUp))
+            print('curlUp', enemy.get_effect_stacks(CurlUp))
             print("vunverable", enemy.get_effect_stacks(Vulnerable))
 
             print()
+            print()
 
     def beginRoom(self):
-        self.actor.increase_effect(Energy, self.actor.max_energy)
+        pass
 
     def playerTurn(self):
         self.actor.draw_card(quantity=5)

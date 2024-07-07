@@ -379,8 +379,9 @@ class Bash(AbstractCard, ABC):
 
     def use(self, caller: 'AbstractActor', target: ['AbstractEnemy']):
         caller.deal_damage(target, self.damage)
-        caller.increase_effect(Energy, -self.energy_cost)
+
         target.increase_effect(Vulnerable, self.vulnerable)
+
 
 
     def upgrade_logic(self):

@@ -350,7 +350,6 @@ class RedLouse(AbstractEnemy):
                     self.grow: 2 if self.ascension >= 17 else 3,
                     self.bite: 3})
 
-
 env = {}
 enemies = {cls(env).sts_name: cls for cls in AbstractEnemy.__subclasses__()}
 

@@ -7,16 +7,6 @@ from spliced_the_spire.main.enumerations import CardType
 from spliced_the_spire.main.abstractions import AbstractActor, AbstractEnemy, AbstractEffect
 
 
-class Energy(AbstractEffect):
-    def __init__(self, owner):
-        self.max = 3
-        self.stacks = 3
-        super().__init__(owner)
-
-    def on_enter_combat(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        self.stacks = self.max
-
-
 class Dexterity(AbstractEffect):
 
     def on_gain_block_from_card(self, owner: AbstractActor | AbstractEnemy, environment, block):
@@ -75,7 +65,7 @@ class ThisBlockNextTurn(AbstractEffect):
 
 class ThisEnergyNextTurn(AbstractEffect):
     def on_start_turn(self: AbstractEffect, owner: AbstractActor | AbstractEnemy, environment):
-        owner.increase_effect(Energy, self.stacks)
+        owner.energy += self.stacks
         self.stacks = 0
 
 
@@ -188,7 +178,7 @@ class RageEffect(AbstractEffect):
 
 class CurlUp(AbstractEffect):
     def on_victim_of_attack(self, owner, damaging_enemy):
-        print("hello victum")
+        print("hello victim")
         owner.increase_effect(Block, self.stacks)
         owner.set_effect(CurlUp, 0)
 
