@@ -131,3 +131,23 @@ class TestCards(unittest.TestCase):
 
         self.assertEqual(2, target.health)
         self.assertEqual(3, actor.energy)
+
+    def test_cleave(self):
+        # ---- Test for 14 damage and correct energy usage
+        card = Cleave()
+        actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card], environment={})
+        target1 = DummyEnemy(health=20, environment={})
+        target2 = DummyEnemy(healh=20, environment={})
+        target3 = DummyEnemy(health=20, environment={})
+
+
+        actor.use_card(target1, card, [target1, target2, target3])
+
+        self.assertEqual(6, target.health)
+        self.assertEqual(3, actor.energy)
+
+        # ---- Test to make sure you can't use it with a non-attack in your hand
+        card = Clash()
+        card2 = RedDefend()
+        actor = DummyActor(Ironclad, cards=[], health=10, energy=3, hand=[card, card2], environment={})
+        target = DummyEnemy(health=20, environment={})
