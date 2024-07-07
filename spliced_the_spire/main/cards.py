@@ -743,7 +743,7 @@ class BloodForBlood(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.deal_damage(target, self.damage)
 
     def upgrade_logic(self):
@@ -761,7 +761,7 @@ class Bloodletting(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.receive_damage_from_card(3, self)
         caller.gain_energy(self.energy_gain)
 
@@ -776,7 +776,7 @@ class BurningPact(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.draw_card(self.card_draw)
         caller.exhaust_card(caller.select_card(caller.get_hand_without(self), SelectEvent.EXHAUST))
 
@@ -791,7 +791,7 @@ class Carnage(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.deal_damage(target, self.damage)
 
     def upgrade_logic(self):
@@ -805,7 +805,7 @@ class Combust(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.increase_effect(effects.CombustEffect, self.stacks)
 
     def upgrade_logic(self):
@@ -818,7 +818,7 @@ class DarkEmbrace(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.increase_effect(DarkEmbraceEffect, 1)
 
     def upgrade_logic(self):
@@ -832,7 +832,7 @@ class Disarm(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         target.decrease_effect(Strength, self.strength_loss)
 
     def upgrade_logic(self):
@@ -846,7 +846,7 @@ class Dropkick(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.deal_damage(target, self.damage)
         if target.has_effect(Vulnerable):
             caller.gain_energy()
@@ -862,7 +862,7 @@ class DuelWield(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         # Have the actor select a valid card
         card = caller.select_card(
             event_type=SelectEvent.COPY,
@@ -887,7 +887,7 @@ class Entrench(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.increase_effect(Block, caller.get_effect_stacks(Block))
 
     def upgrade_logic(self):
@@ -901,7 +901,7 @@ class Evolve(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.increase_effect(EvolveEffect, self.draw)
 
     def upgrade_logic(self):
@@ -915,7 +915,7 @@ class FeelNoPain(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.increase_effect(FeelNoPainEffect, self.block)
 
     def upgrade_logic(self):
@@ -929,7 +929,7 @@ class FireBreathing(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.increase_effect(FireBreathingEffect, self.damage)
 
     def upgrade_logic(self):
@@ -943,7 +943,7 @@ class FlameBarrier(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.increase_effect(FlameBarrierEffect, self.damage)
 
     def upgrade_logic(self):
@@ -957,7 +957,7 @@ class GhostlyArmor(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.increase_effect(Block, self.block)
 
     def upgrade_logic(self):
@@ -971,7 +971,7 @@ class Hemokinesis(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.deal_damage(target, self.damage)
         caller.receive_damage_from_card(2, self)
 
@@ -985,7 +985,7 @@ class InfernalBlade(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         card_cls = random.choice([subclass for subclass in AbstractCard.__subclasses__()
                                   if subclass().card_type == CardType.ATTACK
                                   and subclass not in (Feed, Reaper)])
@@ -1004,7 +1004,7 @@ class Inflame(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
+    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy'):
         caller.increase_effect(Strength, self.str)
 
     def upgrade_logic(self):
@@ -1018,8 +1018,8 @@ class Intimidate(AbstractCard, ABC):
                          card_rarity=Rarity.UNCOMMON, card_color=Color.RED,
                          *args, **kwargs)
 
-    def use(self, caller: 'AbstractActor', target: 'AbstractEnemy', room: Room):
-        for enemy in room.enemies:
+    def use(self, caller: 'AbstractActor', target: ['AbstractEnemy']):
+        for enemy in target:
             enemy: AbstractEnemy
             enemy.increase_effect(Weak, self.weak)
 
