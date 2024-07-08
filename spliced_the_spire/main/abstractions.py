@@ -85,7 +85,7 @@ class EffectMixin:
 
 class EventHookMixin:
     def __init__(self, owner):
-        implemented_hooks = getattr(owner, 'implemented_hooks')
+        self.implemented_hooks = getattr(owner, 'implemented_hooks')
 
         # Should in theory be every method in EventHookMixin
         all_subclass_implemented_methods = [method for method in dir(EventHookMixin)
@@ -96,12 +96,12 @@ class EventHookMixin:
             if getattr(EventHookMixin, method) != getattr(type(self), method):
                 # Add this object to the list of things that should be called for methods
                 parent_method = getattr(EventHookMixin, method)
-                #implemented_hooks.setdefault(parent_method, []).append(self)
-                if type(implemented_hooks) == dict:
+                #self.implemented_hooks.setdefault(parent_method, []).append(self)
+                if type(self.implemented_hooks) == dict:
                     pass
 
                 else:
-                    implemented_hooks.append(parent_method)
+                    self.implemented_hooks.append(parent_method)
 
     # Damage hooks
 
@@ -709,7 +709,7 @@ class AbstractEnemy(ABC, EffectMixin, EventHookMixin):
         if actual_damage:  # TODO: Fix bad coding here
             self.health -= actual_damage
         if actual_damage > 0:
-            print("hello world")
+
             call_all(method=EventHookMixin.on_victim_of_attack,
                      owner=self,
                      parameters=(self, self.actor))
@@ -784,7 +784,7 @@ def call_all(method, owner, parameters, return_param: Optional[int] = None):
 
     # Get all objects that the method requested
     objects_with_hooks = owner.implemented_hooks[method]
-
+    print(objects_with_hooks)
     # For each of those objects
     for obj in objects_with_hooks:
         # Get the actual method associated with the object
