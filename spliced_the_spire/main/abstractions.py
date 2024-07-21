@@ -96,12 +96,8 @@ class EventHookMixin:
             if getattr(EventHookMixin, method) != getattr(type(self), method):
                 # Add this object to the list of things that should be called for methods
                 parent_method = getattr(EventHookMixin, method)
-                #self.implemented_hooks.setdefault(parent_method, []).append(self)
-                if type(self.implemented_hooks) == dict:
-                    pass
+                self.implemented_hooks.setdefault(self, parent_method)
 
-                else:
-                    self.implemented_hooks.append(parent_method)
 
     # Damage hooks
 
@@ -216,7 +212,7 @@ class EventHookMixin:
 
 class AbstractActor(EffectMixin, EventHookMixin):
     def __init__(self, clas, cards: list[AbstractCard] = None, hand: Optional[list[AbstractCard]] = None,
-                 room: Room = None, health: int = None, max_health: int = None):
+                health: int = None, max_health: int = None):
         super().__init__()
         self.times_received_damage: int = 0
         self.name: str = "Actor"
@@ -431,7 +427,7 @@ class AbstractActor(EffectMixin, EventHookMixin):
     def deal_damage(self, target, damage):
         damage_mod = call_all(method=EventHookMixin.modify_damage_dealt,
                               owner=self,
-                              parameters=(self, self.room, damage),
+                              parameters=(self, damage),
                               return_param=damage)
         actual_damage = damage + damage_mod
         target.take_damage(actual_damage)
@@ -530,7 +526,7 @@ class AbstractActor(EffectMixin, EventHookMixin):
             # Process effects related to card draw
             call_all(method=EventHookMixin.on_card_draw,
                      owner=self,
-                     parameters=(self, self.room, card))
+                     parameters=(self, card))
         return True
 
     @abstractmethod
@@ -658,6 +654,7 @@ class AbstractEnemy(ABC, EffectMixin, EventHookMixin):
                                         f'Generated {self.name} with {self.max_health} max health, '
                                         f'expected max_health range for {self.name} on A{ascension} is {lower}-{upper}')
 
+
         # Since this was just created current health should be full
         self.health = set_health if set_health else self.max_health
 
@@ -682,7 +679,6 @@ class AbstractEnemy(ABC, EffectMixin, EventHookMixin):
         # Turn specific stuff for enemies to be set in abilities
         self.intent: Optional[IntentType] = None
         self.message: Optional[str] = None
-
         # Initialize the EffectMixin
         super().__init__()
 

@@ -13,8 +13,7 @@ class BurningBlood(AbstractRelic):
     def __init__(self):
         self.implemented_hooks = [self.on_end_combat]
         super().__init__(relic_color=Color.RED,
-                         relic_rarity=Rarity.STARTER,
-                         implemented_hooks=self.implemented_hooks)
+                         relic_rarity=Rarity.STARTER)
 
     def on_end_combat(self, owner: AbstractActor | AbstractEnemy, environment):
         owner.heal(6)

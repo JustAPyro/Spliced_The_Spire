@@ -239,7 +239,6 @@ class GreenLouse(AbstractEnemy, ABC):
                              curl_up_stacks if curl_up_stacks else asc_int(ascension, GreenLouse.curl_up_stack_map))
 
         self.base_damage = base_damage
-
     def bite(self):
         """Deals damage based on the base_damage of the louse and the ascension."""
         self.deal_damage(asc_int(self.ascension, {
